@@ -1,4 +1,4 @@
-# monte-carlo-diagonalization
+# monte_carlo_diagonalization
 This package uses a Monte Carlo sampling of the Fock states and computes the ground state and the Green function for this truncated space, using the Hubbard model.
 
 
