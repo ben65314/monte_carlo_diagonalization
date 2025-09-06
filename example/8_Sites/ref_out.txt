@@ -1,0 +1,9 @@
+
+Run Parameters: --Sat Sep  6 15:26:40 2025
+#Sites = 8.0	u = 8.0	mu = 4.0
+Initial State = [43605	]
+
+Sampling Size  = 4900(1.0000)	Reticle = 4900.0	Beta = 0.000
+
+Fund energy : -34.6661474201242541
+----------------------------------------------

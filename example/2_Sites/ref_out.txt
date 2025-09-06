@@ -1,0 +1,9 @@
+
+Run Parameters: --Mon Aug 18 15:50:06 2025
+#Sites = 2.0	u = 8.0	mu = 4.0
+Initial State = [9	]
+
+Sampling Size  = 4(1.0000)	Reticle = 4.0	Beta = 0.000
+
+Fund energy : -8.4721359549995814
+----------------------------------------------
