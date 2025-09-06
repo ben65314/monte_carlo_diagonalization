@@ -38,11 +38,11 @@ make
 
 # Usage
 The `mcd_solver` and `subspace_finder` are the two main executables, while `qMatrixGreenCompute.py`, `graphGreen.py` and `av_combine.py` are used to plot Green functions.
-1. `mcd_solver` samples states, finds the ground state and computes the Green functions of a given $$N_e$$-$$S_z$$ bloc. Produces a `qMatrices.txt` file countaining the Q-matrices needed to plot the Green functions. Needs to be given a parameter file :
+1. `mcd_solver` samples states, finds the ground state and computes the Green functions of a given $N_e$- $S_z$ bloc. Produces a `qMatrices.txt` file countaining the Q-matrices needed to plot the Green functions. Needs to be given a parameter file :
 ```shell
 mcd_solver parameters.txt
 ```
-2. `subspace_finder` computes the ground state searching through all $$N_e$$-$$S_z$$ sectors with ED. Needs to be given a parameter file : 
+2. `subspace_finder` computes the ground state searching through all $N_e$- $S_z$ sectors with ED. Needs to be given a parameter file : 
 ```shell
 mcd_solver parameters.txt
 ```
