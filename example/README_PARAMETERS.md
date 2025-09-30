@@ -3,7 +3,7 @@ In a parameter file, defining a value will always be inside a set of brackets \{
 
 ## Always required parameters 
 ### number_of_sites :
-The number of sites ($$N_s$$) of the system.  
+The number of sites ($$N_c$$) of the system.  
 Example : `number_of_sites: {2}`
 ### U:
 The Coulomb potential term.
