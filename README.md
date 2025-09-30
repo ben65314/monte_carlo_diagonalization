@@ -72,7 +72,9 @@ graphGreen.py greenFunctionValueQM.txt
 av_combine.py greenFunctionValueQM.txt
 ```
 # Examples
-In `/examples/` there are preset file parameters ready to be execute. There is documentation about the parameters in `/examples/PARAMETERS_DOC.md` so you can make your own systems.
+In `/examples/` there are preset file parameters ready to be execute. There is documentation about the parameters in `/examples/README_PARAMETERS.md` so you can make your own systems.
+
+All data used in this article is present in `/examples/published_data`.
 # Authors
 This package was made and published by **Benjamin Bernard** and **Maxime Charelbois**. If you have any question about the code, contact us.
 - <benjamin.bernard@uqtr.ca>
