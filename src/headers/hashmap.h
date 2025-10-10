@@ -7,7 +7,7 @@ private :
 	sType hash_size;
 
 	//Used for the hash function
-	unsigned char up, down, sites;
+	unsigned int up, down, sites;
 	std::vector<sType> combMarkersUp;
 	std::vector<sType> combMarkersDown;
 	sType combinationUp;
@@ -18,13 +18,12 @@ private :
 public:
 	bool hash_setted = false;
 
-	unsigned int maxConflict = 0;
-	unsigned int averageConflict = 0;
 	Hashmap(sType* arrayToHash);
 	Hashmap();
 	~Hashmap();
 	
-	void set_hash_parameters(uChar sites, uChar nUp, uChar nDown, uLong size = 0);
+	void set_hash_parameters(uChar sites, uChar nUp, 
+                             uChar nDown, uLong size = 0);
 	void hash_set(sType item);
 	bool hash_find(sType item, sType* index) const;
 	std::vector<sType> hashToVector();

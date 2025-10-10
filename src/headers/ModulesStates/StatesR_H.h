@@ -134,7 +134,7 @@ private:
 		//Initial states
 		StatesR_T<StateType,VectorType>* currentState = new StatesR_T<StateType,VectorType>(50);
 		//*currentState = StatesArr(arrR.size());
-
+		
 		//this->showAllStates();
 		for (unsigned int i = 0; i < this->arr.size(); i++) {
 			if(this->arr.at(i) != 0) currentState->add(this->getAt(i));
@@ -316,6 +316,7 @@ public:
 
 	//Samplings
 	void sampling_MH(){
+		allocateMEM(this->electrons,this->sys_hubP.n_sites);
 		MHSamplingOfStates_r(this->sys_sP.samplingSize, this->sys_sP.beta_MH, this->sys_sP.reticle);
 	}
 	void sampling_least_energy(){

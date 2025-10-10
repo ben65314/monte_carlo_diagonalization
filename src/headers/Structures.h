@@ -104,8 +104,6 @@ struct justManyVariables {
 };
 
 
-//Declaration of external variables
-extern int verbose;
 
 #endif
  

@@ -1,4 +1,6 @@
 #include "binarySearchTree.h"
+//Global variables
+int verbose = 0;
 
 Node* insert(Node* node, uint64_t key, bool* alreadyThere) {
 	// If the tree is empty, return a new node

@@ -1,6 +1,4 @@
 #include "electronManipulationFunctions.h"
-//Global variables
-int verbose = 0;
 //samplingParam global_sP;
 
 

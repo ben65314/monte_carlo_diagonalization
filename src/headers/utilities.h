@@ -53,4 +53,7 @@ typedef uint16_t uShort;
 typedef uint32_t uInt;
 typedef uint64_t uLong;
 
+//Declaration of external variables
+extern int verbose;
+
 #endif
