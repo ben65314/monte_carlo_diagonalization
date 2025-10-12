@@ -3,22 +3,24 @@
 
 
 bool c_operator(sType* num, int index);
-bool cDag_operator(sType* num, int index);
+bool c_dag_operator(sType* num, int index);
 
 void Ht(sType state, std::vector<sType>* proj_states, hubbardParam* hubP);
 
 int Hu(sType state, unsigned char sites);
 
-Electrons findNumberOfElectron(sType state, unsigned char sites);
+Electrons find_number_of_electron(sType state, unsigned char sites);
 
-sType createAntiFerro(unsigned int sites, int n_up, int n_down);
+sType create_anti_ferro(unsigned int sites, int n_up, int n_down);
 
-Electrons transformNSz(int nElec, int spin);
+Electrons transform_NSz(int nElec, int spin);
 
 //JUMP ENERGIES
-void tJumpEnergy(sType, std::vector<sType>* ,std::vector<double>*, hubbardParam*);
+void t_jump_energy(sType, std::vector<sType>*, std::vector<double>*, 
+                 hubbardParam*);
 
-template <class A> void Ht_subspace_condition_expanding(A* sArr, uint64_t start, uint64_t end){
+template <class A> void Ht_subspace_condition_expanding(
+        A* sArr, uint64_t start, uint64_t end){
 	/*******************************************************
 	* Expends a subspace by applying the Ht hopping opoerator
 	*
@@ -26,7 +28,7 @@ template <class A> void Ht_subspace_condition_expanding(A* sArr, uint64_t start,
 	* ----------
 	* sArr	: (A*) ptr to the StatesArr object to expand
 	* start	: (uint64_t) first index to apply Ht on
-	* end		: (uint64_t) index to stop apply Ht on
+	* end	: (uint64_t) index to stop apply Ht on
 	*
 	* Templates
 	* ---------
@@ -49,14 +51,17 @@ template <class A> void Ht_subspace_condition_expanding(A* sArr, uint64_t start,
 	}
 }
 
-template<class T, class U> void writeStateWithDouble(std::vector<T>* fund, U* states, unsigned int sites, double keep=1) {
+template<class T, class U> void write_state_with_double(
+    std::vector<T>* fund, U* states, unsigned int sites, double keep=1) {
 	/*******************************************************
-	* Sort the states according to their fund weight, creates a reduced subspace keeping only the most dominant elements and write everything in a .txt file
+	* Sort the states according to their fund weight, creates a reduced 
+    * subspace keeping only the most dominant elements and write everything in 
+    * a .txt file
 	*
 	* Parameters
 	* ----------
 	* fund	: (std::vector<T>*) ptr to the fund vector
-	* states	: (U*) ptr to the StatesArr object to expand
+	* states: (U*) ptr to the StatesArr object to expand
 	* sites	: (unsigned int) nbr of sites of the system
 	* keep	: (double) weight to keep
 	*
@@ -96,13 +101,17 @@ template<class T, class U> void writeStateWithDouble(std::vector<T>* fund, U* st
 	double cummul = 0;
 	for (uLong i = 0 ; i < sorted_fund.size(); i++) {
 		cummul += sorted_fund.at(i)*sorted_fund.at(i);
-		fund_txt += to_string_pq(sorted_fund.at(i),4,14) +"\t"+
-			to_string_pq((double)sorted_states.at(i),10,0)+"\t"+
-			to_string_pq((double)Hu(sorted_states.at(i),sites),10,0)+"\t"+
-			to_string_pq(cummul,2,16)+"\n";
+		fund_txt += to_string_pq(sorted_fund.at(i), 4, 14) + "\t"
+            + to_string_pq((double)sorted_states.at(i), 10, 0) + "\t"
+			+ to_string_pq((double)Hu(sorted_states.at(i), sites), 10, 0)+ "\t"
+            + to_string_pq(cummul, 2, 16)+"\n";
+
 		//Create reduced sampling size
-		if (cummul < keep or keep==1) {
-			if(verbose > 99) std::cout<<cummul<<"\tADD:"<<sorted_states.at(i)<<"\t"<<sorted_fund.at(i)<<std::endl;
+		if (cummul < keep || keep==1) {
+			if(verbose > 99) {
+                std::cout << cummul << "\tADD:"<< 
+                sorted_states.at(i) << "\t" << sorted_fund.at(i) << std::endl;
+            }
 			states->add(sorted_states.at(i));
 			fund->push_back(sorted_fund.at(i));
 		}
@@ -111,7 +120,9 @@ template<class T, class U> void writeStateWithDouble(std::vector<T>* fund, U* st
 
 	//Writes
 	char cwd[PATH_MAX];
-	if(!getcwd(cwd, sizeof(cwd))) std::cout<<"Problem occured getting CWD"<<std::endl;
+	if (!getcwd(cwd, sizeof(cwd))) {
+        std::cout << "Problem occured getting CWD" << std::endl;
+    }
 	std::string txtName = "/fund.txt";
 	const std::string outFileName = cwd + txtName;
 	std::ofstream outFile;

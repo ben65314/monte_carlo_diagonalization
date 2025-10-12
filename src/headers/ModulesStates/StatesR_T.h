@@ -71,7 +71,7 @@ private:
 
 		//Start state if the array is empty
 		if (fermi_mu < 0) {
-			uLong added_state = createAntiFerro(this->sys_hubP.n_sites,this->electrons.up,this->electrons.down);
+			uLong added_state = create_anti_ferro(this->sys_hubP.n_sites,this->electrons.up,this->electrons.down);
 			currentStates->add(added_state);
 			add(added_state);
 		}
@@ -363,12 +363,15 @@ public:
 		for (StateType i = 0; i < cols; i++) {
 			//Adds diagonal values
 			//Hu and Hmu
-			result_matrix[i * cols + i] += (double)Hu(this->getAt(i),this->sys_hubP.n_sites) * (this->sys_hubP.u);
+			result_matrix[i * cols + i] += (double)Hu(this->getAt(i), 
+                                             this->sys_hubP.n_sites) 
+                                             * (this->sys_hubP.u);
 			result_matrix[i * cols + i] += muValue;
 			
 			std::vector<StateType> projHt;
 			std::vector<double> jumpEnergy;
-			tJumpEnergy(this->getAt(i), &projHt, &jumpEnergy, &this->sys_hubP);
+			t_jump_energy(this->getAt(i), &projHt, &jumpEnergy, 
+                 &this->sys_hubP);
 			for (unsigned int j = 0; j < projHt.size(); j++) {
 				StateType index;
 				if (!this->whereIsElement(projHt.at(j), &index)) continue;
@@ -411,7 +414,7 @@ public:
 			//Ht
 			std::vector<StateType> proj;
 			std::vector<double> energies;
-			tJumpEnergy(this->getAt(i), &proj, &energies, &this->sys_hubP);
+			t_jump_energy(this->getAt(i), &proj, &energies, &this->sys_hubP);
 			//printf("tJump size:%ld\n",proj.size());
 			//fflush(stdout);
 			for (unsigned int j = 0; j < proj.size(); j++) {

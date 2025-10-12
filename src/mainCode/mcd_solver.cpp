@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
 	//Sampling size verification
 	sType gotSubSpaceLen = 0;
 	//std::cout<<INIT STATE
-	Electrons elec = transformNSz(jMV.hubP.nElec,jMV.hubP.totSpin);
+	Electrons elec = transform_NSz(jMV.hubP.nElec,jMV.hubP.totSpin);
 
 	if(jMV.sP.reticle == 0) jMV.sP.reticle = jMV.sP.samplingSize;
 
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]){
 	if (MH_Block.sys_sP.fund_tc < 1) { 
 		if (verbose > 9) std::cout<<"TRUNCATING"<<std::endl;
 		if (verbose > 9) std::cout<<"SIZE BEFORE:"<<MH_Block.getLength()<<std::endl;
-		writeStateWithDouble(&fundState,&MH_Block,MH_Block.sys_hubP.n_sites,MH_Block.sys_sP.fund_tc);
+		write_state_with_double(&fundState,&MH_Block,MH_Block.sys_hubP.n_sites,MH_Block.sys_sP.fund_tc);
 		if (verbose > 9) std::cout<<"SIZE AFTER:"<<MH_Block.getLength()<<std::endl;
 	}
 

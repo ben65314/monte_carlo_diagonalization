@@ -247,7 +247,7 @@ struct justManyVariables readParameters(const std::string fileRead) {
 
 	//Store mu_array and nu_matrix;
 	
-	init = createAntiFerro(sendInfo.hubP.n_sites,up_f,down_f);
+	init = create_anti_ferro(sendInfo.hubP.n_sites,up_f,down_f);
 
 	std::vector<sType> temp;
 	temp.push_back(init);

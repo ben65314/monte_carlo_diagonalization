@@ -1,5 +1,4 @@
 #include "electronManipulationFunctions.h"
-//samplingParam global_sP;
 
 
 bool c_operator(sType* num, int index){
@@ -18,15 +17,15 @@ bool c_operator(sType* num, int index){
 	sType cd_op = 1UL << index;
 	bool c_success = true;
 	//if the bit operation is the same as the addition the creation is good
-	if((*num | cd_op) != *num){
+	if ((*num | cd_op) != *num) {
 		*num += cd_op;
 	}
-	else{
+	else {
 		c_success =  false;	
 	}
 	return c_success;
 }
-bool cDag_operator(sType* num, int index){
+bool c_dag_operator(sType* num, int index){
 	/*********************************************************
 	* Destruction operator of the Fock formalism
 	*
@@ -42,10 +41,10 @@ bool cDag_operator(sType* num, int index){
 	sType cd_op = 1UL << index;
 	bool d_success = true;
 	//if the bit operation is the same as the substraction the creation is good
-	if ((*num & cd_op) != 0){
+	if ((*num & cd_op) != 0) {
 		*num -= cd_op;
 	}
-	else{
+	else {
 		d_success = false;	
 	}
 	return d_success;
@@ -57,7 +56,8 @@ void Ht(sType state, std::vector<sType>* proj_states, hubbardParam* hubP) {
 	* Parameters
 	* ----------
 	* state			: (sType) initial state in the Fock formalism
-	* proj_states	: (std::vector<sType>*) Array of the possible accessible states after the Hamiltonian
+	* proj_states	: (std::vector<sType>*) Array of the possible accessible 
+    *                                       states after the Hamiltonian
 	* hubP			: (hubbardParam*) System parameters
 	*
 	* Templates:
@@ -74,9 +74,13 @@ void Ht(sType state, std::vector<sType>* proj_states, hubbardParam* hubP) {
 	proj_states->reserve(2 * sites);
 
 	const sType state_num = state;
-	sType from_down = one << (sites - 1), from_up = one << (2 * sites - 1);
+	sType from_down = one << (sites - 1);
+    sType from_up = one << (2 * sites - 1);
+
 	for(unsigned char i = 0; i < sites; i++){
-		sType to_down = one << (sites - 1), to_up = one << (2 * sites - 1);
+		sType to_down = one << (sites - 1);
+        sType to_up = one << (2 * sites - 1);
+
 		for(unsigned char j = 0; j < sites; j++){
 			if (hubP->tMatrix[i * sites + j] == 0){
 				to_down >>= 1;
@@ -84,10 +88,13 @@ void Ht(sType state, std::vector<sType>* proj_states, hubbardParam* hubP) {
 				continue;
 			}
 			
-			if (((from_down & state_num) != 0) && ((to_down & state_num ) == 0)) {
+            //Down electron jump
+			if (((from_down & state_num) != 0) 
+                && ((to_down & state_num ) == 0)) {
 				proj_states->push_back((state_num | to_down) ^ from_down);
 			}
 			
+            //Up electron jump
 			if (((from_up & state_num) != 0) && ((to_up & state_num ) == 0)) {
 				proj_states->push_back((state_num | to_up) ^ from_up);
 			}
@@ -117,7 +124,7 @@ int Hu(sType state, unsigned char sites) {
 	int nU = one_counter(same_occupation);
 	return nU;
 }
-Electrons findNumberOfElectron(sType state, unsigned char sites) {
+Electrons find_number_of_electron(sType state, unsigned char sites) {
 	/*****************************************************************
 	* Counts the number of electron of each spin for a given state
 	*
@@ -136,8 +143,8 @@ Electrons findNumberOfElectron(sType state, unsigned char sites) {
 	Electrons elec;
 	
 	for (unsigned char j = 0; j < sites; j++){
-		elec.up += ((state & up_counter) != 0);
-		elec.down += ((state & down_counter) != 0);
+		elec.up += (state & up_counter) != 0;
+		elec.down += (state & down_counter) != 0;
 
 		up_counter <<= 1;
 		down_counter <<= 1;
@@ -146,9 +153,9 @@ Electrons findNumberOfElectron(sType state, unsigned char sites) {
 	return elec;
 }
 
-sType createAntiFerro(unsigned int sites, int n_up, int n_down){
+sType create_anti_ferro(unsigned int sites, int n_up, int n_down){
 	/*******************************************************************
-	* Creates the best antiFerro state
+	* Creates the best antiferromagnetic state
 	*
 	* Parameters
 	* ----------
@@ -186,11 +193,10 @@ sType createAntiFerro(unsigned int sites, int n_up, int n_down){
 	return bi_state;
 }
 
-//void createEachFrequency(hubbardParam* hubP, int nUp, int nDown, std::vector<T>* states)
-
-Electrons transformNSz(int n_elec, int spin) {
+Electrons transform_NSz(int n_elec, int spin) {
 	/*****************************************
-	* Transforms the total number of electron of the system and the total spin in an Electrons structure countaining the number of ups and downs
+	* Transforms the total number of electron of the system and the total spin 
+    * in an Electrons structure countaining the number of ups and downs
 	*
 	* Parameters
 	* ----------
@@ -208,16 +214,19 @@ Electrons transformNSz(int n_elec, int spin) {
 }
 
 //Jump ENERGIES
-void tJumpEnergy(sType right_state, std::vector<sType>* states, std::vector<double>* energies, hubbardParam* hubP) {
+void t_jump_energy(sType right_state, std::vector<sType>* states, 
+                   std::vector<double>* energies, hubbardParam* hubP) {
 	/*******************************************************************
 	* Calculates the energy of a t jump between two given states
 	*
 	* Parameters
 	* ----------
 	* right_state	: (sType) state to jump from
-	* states		: (std::vector<sType>*) receptacles of the states accessible from right_state
-	* energies		: (std::vector<double>*) receptacles of the energiesfor each states
-	* hubP		: (hubbardParam*) System parameters
+	* states		: (std::vector<sType>*) receptacles of the states 
+    *                                       accessible from right_state
+	* energies		: (std::vector<double>*) receptacles of the energiesfor 
+    *                                        each states
+	* hubP		    : (hubbardParam*) System parameters 
 	*
 	* Returns
 	* -------
@@ -238,7 +247,8 @@ void tJumpEnergy(sType right_state, std::vector<sType>* states, std::vector<doub
 				int indexJ = (sites-j-1 + k*sites);
 				int indexI = (sites-i-1 + k*sites);
 				//From J -> I
-				if (cDag_operator(&temp_stateIJ,indexJ) && c_operator(&temp_stateIJ,indexI)) {
+				if (c_dag_operator(&temp_stateIJ, indexJ) 
+                    && c_operator(&temp_stateIJ, indexI)) {
 					//Add to the receptacle
 					states->push_back(temp_stateIJ);
 
@@ -253,7 +263,8 @@ void tJumpEnergy(sType right_state, std::vector<sType>* states, std::vector<doub
 					energies->push_back(jumpFactor * phase);
 				}	
 				//From I -> J
-				if (cDag_operator(&temp_stateJI,indexI) && c_operator(&temp_stateJI,indexJ)) {
+				if (c_dag_operator(&temp_stateJI, indexI) 
+                    && c_operator(&temp_stateJI, indexJ)) {
 					//Add to the receptacle
 					states->push_back(temp_stateJI);
 
@@ -261,7 +272,7 @@ void tJumpEnergy(sType right_state, std::vector<sType>* states, std::vector<doub
 					temp_stateJI >>= indexJ + 1;
 					char phase = 1;
 					for (int l = indexJ + 1; l < indexI; l++) {
-						if ((temp_stateJI & 1) == 1) phase *= -1;  
+						if ((temp_stateJI & 1) == 1) phase *= -1;
 						temp_stateJI >>= 1;	
 					}
 					//Add the energy to the receptacle

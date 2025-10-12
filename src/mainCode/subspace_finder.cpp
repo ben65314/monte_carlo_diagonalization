@@ -67,7 +67,7 @@ int main(int argc, char *argv[]){
 
             //Setting block
 			std::vector<sType> state_init = {
-				createAntiFerro(jMV.hubP.n_sites, i, j)};
+				create_anti_ferro(jMV.hubP.n_sites, i, j)};
 			arrType states_block = arrType(&state_init, jMV.hubP);
 			states_block.set_sampling_parameters(sP);
 			states_block.electrons = elec;

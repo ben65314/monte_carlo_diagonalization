@@ -67,7 +67,7 @@ private:
 
 		//Start state if the array is empty
 		if (fermi_mu < 0) {
-			uLong added_state = createAntiFerro(this->sys_hubP.n_sites,this->electrons.up,this->electrons.down);
+			uLong added_state = create_anti_ferro(this->sys_hubP.n_sites,this->electrons.up,this->electrons.down);
 			currentStates->add(added_state);
 			add(added_state);
 		}
@@ -294,7 +294,7 @@ public:
 	StatesR_H(const std::vector<StateType>* array_to_state, hubbardParam hubP){
 		hmap = Hashmap(this->arr.data());
         this->set_hubbard_parameters(hubP);
-		Electrons elec = findNumberOfElectron(array_to_state->at(0),this->sys_hubP.n_sites);
+		Electrons elec = find_number_of_electron(array_to_state->at(0),this->sys_hubP.n_sites);
 		allocateMEM(elec,this->sys_hubP.n_sites);
 
 
@@ -372,7 +372,7 @@ public:
 			
 			std::vector<StateType> projHt;
 			std::vector<double> jumpEnergy;
-			tJumpEnergy(this->getAt(i), &projHt, &jumpEnergy, &this->sys_hubP);
+			t_jump_energy(this->getAt(i), &projHt, &jumpEnergy, &this->sys_hubP);
 			for (unsigned int j = 0; j < projHt.size(); j++) {
 				StateType index;
 				if (!this->whereIsElement(projHt.at(j), &index)) continue;
@@ -417,7 +417,7 @@ public:
 			//Ht
 			std::vector<StateType> proj;
 			std::vector<double> energies;
-			tJumpEnergy(this->getAt(i), &proj, &energies, &this->sys_hubP);
+			t_jump_energy(this->getAt(i), &proj, &energies, &this->sys_hubP);
 			//printf("tJump size:%ld\n",proj.size());
 			//fflush(stdout);
 			for (unsigned int j = 0; j < proj.size(); j++) {
@@ -434,7 +434,7 @@ public:
 
 	//Pure-Virtual function override
 	void add(StateType el){
-		if (!hmap.hash_setted) allocateMEM(findNumberOfElectron(el,this->sys_hubP.n_sites),this->sys_hubP.n_sites);
+		if (!hmap.hash_setted) allocateMEM(find_number_of_electron(el,this->sys_hubP.n_sites),this->sys_hubP.n_sites);
 		
 		hmap.hash_set(el);
 	}

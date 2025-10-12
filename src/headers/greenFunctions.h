@@ -34,7 +34,7 @@ template <class StatesArrType> void c_subSpace(StatesArrType* const sub_space, i
 	else {
 		for (unsigned long i = 0; i < len; i++) {
 			sType temp = sub_space->getAt(i);
-			if (cDag_operator(&temp, index)) { 
+			if (c_dag_operator(&temp, index)) { 
 				c_sub_space->add(temp);
 			}
 		}
@@ -209,7 +209,7 @@ template <class T, class StatesArrType> void excitedVectorProjection(bool create
 			if (c_operator(&current_state, index)) can_projected = true;
 		}
 		else {
-			if (cDag_operator(&current_state, index)) can_projected = true;
+			if (c_dag_operator(&current_state, index)) can_projected = true;
 		}
 
 		if (can_projected) {

@@ -94,7 +94,7 @@ template <class R> void normalize(double* vec, R size) {
 	* NONE
 	*************************************************************/
 	//Normalisation of vec
-	double norm = 1/cblas_dnrm2(size,vec,1);
+	double norm = 1 / cblas_dnrm2(size, vec, 1);
 	cblas_dscal(size,norm,vec,1);
 }
 template <class R> void initial_vector(
@@ -156,7 +156,7 @@ template <class T, class R> std::string write_vector(const T* vec, R size){
 	std::string write = "[";
 	for (R i = 0; i < size; i++) {
 		write += to_string_p(vec[i], 0) + "\t";
-		if ((i+1) % 10 == 0){write += "\n";}
+		if ((i+1) % 10 == 0) write += "\n";
 	}
 	write += "]\n";
 	return write;
