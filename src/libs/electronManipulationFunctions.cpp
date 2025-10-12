@@ -114,7 +114,7 @@ int Hu(sType state, unsigned char sites) {
 	* nU	: (int) number of sites that have a double occupation
 	***********************************************************/
 	sType same_occupation = state & (state << sites); 
-	int nU = oneCounter(same_occupation);
+	int nU = one_counter(same_occupation);
 	return nU;
 }
 Electrons findNumberOfElectron(sType state, unsigned char sites) {

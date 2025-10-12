@@ -58,7 +58,7 @@ sType Hashmap::hash_function(sType item) const {
     // Inspection variables
 	sType checkDown = 1<<(this->sites);
 	sType checkUp = checkDown<<(this->sites);
-	unsigned int upCount = 0, downCount = 0;
+	int upCount = 0, downCount = 0;
 	sType adderUp, adderDown, indexUp = 0, indexDown = 0;
 
 	// Checks where are the up and down electrons to get the markers 
@@ -96,7 +96,6 @@ sType Hashmap::hash_function(sType item) const {
 		else downCount++;
 	}
 	sType hashKey = this->combinationUp * indexDown + indexUp;
-
 	return hashKey;
 }
 
@@ -216,25 +215,47 @@ void Hashmap::create_comb_markers() {
 	* NONE
 	*******************************************************/
 	// Up comb markers
-	for (unsigned char i = 0; i < this->up; i++) { // Rows
-		for (unsigned char j = 0; j < this->sites; j++) {  // Columns
-			if (this->sites - j < this->up - i) {
-				this->combMarkersUp[i * this->sites + j] = 1;
-			}
-			this->combMarkersUp[i * this->sites + j] 
-                = comb(this->sites - j - 1, this->up - i - 1);
+	for (int i = 0; i < this->up; i++) { // Rows
+		for (int j = 0; j < this->sites; j++) {  // Columns
+			if (j-i < 0|| this->sites-j<=this->up -i) {
+				this->combMarkersUp[i * this->sites + j] = 0;
+            }
+            else {
+                this->combMarkersUp[i * this->sites + j] 
+                    = comb(this->sites - j - 1, this->up - i - 1);
+            }
 		}
 	}
 
 	// Down comb markers
 	for (unsigned char i = 0; i < this->down; i++) { // Rows
 		for (unsigned char j = 0; j < this->sites; j++) {  // Columns
-			if (this->sites - j < this->down - i) {
-				this->combMarkersDown[i * this->sites + j] = 1;
-			}
-			this->combMarkersDown[i * this->sites + j] 
-                = comb(this->sites - j - 1, this->down - i - 1);
+			if (j-i < 0 || this->sites-j<=this->down-i) {
+				this->combMarkersDown[i * this->sites + j] = 0;
+            }
+            else {
+                this->combMarkersDown[i * this->sites + j] 
+                    = comb(this->sites - j - 1, this->down - i - 1);
+            }
 		}
 	}
+
+    //std::cout<<"aaaCREATED UP MARKERS"<<std::endl;
+    //for (int i = 0; i < this->up; i++){
+    //    for (int j = 0; j < this->sites; j++){
+    //        std::cout<<combMarkersUp[i*this->sites+j]<<"\t";
+    //    
+    //    }
+    //    std::cout<<"\n";
+    //}
+
+    //std::cout<<"aaaCREATED DOWN MARKERS"<<std::endl;
+    //for (int i = 0; i < this->down; i++){
+    //    for (int j = 0; j < this->sites; j++){
+    //        std::cout<<combMarkersDown[i*this->sites+j]<<"\t";
+    //    
+    //    }
+    //    std::cout<<"\n";
+    //}
 }
 

@@ -130,7 +130,7 @@ public:
 	virtual void H(VectorType* h_phi_n, VectorType* phi_n) = 0;
 
 	virtual void s_matrix_creation(VectorType* s_matrix) {
-		makeIdentity(s_matrix,this->getLength());
+		make_identity(s_matrix,this->getLength());
 
 	}
 

@@ -100,7 +100,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 
 			if (abs(prev_iter_energy - energy) < epsilon && current_iteration > 3) {
 				converged = true;
-				*deg = degFundamentalCheck(arr_a,n);
+				*deg = deg_fundamental_check(arr_a,n);
 				fundState_lanczos_basis->clear();
 				*fundState_lanczos_basis = std::vector<double>(vecs, vecs + n*(*deg));
 			}
@@ -194,7 +194,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		int nIterations = 1000;
 
 		// Random Initial Vector
-		initialVector(sArr->getLength(),fundState->data());
+		initial_vector(sArr->getLength(),fundState->data());
 		
 		LanczosEnergy(&fundState_lanczosBasis,fundState->data(),sArr,&alpha,&beta,&fundEnergy,&nIterations,deg,epsilon);
 		if (verbose > 9) std::cout<<"DEGENERACY:"<<*deg<<std::endl;
@@ -269,7 +269,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 			if(verbose > 99){
 				for (int i = 0; i < M0; i++){
 					double nn = cblas_dnrm2(len_bk, vk->data() + i * len_bk, 1);
-					std::cout<<"vec["<<i<<"] = "<<toStringP_Q(nn)<<std::endl;
+					std::cout<<"vec["<<i<<"] = "<<to_string_pq(nn)<<std::endl;
 				}
 			}
 			//(3) Norm of the v_j vector
@@ -492,7 +492,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 			delete[] work; delete[] rwork;
 
 			//Check degeneracy
-			*deg = degFundamentalCheck(eigenValues,rows);
+			*deg = deg_fundamental_check(eigenValues,rows);
 			delete[] eigenValues;
 
 			if (*deg > 1) fundState->resize(rows*(*deg));

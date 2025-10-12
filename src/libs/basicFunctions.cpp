@@ -2,7 +2,7 @@
 
 struct hubbardParam;
 
-void isSuccess(bool status) {
+void is_success(bool status) {
 	/*****************************************
 	* Print the success value with a change of colors, for benchmarks
 	*
@@ -39,7 +39,7 @@ void cct(std::string text, int color) {
 	*****************************************/
 	std::cout << "\033[1;" << color << "m" << text << "\033[0m";	
 }
-int getNumberOfBlocks(int sites) {
+int get_number_of_blocks(int sites) {
 	/*****************************************
 	* Counts the number of different blocks the Hamiltonian will divide into
 	*
@@ -49,13 +49,13 @@ int getNumberOfBlocks(int sites) {
 	*
 	* Returns
 	* -------
-	* nbrBlocks : (int) Number of different blocks
+	* nbr_blocks : (int) Number of different blocks
 	* ****************************************/
-	int nbrBlocks = sites + 1;
-	nbrBlocks *= nbrBlocks;
-	return nbrBlocks;
+	int nbr_blocks = sites + 1;
+	nbr_blocks *= nbr_blocks;
+	return nbr_blocks;
 }
-double findMinOfArray(std::vector<double> array) {
+double find_min_of_array(std::vector<double> array) {
 	/*****************************************
 	* Finds the minimum value of an array by just looking every element
 	* 
@@ -104,9 +104,10 @@ unsigned long comb(uLong n, uLong r) {
 	if (n < 1 && r > 0) result = 0 ;
 	return result;
 }
-unsigned long combSpecified(uLong nU, uLong sites, uLong up, uLong down) {
+unsigned long comb_specified(uLong nU, uLong sites, uLong up, uLong down) {
 	/*****************************************
-	* Calculates the combination term for a specified number of up electrons, down electrons and double occupation
+	* Calculates the combination term for a specified number of up electrons,
+    * down electrons and double occupation
 	*
 	* Parameters
 	* ----------
@@ -120,7 +121,8 @@ unsigned long combSpecified(uLong nU, uLong sites, uLong up, uLong down) {
 	* result: (unsigned long) possible combinations 
 	****************************************/
 	if (up < nU || down < nU) {
-		std::cout<<"WARNING - number of electrons inferior to number of double occupation"<<std::endl;
+		std::cout << "WARNING - number of electrons inferior to number" <<
+                    " of double occupation" << std::endl;
 		return 0;
 	}
 
@@ -130,9 +132,10 @@ unsigned long combSpecified(uLong nU, uLong sites, uLong up, uLong down) {
 
 	return result;
 }
-double fermiDiracFunction(float x, float beta, float mu) {
+double fermi_dirac_function(float x, float beta, float mu) {
 	/*****************************************
-	* Evaluates the point x of a a Fermi-Dirac distribution with parameters beta and mu given
+	* Evaluates the point x of a a Fermi-Dirac distribution with 
+    * parameters beta and mu given
 	*
 	* Parameters
 	* ----------
@@ -149,9 +152,10 @@ double fermiDiracFunction(float x, float beta, float mu) {
 
 	return n;
 }
-double boltzmannDistributionFunction(float dE, float beta) {
+double boltzmann_distribution_function(float dE, float beta) {
 	/*****************************************
-	* Evaluates the probability of change of the energy dE in a Boltzmann distribution with parameter beta given
+	* Evaluates the probability of change of the energy dE in a 
+    * Boltzmann distribution with parameter beta given
 	*
 	* Parameters
 	* ----------
@@ -167,7 +171,7 @@ double boltzmannDistributionFunction(float dE, float beta) {
 	return exp_;
 }
 
-double calculateSD(std::vector<double> data) {
+double calculate_sd(std::vector<double> data) {
 	/*****************************************
 	* Calculates the standard deviation of a data sample
 	*
@@ -177,26 +181,27 @@ double calculateSD(std::vector<double> data) {
 	*
 	* Returns
 	* -------
-	* std	: (double) standard deviation of the sample
+	* sd	: (double) standard deviation of the sample
 	****************************************/
-	double sum = 0.0, mean, standardDeviation = 0.0;
-	int i;
-	int len = data.size();
-	for (i = 0; i < len; ++i) {
+	double sum = 0.0, mean, standard_deviation = 0.0;
+
+    // Sums all contribution
+	for (unsigned int i = 0; i < data.size(); ++i) {
 		sum += data.at(i);
 	}
 
-	mean = sum / len;
-
-	for (i = 0; i < len; ++i) {
+	mean = sum / data.size();
+    
+    //Standard deviation^2
+	for (unsigned int i = 0; i < data.size(); ++i) {
 		double temp = data.at(i) - mean;
-		standardDeviation += temp*temp;
+		standard_deviation += temp*temp;
 	}
 
-	double std = sqrt(standardDeviation / len);
-	return std;
+	double sd = sqrt(standard_deviation / data.size());
+	return sd;
 }
-int degFundamentalCheck(double* eV, uLong n, double eps) {
+int deg_fundamental_check(double* eV, uLong n, double eps) {
 	/*********************************************************
 	* Checks the degeneracy level of the fundamental
 	*
@@ -211,21 +216,21 @@ int degFundamentalCheck(double* eV, uLong n, double eps) {
 	* NONE
 	*******************************************************/
 	int deg_degree = 1;
-	for (uLong i = 0; i < n; i++) {
+	for (uLong i = 1; i < n; i++) {
 		//Increase counter if energies are the same
-		if (abs(eV[i]-eV[i+1]) < eps) deg_degree++;
+		if (abs(eV[i-1]-eV[i]) < eps) deg_degree++;
 		else break;
 	}
 	return deg_degree;
 }
 
-//void makeIdentity(T* matrix, R rows) in header file
-//void makeTridiag(T* matrix, R* diag, R* h_diag, U size) in header file
+//void make_identity(T* matrix, R rows) in header file
+//void make_tri_diag(T* matrix, R* diag, R* h_diag, U size) in header file
 //void normalize(double* vec, R size) in header file
-//void initialVector(R const SIZE, T* v, uInt seed) in header file
+//void initial_vector(R const SIZE, T* v, uInt seed) in header file
 //void gramSchmidtIteration(double* prev_vectors, R const size_vectors, R const num_vectors, double* to_ortho_vector) in header file
 
-std::string toStringP(const double a_value, const int n) {
+std::string to_string_p(const double a_value, const int n) {
 	/*****************************************
 	* Transforms a double value in a string with a given precicion
 	*
@@ -244,7 +249,8 @@ std::string toStringP(const double a_value, const int n) {
 	return std::move(out).str();
 }
 
-template <> std::string toStringP_Q(const double a_value, const uInt integers, const uInt decimals) {
+template <> std::string to_string_pq(const double a_value, const uInt integers,
+                                     const uInt decimals) {
 	/*****************************************
 	* Transforms a double value in a string with a given precicion
 	*
@@ -260,37 +266,42 @@ template <> std::string toStringP_Q(const double a_value, const uInt integers, c
 	***************************************/
 	char s[100];
 	if (abs(a_value) > 10e-10) {
-		if (a_value < 0) sprintf(s,"% *.*f",integers+decimals,decimals,a_value);
-		else sprintf(s,"% *.*f",integers+decimals,decimals,a_value);
+        sprintf(s, "% *.*f", integers + decimals, decimals, a_value);
 	}
-	else sprintf(s,"% *.*f",integers+decimals,decimals,0.0);
+	else {
+        sprintf(s,"% *.*f",integers+decimals,decimals,0.0);
+    }
 
 	std::string str(s);
 	return str;
 }
 
-template <> double removeZeros(double a){
+template <> double remove_zeros(double a){
 	/*****************************************
-	if a value of a real number is near zero, will make it zero
-
-	Parameters
-	----------
-	a: (double) number to verify
-
-	Returns
-	-------
-	a: (double) number with near zero ->  zero
+	* if a value of a real number is near zero, will make it zero
+    *
+	* Parameters
+	* ----------
+	* a: (double) number to verify
+    *
+	* Returns
+	* -------
+	* a: (double) number with near zero ->  zero
 	****************************************/
 	if (abs(a) < 10e-13){a = 0;}	
 	return a;
 }
 
-//std::string writeVector(const double* vec, R size) in header file
-//std::string writeMatrix(const double* mat, R rows, R cols, int integers, int precision) in header file
-//std::string printVector(const T* vec, R size) in header file
-//std::string printMatrix(const T* mat, R rows, R cols, int integers, int precision) in header file
+//std::string write_vector(const double* vec, R size) in header file
+//std::string write_matrix(const double* mat, R rows, R cols, 
+//                         int integers, int precision) in header file
+//std::string print_vector(const T* vec, R size) in header file
+//std::string print_matrix(const T* mat, R rows, R cols, 
+//                         int integers, int precision) in header file
 
-std::string timeFormating(std::chrono::time_point<std::chrono::high_resolution_clock> start, std::chrono::time_point<std::chrono::high_resolution_clock> end){
+std::string time_formating(
+        std::chrono::time_point<std::chrono::high_resolution_clock> start,
+        std::chrono::time_point<std::chrono::high_resolution_clock> end){
 	/*****************************************
 	* Takes two time point and puts them in a string accordingly to their size
 	*
@@ -298,7 +309,7 @@ std::string timeFormating(std::chrono::time_point<std::chrono::high_resolution_c
 	* ----------
 	* start	: (time_point) First time point
 	* end	: (time_point) Second time point
-
+    *
 	* Returns
 	* -------
 	* time	: (string) time passed between the two points in string format
@@ -306,31 +317,33 @@ std::string timeFormating(std::chrono::time_point<std::chrono::high_resolution_c
 	std::string time="";
 	double min, sec, ms, mus;
 	min = sec = ms = mus = 0;
+    
+    using namespace std::chrono;
 
 	//Minutes
-	if(std::chrono::duration_cast<std::chrono::minutes>(end - start).count() > 1){
-		min = floor((double)std::chrono::duration_cast<std::chrono::minutes>(end - start).count());
-		time += toStringP(min, 0) + "min ";
+	if(duration_cast<minutes>(end - start).count() > 1){
+		min = floor((double)duration_cast<minutes>(end - start).count());
+		time += to_string_p(min, 0) + "min ";
 	}
 	//Seconds
-	if(std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > 1){
-		sec = floor((double)std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
-		time += toStringP(sec- min * 60, 0) + "s ";
+	if(duration_cast<seconds>(end - start).count() > 1){
+		sec = floor((double)duration_cast<seconds>(end - start).count());
+		time += to_string_p(sec- min * 60, 0) + "s ";
 	}
 	//Milliseconds
-	if(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 1){
-		ms = floor((double)std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
-		time += toStringP(ms - sec * 1000, 0) + "ms ";
+	if(duration_cast<milliseconds>(end - start).count() > 1){
+		ms = floor((double)duration_cast<milliseconds>(end - start).count());
+		time += to_string_p(ms - sec * 1000, 0) + "ms ";
 	}
 	//Microseconds
-	if(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() > 1){
-		mus = floor((double)std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
-		time += toStringP(mus - 1000 * ms, 0) + "μs ";
+	if(duration_cast<microseconds>(end - start).count() > 1){
+		mus = floor((double)duration_cast<microseconds>(end - start).count());
+		time += to_string_p(mus - 1000 * ms, 0) + "μs ";
 	}
 	return time;
 }
 
-unsigned int oneCounter(sType num) {
+unsigned int one_counter(sType num) {
 	/*****************************************
 	* Counts the number of ones in a given number in a binary representation
 	*
@@ -352,34 +365,41 @@ unsigned int oneCounter(sType num) {
 
 	return count;
 }
-sType rotr(sType bitVec, unsigned char rotIndex, unsigned char size) {
+sType rotr(sType bit_vec, unsigned char rot_index, unsigned char size) {
 	/*****************************************
-	* Shifts bits to the right
+	* Shifts bits to the right, while keeping looping boundary conditions
 	*
 	* Parameters
 	* ----------
-	* bitVec	: (sType) number to rotr
-	* rotIndex	: (unsigned char) move to right number of times
-	* size		: (unsigned char) number of bit string
+	* bit_vec	 : (sType) number to rotr
+	* rot_index	 : (unsigned char) move to right number of times
+	* size		 : (unsigned char) number of bit string
 	* 
 	* Returns
 	* -------
+    * new_bit_vec: (sType) shifted bit_vec
 	****************************************/
-	return (((bitVec >> rotIndex) | (bitVec << (size - rotIndex))) & ((sType)pow(2,size)-1));
+    sType new_bit_vec = bit_vec >> rot_index;
+    new_bit_vec |= bit_vec << (size - rot_index);
+    new_bit_vec &= (sType)pow(2,size)-1;
+	return new_bit_vec;
 }
 
-void combinationRecursive(std::vector<uShort> empty_spaces, sType current_num, uShort left_to_place, sType* all_comb, sType* placed, sType* it){
+void combination_recursive(std::vector<uShort> empty_spaces, sType current_num, 
+                           uShort left_to_place, sType* all_comb, 
+                           sType* placed, sType* it){
 	/****************************************************************
-	* Creates the combinations of the number specified <leftToPlace> to each place accessible <empty_spaces>. This function is specially used when creating double occupation states.
+	* Creates the combinations of the number specified <left_to_place> to each 
+    * location accessible <empty_spaces>. This function is specially used when 
+    * creating double occupation states.
 	* 
-	* Parameter
-	* ---------
+	* Parameters
+	* ----------
 	* empty_spaces	: (std::vector) Emplacement where we can place an electron
 	* current_num	: (unsigned long) coutains the previously placed electron
 	* left_to_place	: (unsigned short) number of electrons to placed
 	* all_comb		: (unsigned long*) Countains all the possible spaces
 	* placed		: (unsigned long*) number of state placed
-	*
 	*
 	* Returns
 	* -------
@@ -396,40 +416,46 @@ void combinationRecursive(std::vector<uShort> empty_spaces, sType current_num, u
 	for (uInt i = 0; i < empty_spaces.size(); i++) {
 		uLong added_num = current_num ^ (1ul << empty_spaces.at(i));
 		std::vector<uShort> updated_empty_spaces = empty_spaces;
-		updated_empty_spaces.erase(updated_empty_spaces.begin(), updated_empty_spaces.begin() + i + 1);
+		updated_empty_spaces.erase(updated_empty_spaces.begin(),
+                                   updated_empty_spaces.begin() + i + 1);
 
 
-		combinationRecursive(updated_empty_spaces, added_num, left_to_place - 1, all_comb, placed, it);
+		combination_recursive(updated_empty_spaces, added_num,
+                              left_to_place - 1, all_comb, placed, it);
 	}
 }
 
-void combinationDoubleOccupation(uShort N, uShort sites, std::vector<sType>* all_double_occupation) {
+void combination_double_occupation(
+        uShort N, uShort sites, std::vector<sType>* all_double_occupation) {
 	/****************************************************************
-	* Creates all the combinations of states with <N> double electron occupation in a system of <sites> sites. This will coutain only the <N> double occupation without any single electron occupation on any site.
+	* Creates all the combinations of states with <N> double electron 
+    * occupation in a system of <sites> sites. This will coutain only the <N> 
+    * double occupation without any single electron occupation on any site.
 	* 
-	* Parameter
+	* Parameters
 	* ----------
-	* N						: (uShort) Number of required double occupation
-	* sites					: (uShort) Number of sites of the system
-	* allDoubleOccupation	: (std::vector) all the <N> double occupation states
+	* N					   : (uShort) Number of required double occupation
+	* sites				   : (uShort) Number of sites of the system
+	* all_double_occupation: (std::vector) all the <N> double occupation states
 	*
 	* Returns
 	* -------
 	* NONE
 	*****************************************************************/
-	uint64_t combU = comb(sites,N);
-	*all_double_occupation = std::vector<sType>(combU,0);
+	uint64_t combU = comb(sites, N);
+	*all_double_occupation = std::vector<sType>(combU, 0);
 	uLong placed = 0;
 
 	//All sites accessible
 	std::vector<uint16_t> chosenSites(sites);
-	std::iota(chosenSites.begin(), chosenSites.end(),0);
+	std::iota(chosenSites.begin(), chosenSites.end(), 0);
 	uint64_t current_num = 0;
 
 	//Recursive combination function
-	//StatesArr* combinations = new StatesArr(combU);
-	uLong it = 0;
-	combinationRecursive(chosenSites,current_num,N,all_double_occupation->data(), &placed, &it);
+    //FIXME:Does 'it' do anything?
+	uLong it = 0; 
+	combination_recursive(chosenSites, current_num, N, 
+                          all_double_occupation->data(), &placed, &it);
 
 	//Shift the states found to create the double occupation
 	for (unsigned int i = 0; i < all_double_occupation->size(); i++) {
@@ -438,14 +464,18 @@ void combinationDoubleOccupation(uShort N, uShort sites, std::vector<sType>* all
 	}
 }
 
-void combinationRecursiveAddingSingle(std::vector<uShort> empty_spaces_up, std::vector<uShort> empty_spaces_down, sType current_num, uShort n_up, uShort n_down, uShort sites, sType* all_comb, sType* placed) {
+void combination_recursive_adding_single(
+    std::vector<uShort> empty_spaces_up, std::vector<uShort> empty_spaces_down,
+    sType current_num, uShort n_up, uShort n_down, uShort sites,
+    sType* all_comb, sType* placed) {
 	/****************************************************************
-	* Completes the <currentNum> with <nUp> and <nDown> single occupationelectrons
+	* Completes the <currentNum> with <nUp> and <nDown> single occupation 
+    * electrons
 	* 
 	* Parameter
 	* ----------
-	* empty_spaces_up	: (std::vector) Emplacement where we can place an up electron
-	* empty_spaces_down	: (std::vector) Emplacement where we can place a down electron
+	* empty_spaces_up	: (std::vector) Where we can place an up electron
+	* empty_spaces_down	: (std::vector) Where we can place a down electron
 	* current_num		: (ulong) coutains the previously placed electrons
 	* n_up				: (uShort) number of up electrons to place
 	* n_down			: (uShort) number of down electrons to place
@@ -472,12 +502,19 @@ void combinationRecursiveAddingSingle(std::vector<uShort> empty_spaces_up, std::
 			std::vector<uShort> updated_empty_spaces_up = empty_spaces_up;
 			std::vector<uShort> updated_empty_spaces_down = empty_spaces_down;
 			//Remove the access for down electrons to be put here
-			updated_empty_spaces_down.erase(std::remove(updated_empty_spaces_down.begin(), updated_empty_spaces_down.end(), empty_spaces_up.at(i)), updated_empty_spaces_down.end());
+			updated_empty_spaces_down.erase(
+                std::remove(updated_empty_spaces_down.begin(), 
+                            updated_empty_spaces_down.end(), 
+                            empty_spaces_up.at(i)),
+                updated_empty_spaces_down.end());
 			//Remove the access for up electrons to be put here
-			updated_empty_spaces_up.erase(updated_empty_spaces_up.begin(), updated_empty_spaces_up.begin() + i + 1);
+			updated_empty_spaces_up.erase(updated_empty_spaces_up.begin(),
+                                 updated_empty_spaces_up.begin() + i + 1);
 
 			//Recursive
-			combinationRecursiveAddingSingle(updated_empty_spaces_up,updated_empty_spaces_down, added_num, n_up-1, n_down, sites, all_comb, placed);
+			combination_recursive_adding_single(
+                updated_empty_spaces_up, updated_empty_spaces_down, added_num,
+                n_up-1, n_down, sites, all_comb, placed);
 		}
 
 	}
@@ -487,19 +524,25 @@ void combinationRecursiveAddingSingle(std::vector<uShort> empty_spaces_up, std::
 
 			std::vector<uShort> updated_empty_spaces_down = empty_spaces_down;
 			//Remove the access for down electrons to be put here
-			updated_empty_spaces_down.erase(updated_empty_spaces_down.begin(), updated_empty_spaces_down.begin() + i + 1);
+			updated_empty_spaces_down.erase(updated_empty_spaces_down.begin(), 
+                                   updated_empty_spaces_down.begin() + i + 1);
 
 			//Recursive
-			combinationRecursiveAddingSingle(empty_spaces_up,updated_empty_spaces_down, added_num, n_up, n_down-1, sites, all_comb, placed);
+			combination_recursive_adding_single(
+                empty_spaces_up, updated_empty_spaces_down, added_num, n_up,
+                n_down-1, sites, all_comb, placed);
 		}
 
 	}
 }
-void combinationAll(uShort n_up, uShort n_down, uShort sites, uShort nU, std::vector<sType>* all_states) {
+void combination_all(uShort n_up, uShort n_down, uShort sites, uShort nU, 
+                     std::vector<sType>* all_states) {
 	/****************************************************************
-	* Computes the combinations of the states countaining <nUp> electrons up and <nDown> electrons down, while there is <nU> double occupation in a system of <sites> sites.
+	* Computes the combinations of the states countaining <nUp> electrons up 
+    * and <nDown> electrons down, while there is <nU> double occupation in a 
+    * system of <sites> sites.
 	* 
-	* Parameter
+	* Parameters
 	* ----------
 	* n_up		: (uShort) number of up electrons to place
 	* n_down	: (uShort) number of down electrons to place
@@ -512,18 +555,20 @@ void combinationAll(uShort n_up, uShort n_down, uShort sites, uShort nU, std::ve
 	* NONE
 	*****************************************************************/
 	//Number of states with specified nU, nUp, nDown values
-	uLong combU_up_down = combSpecified(nU,sites,n_up,n_down);
+	uLong combU_up_down = comb_specified(nU, sites, n_up, n_down);
 	
 	//Different ways to placed the double occupation
-	uLong comb_U = comb(sites,nU);
+	uLong comb_U = comb(sites, nU);
 	uLong comb_else = combU_up_down / comb_U;
-	*all_states = std::vector<sType>(combU_up_down,0);
+	*all_states = std::vector<sType>(combU_up_down, 0);
 
 	if (n_up < nU || n_down < nU) {
-		std::cout<<"Not enough electron up or down for the double occupation required"<<std::endl;
+		std::cout << "Not enough electron up or down for" << 
+            " the double occupation required" << std::endl;
 		exit(1);
 	}
 
+    //Number of electron is too high, will create nu larger
 	if ((n_up + n_down - sites) > nU) return;
 
 	//Independent electron number
@@ -534,12 +579,13 @@ void combinationAll(uShort n_up, uShort n_down, uShort sites, uShort nU, std::ve
 
 	//Places the double occupation through the lattice
 	if (nU > 0) {
-		combinationDoubleOccupation(nU,sites,&states_double_occupation);
+		combination_double_occupation(nU, sites, &states_double_occupation);
 	}
 
 	if (n_up > 0 || n_down > 0) {
 		uLong placed = 0;
-		#pragma omp parallel default(none) shared(states_double_occupation, all_states, sites, comb_else, n_up, n_down) private(placed)
+		#pragma omp parallel default(none) shared(states_double_occupation,\
+        all_states, sites, comb_else, n_up, n_down) private(placed)
 		{
 		#pragma omp for  
 		for (uLong i = 0; i < states_double_occupation.size(); i++) {
@@ -556,17 +602,21 @@ void combinationAll(uShort n_up, uShort n_down, uShort sites, uShort nU, std::ve
 				one <<= 1;
 			}
 			//Add the leftover electron without double occupation
-			combinationRecursiveAddingSingle(left_places, left_places, current_num,n_up, n_down, sites, all_states->data() + i * comb_else, &placed);
+			combination_recursive_adding_single(
+                    left_places, left_places, current_num,n_up, n_down, sites, 
+                    all_states->data() + i * comb_else, &placed);
 
-		}
-		}
+		}//End of pragma omp for
+		}//End of pragma omp parallel
 
 		if (nU == 0) {
 			std::vector<uShort> chosen_sites(sites);
-			std::iota(chosen_sites.begin(), chosen_sites.end(),0);
+			std::iota(chosen_sites.begin(), chosen_sites.end(), 0);
 			uLong current_num = 0;
 			placed = 0;
-			combinationRecursiveAddingSingle(chosen_sites, chosen_sites,current_num,n_up,n_down,sites,all_states->data(),&placed);
+			combination_recursive_adding_single(
+                chosen_sites, chosen_sites, current_num, n_up, n_down, sites, 
+                all_states->data(), &placed);
 
 		}
 	}
@@ -577,9 +627,9 @@ void combinationAll(uShort n_up, uShort n_down, uShort sites, uShort nU, std::ve
 	}
 }
 
-bool acceptFunction(sType state, float acceptQuota){
+bool accept_function(sType state, float acceptQuota){
 	//std::srand(time(NULL));
-	if (state == 0) std::cout<<"";//Line to shutup the warnings for now
+	if (state == 0) std::cout << "";//Line to shutup the warnings for now
 
 	float rng_number = ((double)std::rand()) / RAND_MAX;
 

@@ -32,7 +32,7 @@ struct hubbardParam{ //Hubbard parameters
 		std::cout<<"Hubbard block used : N"<<nElec<<"Sz"<<totSpin<<std::endl;
 		std::cout<<"U = "<<u<<"\tmu = "<<mu<<std::endl;
 		std::cout<<"tMatrix = "<<std::endl;
-		printMatrix(tMatrix.data(),n_sites,n_sites);
+		print_matrix(tMatrix.data(), n_sites, n_sites);
 		std::cout<<std::endl;
 	}
 };
@@ -91,7 +91,7 @@ struct samplingParam{ //Sampling parameters
 		std::cout<<"Beta_MH = "<<beta_MH<<std::endl;
 		std::cout<<"# H applied = "<<nHapply<<"\tBeta_Happly = "<<beta_Happly<<std::endl;
 		std::cout<<"Initial states:"<<std::endl;
-		printVector(initState.data(),initState.size());
+		print_vector(initState.data(), initState.size());
 		std::cout<<std::endl;
 	}
 };

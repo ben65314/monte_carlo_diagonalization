@@ -32,7 +32,7 @@ private:
 		
 		//Computes the number of states for each double occupation level
 		for (uShort i = 0; i <= max_nU; i++) {
-			uLong combinations = combSpecified(i,this->sys_hubP.n_sites,this->electrons.up,this->electrons.down);
+			uLong combinations = comb_specified(i,this->sys_hubP.n_sites,this->electrons.up,this->electrons.down);
 			nStates_for_nU.push_back(combinations);
 
 			//Searches for the level that cannot be fully filled according to the samplingSize
@@ -54,7 +54,7 @@ private:
 			std::vector<StateType> all_combinations_for_this_nU;
 			
 			//Calculates all states for a given nUp, nDown, nU
-			combinationAll(this->electrons.up,this->electrons.down,this->sys_hubP.n_sites,i, &all_combinations_for_this_nU);
+			combination_all(this->electrons.up,this->electrons.down,this->sys_hubP.n_sites,i, &all_combinations_for_this_nU);
 			
 			for (uLong j = 0; j < all_combinations_for_this_nU.size(); j++) {
 				//Will take the last filled level has the starting point in the Monte-Carlo sampling
@@ -94,7 +94,7 @@ private:
 					float randomGen = (float)rand() / (float)RAND_MAX;
 
 					float dE = (new_nU - current_nU)*this->sys_hubP.u;
-					if(randomGen < boltzmannDistributionFunction(dE, this->sys_sP.beta_MH)) {
+					if(randomGen < boltzmann_distribution_function(dE, this->sys_sP.beta_MH)) {
 					//if (randomGen <fermiDirac_acceptation_coeficients.at(new_nU)) {
 						nextStepEval->add(newStates.at(j));
 						if(!this->countainsElement(newStates.at(j))){
@@ -161,7 +161,7 @@ private:
 			step2 = std::chrono::high_resolution_clock::now();
 			if(verbose > 5) std::cout<<"\nCURRENT SAMPLE SIZE:"<<MH_size<<" ("<<(float)MH_size / samplingSize<<std::endl;
 			if(verbose > 5) std::cout<<"CurrentStateLen:"<<currentState->getLength()<<std::endl;
-			if(verbose > 5) std::cout<<"Time to gather current sample:"<<timeFormating(step1,step2)<<std::endl;
+			if(verbose > 5) std::cout<<"Time to gather current sample:"<<time_formating(step1,step2)<<std::endl;
 			step1 = std::chrono::high_resolution_clock::now();
 			size_currentStepEval = currentState->getLength();
 			size_nextStepEval = (reticle * size_currentStepEval > samplingSize) ? samplingSize : reticle * size_currentStepEval;
@@ -291,8 +291,9 @@ public:
 		hmap = Hashmap(this->arr.data());
 		hmap.hash_setted = false;
 	}
-	StatesR_H(const std::vector<StateType>* array_to_state){
+	StatesR_H(const std::vector<StateType>* array_to_state, hubbardParam hubP){
 		hmap = Hashmap(this->arr.data());
+        this->set_hubbard_parameters(hubP);
 		Electrons elec = findNumberOfElectron(array_to_state->at(0),this->sys_hubP.n_sites);
 		allocateMEM(elec,this->sys_hubP.n_sites);
 

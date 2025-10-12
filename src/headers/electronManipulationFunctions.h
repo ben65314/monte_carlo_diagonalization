@@ -43,7 +43,7 @@ template <class A> void Ht_subspace_condition_expanding(A* sArr, uint64_t start,
 		//Add to sArr
 		for (uint64_t j = 0; j < proj_Ht.size(); j++) {
 			//Possible accept condition
-			if (!acceptFunction(proj_Ht.at(j))) continue;
+			if (!accept_function(proj_Ht.at(j))) continue;
 			sArr->add(proj_Ht.at(j));
 		}
 	}
@@ -96,10 +96,10 @@ template<class T, class U> void writeStateWithDouble(std::vector<T>* fund, U* st
 	double cummul = 0;
 	for (uLong i = 0 ; i < sorted_fund.size(); i++) {
 		cummul += sorted_fund.at(i)*sorted_fund.at(i);
-		fund_txt += toStringP_Q(sorted_fund.at(i),4,14) +"\t"+
-			toStringP_Q((double)sorted_states.at(i),10,0)+"\t"+
-			toStringP_Q((double)Hu(sorted_states.at(i),sites),10,0)+"\t"+
-			toStringP_Q(cummul,2,16)+"\n";
+		fund_txt += to_string_pq(sorted_fund.at(i),4,14) +"\t"+
+			to_string_pq((double)sorted_states.at(i),10,0)+"\t"+
+			to_string_pq((double)Hu(sorted_states.at(i),sites),10,0)+"\t"+
+			to_string_pq(cummul,2,16)+"\n";
 		//Create reduced sampling size
 		if (cummul < keep or keep==1) {
 			if(verbose > 99) std::cout<<cummul<<"\tADD:"<<sorted_states.at(i)<<"\t"<<sorted_fund.at(i)<<std::endl;

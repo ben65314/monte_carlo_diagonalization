@@ -88,14 +88,14 @@ std::string writeQ_System(double fundE, double eta, Electrons elec, hubbardParam
 	* text			 : (std::string) String of parameters
 	*****************************************************************/
 	std::string text = "";
-	text += toStringP(hubP_to_write->n_sites,0) + "\t";
-	text += toStringP(hubP_to_write->u,0) + "\t";
-	text += toStringP(hubP_to_write->mu,0) + "\t";
-	text += toStringP((elec.up+elec.down),0) + "\t";
-	text += toStringP((elec.up-elec.down),0) + "\t";
-	text += toStringP(fundE,16) + "\t";
-	text += toStringP(eta,5) + "\t";
-	text += toStringP(percStates,2) + "\t";
+	text += to_string_p(hubP_to_write->n_sites,0) + "\t";
+	text += to_string_p(hubP_to_write->u,0) + "\t";
+	text += to_string_p(hubP_to_write->mu,0) + "\t";
+	text += to_string_p((elec.up+elec.down),0) + "\t";
+	text += to_string_p((elec.up-elec.down),0) + "\t";
+	text += to_string_p(fundE,16) + "\t";
+	text += to_string_p(eta,5) + "\t";
+	text += to_string_p(percStates,2) + "\t";
 	return text;
 }
 
@@ -119,9 +119,9 @@ template <class T> std::string writeQ_MatrixString(std::vector<T>* QM, std::vect
 	*****************************************************************/
 	std::string text = "";
 	for (uInt j = 0; j < eigen_val->size(); j++) {
-		text += toStringP_Q(eigen_val->at(j),5,12) + "\t";
+		text += to_string_pq(eigen_val->at(j),5,12) + "\t";
 		for (int i = 0; i < ns; i++) {
-			text += toStringP_Q(QM->at(i * eigen_val->size() + j),4,14) + "\t";
+			text += to_string_pq(QM->at(i * eigen_val->size() + j),4,14) + "\t";
 		}
 		if (j < eigen_val->size()-1) text+="\n";
 	}
@@ -137,10 +137,10 @@ template <class T> std::string writeCF_MatrixString(std::vector<double>* all_alp
 		int iterate = 0 ;
 		for (uInt i = 0; i < len_param->size(); i++) {
 			if (j < len_param->at(i)) {
-				text += toStringP_Q(all_alpha->at(j+iterate),4,14) + "\t";
+				text += to_string_pq(all_alpha->at(j+iterate),4,14) + "\t";
 			}
 			else {
-				text += toStringP_Q(0.0,4,14) + "\t";
+				text += to_string_pq(0.0,4,14) + "\t";
 				
 			}
 			iterate += len_param->at(i);
@@ -153,10 +153,10 @@ template <class T> std::string writeCF_MatrixString(std::vector<double>* all_alp
 		int iterate = 0;
 		for (uInt i = 0; i < len_param->size(); i++) {
 			if (j < len_param->at(i)) {
-				text += toStringP_Q(all_beta->at(j+iterate),4,14) + "\t";
+				text += to_string_pq(all_beta->at(j+iterate),4,14) + "\t";
 			}
 			else {
-				text += toStringP_Q(0.0,4,14) + "\t";
+				text += to_string_pq(0.0,4,14) + "\t";
 			}
 			iterate += len_param->at(i)+1;
 		}

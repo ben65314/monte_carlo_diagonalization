@@ -7,7 +7,7 @@ private :
 	sType hash_size;
 
 	//Used for the hash function
-	unsigned int up, down, sites;
+	int up, down, sites;
 	std::vector<sType> combMarkersUp;
 	std::vector<sType> combMarkersDown;
 	sType combinationUp;

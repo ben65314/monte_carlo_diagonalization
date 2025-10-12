@@ -68,8 +68,7 @@ int main(int argc, char *argv[]){
             //Setting block
 			std::vector<sType> state_init = {
 				createAntiFerro(jMV.hubP.n_sites, i, j)};
-			arrType states_block = arrType(&state_init);
-			states_block.set_hubbard_parameters(jMV.hubP);
+			arrType states_block = arrType(&state_init, jMV.hubP);
 			states_block.set_sampling_parameters(sP);
 			states_block.electrons = elec;
 
@@ -84,6 +83,8 @@ int main(int argc, char *argv[]){
 			double fundE = LS.fundEnergy(&fundState, 
 				                         &states_block, &deg);
             
+            if (verbose > 4) std::cout << "The bloc ("<<i<<","<<j
+                <<") energy is "<<fundE<<std::endl;
             //Look for minimum energy
 			if (fundE < minEnergy) {
 				minEnergy = fundE;
@@ -96,17 +97,17 @@ int main(int argc, char *argv[]){
     //Information on min_block
 	int N = min_block_electrons.up + min_block_electrons.down;
 	int S = min_block_electrons.up - min_block_electrons.down;
-	std::cout<<"The fundamental block is N"<<N<<"S"<<S<<
-		"\nThe fundamental energy is "<<minEnergy<<std::endl;
+	std::cout<<"\nThe fundamental block is N"<<N<<"S"<<S<<
+		"\nThe fundamental energy is "<<minEnergy<<'\n'<<std::endl;
 
 
 	//End time
 	if (verbose > 0) {
-		std::cout << "Reading time : " << timeFormating(step1, step2) 
+		std::cout << "Reading time : " << time_formating(step1, step2) 
 			<< std::endl;
-		std::cout << "Compute time : " << timeFormating(step2, step3) 
+		std::cout << "Compute time : " << time_formating(step2, step3) 
 			<< std::endl;
-		std::cout << "Total time : " << timeFormating(step1, step3) 
+		std::cout << "Total time : " << time_formating(step1, step3) 
 			<< std::endl;
 	}
 	return 0;
