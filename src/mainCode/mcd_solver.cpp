@@ -76,7 +76,7 @@ int main(int argc, char *argv[]){
 	std::vector<vType> fundState = std::vector<vType>(gotSubSpaceLen,0);
 	int deg = 1;
 	LanczosSolver<vType,decltype(MH_Block)> LS;
-	double fundE = LS.fundEnergy(&fundState, &MH_Block, &deg);
+	double fundE = LS.fund_energy(&fundState, &MH_Block, &deg);
 	if(verbose > 99) std::cout<<"ENDING FUND VECTOR"<<std::endl;
 	if(verbose > 99) print_vector(fundState.data(),gotSubSpaceLen);
 	//MH_Block.showAllStates();

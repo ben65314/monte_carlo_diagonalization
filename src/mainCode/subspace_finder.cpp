@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
 				sP.sampling_size,0);
 			LanczosSolver<vType,arrType> LS;
 			int deg = 1;
-			double fundE = LS.fundEnergy(&fundState, 
+			double fundE = LS.fund_energy(&fundState, 
 				                         &states_block, &deg);
             
             if (verbose > 4) std::cout << "The bloc ("<<i<<","<<j

@@ -316,7 +316,7 @@ template <class T, class StatesArrType> std::vector<double> computeQ_matrix (std
 	vecBL = std::vector<T>(arr_BL, arr_BL + newSpaceLen * sites);
 	//Band lanczos
 	LanczosSolver<T,StatesArrType> LS;	
-	BLspace_Evalues = LS.bandLanczosAlgorithm(&vecBL, sites, newSpaceLen, statesExcited, &BLspaceSize, &BLspace_Evectors, &ProdCOmega);
+	BLspace_Evalues = LS.band_lanczos_algorithm(&vecBL, sites, newSpaceLen, statesExcited, &BLspaceSize, &BLspace_Evectors, &ProdCOmega);
 
 	//printMatrix(BLspace_Evectors.data(),)
 	//Clear mem
