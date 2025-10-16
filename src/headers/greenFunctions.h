@@ -22,13 +22,13 @@ template <class StatesArrType> void c_subspace(
 	* NONE
 	*****************************************************************/
 	unsigned int sites = sub_space->sys_hubP.n_sites;
-	unsigned long len = sub_space->getLength();
+	unsigned long len = sub_space->get_length();
 	
 	int index = sites - location - 1 + spin * sites;
     //Creates
 	if (creation) {
 		for (unsigned long i = 0; i < len; i++) {
-			sType temp = sub_space->getAt(i);
+			sType temp = sub_space->get_at(i);
 			if (c_operator(&temp, index)) { 
 				c_sub_space->add(temp);
 			}
@@ -37,7 +37,7 @@ template <class StatesArrType> void c_subspace(
     //Annihilates 
 	else {
 		for (unsigned long i = 0; i < len; i++) {
-			sType temp = sub_space->getAt(i);
+			sType temp = sub_space->get_at(i);
 			if (c_dag_operator(&temp, index)) { 
 				c_sub_space->add(temp);
 			}
@@ -71,7 +71,7 @@ template <class StatesArrType> void green_space_projection(
 	if (verbose < -9) std::cout << "green_space_projection(...)" << std::endl;
 
 	unsigned int sites = origin_sub_space->sys_hubP.n_sites;
-	proj_sub_space->removeAll();
+	proj_sub_space->remove_all();
 
 	for (unsigned int i = 0; i < sites; i++) {
 		c_subspace(origin_sub_space, i, spin, creation, proj_sub_space);
@@ -139,42 +139,7 @@ template <class T> std::string write_q_matrix_string(
 	return text;
 }
 
-template <class T> std::string writeCF_MatrixString(std::vector<double>* all_alpha, std::vector<T>* all_beta, std::vector<int>* len_param) {
-	int max = *std::max_element(len_param->begin(), len_param->end());
 
-	std::string text = "!a\n";
-	for (uInt j = 0; j < max; j++) {
-		int iterate = 0 ;
-		for (uInt i = 0; i < len_param->size(); i++) {
-			if (j < len_param->at(i)) {
-				text += to_string_pq(all_alpha->at(j+iterate),4,14) + "\t";
-			}
-			else {
-				text += to_string_pq(0.0,4,14) + "\t";
-				
-			}
-			iterate += len_param->at(i);
-		}
-		text+="\n";
-	}
-	text+="!b\n";
-
-	for (uInt j = 0; j < max+1; j++) {
-		int iterate = 0;
-		for (uInt i = 0; i < len_param->size(); i++) {
-			if (j < len_param->at(i)) {
-				text += to_string_pq(all_beta->at(j+iterate),4,14) + "\t";
-			}
-			else {
-				text += to_string_pq(0.0,4,14) + "\t";
-			}
-			iterate += len_param->at(i)+1;
-		}
-		text+="\n";
-	}
-
-	return text;
-}
 
 template <class T, class StatesArrType> void excited_vector_projection(
         bool create, unsigned int site, int spin, const T* initial_vector, 
@@ -208,13 +173,12 @@ template <class T, class StatesArrType> void excited_vector_projection(
 	* NONE
 	*****************************************************************/
 	sType current_state;
-	//printVector(initialVector,initialStates->getLength());
 	int ns = initial_states->sys_hubP.n_sites; //number of sites
 	int index = ns - site - 1 + spin * ns;
 	
-	for(long unsigned i = 0; i < initial_states->getLength(); i++){
+	for(long unsigned i = 0; i < initial_states->get_length(); i++){
 		//Exciting the state
-		current_state = initial_states->getAt(i);
+		current_state = initial_states->get_at(i);
 		bool can_projected = false;
 		sType one = 1UL << (ns * 2 - 1);
 		char phase = 1;
@@ -233,7 +197,7 @@ template <class T, class StatesArrType> void excited_vector_projection(
 
 		if (can_projected) {
 			sType index_vec;
-			if (projected_states->whereIsElement(current_state, &index_vec))
+			if (projected_states->where_is_element(current_state, &index_vec))
 			{
 				projected_vector[index_vec] = (T)phase * initial_vector[i];
 			}
@@ -323,14 +287,14 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 	
 	//Number of times H is applied to generate new states
 	if (verbose > 9) std::cout << "Before H excitation : " 
-                               << states_excited->getLength() << std::endl;
+                               << states_excited->get_length() << std::endl;
 
 	states_excited->subspace_condition_expanding();
 	
 	if (verbose > 9) std::cout << "After H excitation : " 
-                               << states_excited->getLength() << std::endl;
+                               << states_excited->get_length() << std::endl;
 
-	new_space_len = states_excited->getLength();
+	new_space_len = states_excited->get_length();
 	arr_BL = new T[new_space_len * sites]();
 
 	//Countains all the initial vectors for the band Lanczos algorithm
@@ -350,7 +314,7 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 
 	//Clear mem
 	std::vector<T>().swap(vec_BL);
-	states_excited->removeAll();
+	states_excited->remove_all();
 	delete[] arr_BL;
 	
 	//Repeat for each nu/mu pair
@@ -397,12 +361,12 @@ template <class T, class StatesArrType> void compute_q_matrix_band_lanczos(
 	if (verbose < -4) std::cout << "compute_q_matrix_band_lanczos(...)" 
                                 << std::endl;
 
-	int size = states_array->getLength();
+	int size = states_array->get_length();
 	int sites = states_array->sys_hubP.n_sites;
 
 	//////Wrtiting the Q-Matrix and the eigen values in a txt file
 	Electrons elec = states_array->electrons;
-	float perc_used = (float)states_array->getLength() / 
+	float perc_used = (float)states_array->get_length() / 
                         (comb(sites, elec.up) * comb(sites, elec.down));
 	std::string written_q_matrix = write_q_system(fundE, (double)gP.g_eta, elec,
                                             &states_array->sys_hubP, perc_used);
@@ -482,21 +446,21 @@ template <class StatesArrType> void compute_green_long(
 
 	if (verbose > 99) {
 		std::cout<<"PROJ STATES E"<<std::endl;
-		states_excited_e->showAllStates();
+		states_excited_e->show_all_states();
 		std::cout<<"PROJ STATES H"<<std::endl;
-		states_excited_h->showAllStates();
+		states_excited_h->show_all_states();
 	}
 
 	//Wrtiting the Q-Matrix and the eigen values in a txt file
 	Electrons elec = states_array->electrons;
-	float perc_used = (float)states_array->getLength() / 
+	float perc_used = (float)states_array->get_length() / 
                             (comb(sites, elec.up) * comb(sites, elec.down));
 	std::string written_q_matrix = write_q_system(fundE, (double)gP.g_eta, elec,
                                             &states_array->sys_hubP, perc_used);
 	
 	//Vectors
 	//ELECTONS
-	int new_space_len_e = states_excited_e->getLength();
+	int new_space_len_e = states_excited_e->get_length();
 
 	written_q_matrix += "\n# Eigen values E -- Q-Matrixes E\n";
 
@@ -510,14 +474,14 @@ template <class StatesArrType> void compute_green_long(
 			for (int i = 0; i < sites; i++){
 				excited_vector_projection(
                     true, i, spin, 
-                    fund_state->data() + states_array->getLength() * m,
+                    fund_state->data() + states_array->get_length() * m,
                     states_array, states_excited_e, 
                     arr_BL_e + i * new_space_len_e);
 			}
 
 			//Hamiltonian matrices
 			double* hE = new double[new_space_len_e*new_space_len_e]();
-			states_excited_e->matrixCreation(hE);
+			states_excited_e->matrix_creation(hE);
 
 			char jobs = 'V', uplo='U';
 			double* eigen_value_e = new double[new_space_len_e]();
@@ -548,7 +512,7 @@ template <class StatesArrType> void compute_green_long(
 
 
 	//HOLES
-	int new_space_len_h = states_excited_h->getLength();
+	int new_space_len_h = states_excited_h->get_length();
 
 
 	//Wrtiting the Q-Matrix and the eigen values in a txt file
@@ -564,14 +528,14 @@ template <class StatesArrType> void compute_green_long(
 			for (int i = 0; i < sites; i++){
 				excited_vector_projection(
                     false, i, spin, 
-                    fund_state->data() + states_array->getLength() * m, 
+                    fund_state->data() + states_array->get_length() * m, 
                     states_array, states_excited_h, 
                     arr_BL_h + i * new_space_len_h);
 			}
 
 			//Hamiltonian matrices
 			double* hH = new double[new_space_len_h*new_space_len_h]();
-			states_excited_h->matrixCreation(hH);
+			states_excited_h->matrix_creation(hH);
 
 			char jobs = 'V', uplo='U';
 			double* eigen_value_h = new double[new_space_len_h]();

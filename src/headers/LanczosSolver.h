@@ -37,7 +37,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		* NONE
 		*******************************************************/
         //Number of states
-		int size = sArr->getLength();
+		int size = sArr->get_length();
 		//Sets size of alpha and beta
 		alpha->clear();	alpha->reserve(*iter);
 		beta->clear();	beta->reserve(*iter);
@@ -151,7 +151,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		* -------
 		* NONE
 		*******************************************************/
-		int size = sArr->getLength();
+		int size = sArr->get_length();
 		int size_proj = alpha->size();
 
 		std::vector<double> r(gs, gs + size);
@@ -213,7 +213,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		int nIterations = 1000;
 
 		// Random Initial Vector
-		initial_vector(sArr->getLength(),fundState->data());
+		initial_vector(sArr->get_length(), fundState->data());
 		
 		lanczos_energy(&fundState_lanczosBasis, fundState->data(), sArr, &alpha, 
                 &beta, &fundEnergy, &nIterations, deg, epsilon);
@@ -222,7 +222,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		//Increase the size of the fundState according to the degeneracy
 		for (int i = 1; i < *deg; i++) {
 			fundState->insert(fundState->end(), fundState->begin(),
-                     fundState->begin() + sArr->getLength());
+                     fundState->begin() + sArr->get_length());
 		}
 		lanczos_vectors(&fundState_lanczosBasis, fundState->data(), sArr, 
                  &alpha, &beta, deg);
@@ -510,7 +510,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		****************************************************/
 		if(verbose == -1) std::cout << "double fundEnergy(...) called\n";
 		double fund_energy;
-		int rows = states->getLength();
+		int rows = states->get_length();
 
 		if (rows > LANCZOS_SIZE) {
 			fund_energy = lanczos_algorithm(fund_state, states, deg);
@@ -519,7 +519,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
             //Will do the same as above put with a smaller matrix
 			double* H = new double[rows*rows]();
 
-			states->matrixCreation(H);
+			states->matrix_creation(H);
 
 			char jobs = 'V', uplo='U';
 			double* eigen_values = new double[rows];

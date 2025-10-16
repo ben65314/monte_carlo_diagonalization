@@ -64,11 +64,11 @@ int main(int argc, char *argv[]){
 	//Sampling methods
 	//MH_Block.sampling_MH();
 	MH_Block.sampling_least_energy();
-	//MH_Block.showAllStates();
+	//MH_Block.show_all_states();
 
 	auto step2_2 = std::chrono::high_resolution_clock::now();
 	if(verbose > 0){std::cout << "(Completed) " << time_formating(step2_1,step2_2) << std::endl;}
-	gotSubSpaceLen = MH_Block.getLength();
+	gotSubSpaceLen = MH_Block.get_length();
 
 	//Finds the fundamental energy of the block
 	auto step2_3 = std::chrono::high_resolution_clock::now();
@@ -79,12 +79,12 @@ int main(int argc, char *argv[]){
 	double fundE = LS.fund_energy(&fundState, &MH_Block, &deg);
 	if(verbose > 99) std::cout<<"ENDING FUND VECTOR"<<std::endl;
 	if(verbose > 99) print_vector(fundState.data(),gotSubSpaceLen);
-	//MH_Block.showAllStates();
+	//MH_Block.show_all_states();
 	if (MH_Block.sys_sP.fund_tc < 1) { 
 		if (verbose > 9) std::cout<<"TRUNCATING"<<std::endl;
-		if (verbose > 9) std::cout<<"SIZE BEFORE:"<<MH_Block.getLength()<<std::endl;
+		if (verbose > 9) std::cout<<"SIZE BEFORE:"<<MH_Block.get_length()<<std::endl;
 		write_state_with_double(&fundState,&MH_Block,MH_Block.sys_hubP.n_sites,MH_Block.sys_sP.fund_tc);
-		if (verbose > 9) std::cout<<"SIZE AFTER:"<<MH_Block.getLength()<<std::endl;
+		if (verbose > 9) std::cout<<"SIZE AFTER:"<<MH_Block.get_length()<<std::endl;
 	}
 
 	//printVector(fundState,gotSubSpaceLen);
@@ -114,10 +114,10 @@ int main(int argc, char *argv[]){
 	//WRITING
 	std::time_t end_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::string writes = (std::string)"\nRun Parameters: --" + std::ctime(&end_time) + (std::string)"#Sites = "+ to_string_p(MH_Block.sys_hubP.n_sites,1)+"\tu = "+to_string_p(MH_Block.sys_hubP.u,1)+"\tmu = "+ to_string_p(MH_Block.sys_hubP.mu,1) + "\n";
-	float per = (float)MH_Block.getLength() / (comb(MH_Block.sys_hubP.n_sites,elec.up) * comb(MH_Block.sys_hubP.n_sites,elec.down));
+	float per = (float)MH_Block.get_length() / (comb(MH_Block.sys_hubP.n_sites,elec.up) * comb(MH_Block.sys_hubP.n_sites,elec.down));
 	writes +="Initial State = " + write_vector(MH_Block.sys_sP.init_state.data(),MH_Block.sys_sP.init_state.size());
-	writes +="\nSampling Size  = " + to_string_p(MH_Block.getLength(),0) + "(" + to_string_p(per,4) +")\tReticle = "+ to_string_p(MH_Block.sys_sP.reticle,1) +"\tBeta = " + to_string_p(MH_Block.sys_sP.beta_MH,3) + "\n";
-	if(verbose == 2) {writes += "States taken = " + MH_Block.showAllStatesString()+"\n";}
+	writes +="\nSampling Size  = " + to_string_p(MH_Block.get_length(),0) + "(" + to_string_p(per,4) +")\tReticle = "+ to_string_p(MH_Block.sys_sP.reticle,1) +"\tBeta = " + to_string_p(MH_Block.sys_sP.beta_MH,3) + "\n";
+	if(verbose == 2) {writes += "States taken = " + MH_Block.show_all_states_string()+"\n";}
 
 
 	writes += "\nFund energy : " + to_string_p(fundE); 

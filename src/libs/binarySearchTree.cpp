@@ -2,50 +2,14 @@
 //Global variables
 int verbose = 0;
 
-Node* insert(Node* node, uint64_t key, bool* alreadyThere) {
-	// If the tree is empty, return a new node
-	//std::cout<<"INSERTING:\tNODE:"<<node->key<<"\tKEY:"<<key->key<<std::endl;
-    if (node == NULL){
-		//std::cout<<"NULL, creating new node:"<<key<<std::endl;
-        return new Node(key);    
-	}
-    // If the key is already present in the tree,
-    // return the node
-    if (node->key == key){ 
-		//std::cout<<"ALREADY EXISTS"<<std::endl;
-		*alreadyThere = true;
-        return node;
-	}
-    // Otherwise, recur down the tree/ If the key
-    // to be inserted is greater than the node's key,
-    // insert it in the right subtree
-    if (node->key < key){ 
-		//std::cout<<"GOING RIGHT"<<std::endl;
-        node->right = insert(node->right, key,alreadyThere);
-	}
-    // If the key to be inserted is smaller than 
-    // the node's key,insert it in the left subtree
-    else { 
-		//std::cout<<"GOING LEFT"<<std::endl;
-		//std::cout<<"LEFT NODE:"<<node->left<<std::endl;
-		//std::cout<<"NODE:"<<node->key<<"\tKEY:"<<key->key<<std::endl;
-        node->left = insert(node->left, key,alreadyThere);
-	}
-    // Return the (unchanged) node pointer
-    return node;
-}
-
 Node* insert(Node* node, Node* key, bool* alreadyThere) {
 	// If the tree is empty, return a new node
-	//std::cout<<"INSERTING:\tNODE:"<<node->key<<"\tKEY:"<<key->key<<std::endl;
     if (node == NULL){
-		//std::cout<<"NULL, creating new node:"<<key<<std::endl;
         return key;    
 	}
     // If the key is already present in the tree,
     // return the node
     if (node->key == key->key){ 
-		//std::cout<<"ALREADY EXISTS"<<std::endl;
 		*alreadyThere = true;
         return node;
 	}
@@ -53,15 +17,11 @@ Node* insert(Node* node, Node* key, bool* alreadyThere) {
     // to be inserted is greater than the node's key,
     // insert it in the right subtree
     if (node->key < key->key){ 
-		//std::cout<<"GOING RIGHT"<<std::endl;
         node->right = insert(node->right, key,alreadyThere);
 	}
     // If the key to be inserted is smaller than 
     // the node's key,insert it in the left subtree
     else { 
-		//std::cout<<"GOING LEFT"<<std::endl;
-		//std::cout<<"LEFT NODE:"<<node->left<<std::endl;
-		//std::cout<<"NODE:"<<node->key<<"\tKEY:"<<key->key<<std::endl;
         node->left = insert(node->left, key,alreadyThere);
 	}
     // Return the (unchanged) node pointer
@@ -88,12 +48,12 @@ const Node* search(const Node* root, uint64_t key) {
 void inorder(const Node* root) {
     if (root != NULL) {
         inorder(root->left);
-		std:: cout << root->key << " ";
+		std::cout << root->key << " ";
         inorder(root->right);
     }
 }
 
-
+// Puts the tree in a uint64_t vector
 void treeToVec(const Node* root, std::vector<uint64_t>* vec) {
 	if (root != NULL) {
 		treeToVec(root->left,vec);

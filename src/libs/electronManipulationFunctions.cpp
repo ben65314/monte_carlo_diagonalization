@@ -283,3 +283,25 @@ void t_jump_energy(sType right_state, std::vector<sType>* states,
 }
 
 //void writeStateWithDouble(std::vector<T>* fund, U* states, unsigned int sites, double keep=1)
+
+double compute_mu(float mu, Electrons elec){
+	/**************************************************
+	* Computes mu interaction used in matrixCreation
+	*
+	* Parameters
+	* ----------
+	* mu: (float) mu value
+	* elec: (Electrons) number of electrons of the state  
+	*
+	* Returns
+	* ------ -
+	* result: (double) mu value
+	************************************************/
+
+	double result;
+	//Counts number of electrons
+	long n_electron = elec.up + elec.down;
+	//Computs chemical potential
+	result = -n_electron * mu;
+	return result;
+}

@@ -19,7 +19,7 @@ public:
 
 	//Manipulation
 	virtual void add(StateType el) = 0;	
-	void removeAll(){
+	void remove_all(){
 		/***************************************
 		* Clear all the states countained
 		*
@@ -47,14 +47,14 @@ public:
 		* this
 		****************************************/
 
-		for (unsigned int i = 0; i < addedArray_1->getLength(); i++) {
-			add(addedArray_1->getAt(i));
+		for (unsigned int i = 0; i < addedArray_1->get_length(); i++) {
+			add(addedArray_1->get_at(i));
 		}
 	}	
 
 	//Accessing
-	virtual StateType getAt(StateType index) const = 0;
-	virtual StateType getLength() const{
+	virtual StateType get_at(StateType index) const = 0;
+	virtual StateType get_length() const{
 		/***************************************
 		* Get function of the number of elements in the array
 		* 
@@ -69,9 +69,10 @@ public:
 		
 		return arr.size();
 	}
-	virtual bool countainsElement(StateType el) const{
+	virtual bool countains_element(StateType el) const{
 		/***************************************
-		* Checks if a specified state is a part of the array (checks the nature and the number of the state)
+		* Checks if a specified state is a part of the array (checks the nature 
+        * and the number of the state)
 		*
 		* Parameters:
 		* -----------
@@ -82,17 +83,17 @@ public:
 		* countains : (bool) is the state given in the array
 		****************************************/
 		StateType index = 0;
-		bool countains = whereIsElement(el, &index);
+		bool countains = where_is_element(el, &index);
 		return countains;
 	}
-	virtual bool whereIsElement(StateType el, StateType* index) const = 0;
-	void getNumArray(std::vector<StateType>* receptacle) const{
+	virtual bool where_is_element(StateType el, StateType* index) const = 0;
+	void get_num_array(std::vector<StateType>* receptacle) const{
 		/***************************************
-		* Returns the vector countaining only the number of the states in the array will not sort the states.
+		* Returns the vector countaining only the number of the states in 
+        * the array will not sort the states.
 		*
 		* Parameters
 		* ----------
-		* nature	: (char) 
 		* receptacle: (vector<StateType>) vector of only the states number
 		*
 		* Returns
@@ -108,7 +109,7 @@ public:
 	}
 	
 	//Presentation
-	void showAllStates() const{
+	void show_all_states() const{
 		/***************************************
 		* Prints all the States countained
 		*
@@ -120,18 +121,17 @@ public:
 		* --------
 		* NONE
 		****************************************/
-		std::cout << showAllStatesString();
+		std::cout << show_all_states_string();
 	}	
 	//void showAllStatesInorder() const;
-	virtual std::string showAllStatesString() const = 0;
+	virtual std::string show_all_states_string() const = 0;
 
 	//Matrices operations
-	virtual void matrixCreation(double* result_matrix) = 0;
+	virtual void matrix_creation(double* result_matrix) = 0;
 	virtual void H(VectorType* h_phi_n, VectorType* phi_n) = 0;
 
 	virtual void s_matrix_creation(VectorType* s_matrix) {
-		make_identity(s_matrix,this->getLength());
-
+		make_identity(s_matrix,this->get_length());
 	}
 
 	//Sampling
@@ -143,26 +143,5 @@ public:
 };
 
 
-template <class A, class B, class C> double computeMu(float mu, StatesArr<A,B,C>* sArr){
-	/**************************************************
-	* Computes mu interaction used in matrixCreation
-	*
-	* Parameters
-	* ----------
-	* mu: (float) mu value
-	* state: (States) state affected by the mu relation on the hamiltonian 
-	*
-	* Returns
-	* ------ -
-	* result: (double) mu value
-	************************************************/
-
-	double result;
-	//Counts number of electrons
-	long nElectron = sArr->electrons.up + sArr->electrons.down;
-	//Computs chemical potential
-	result = -nElectron * mu;
-	return result;
-}
 
 

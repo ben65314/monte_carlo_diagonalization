@@ -15,7 +15,6 @@ struct Node {
 
 };
 
-Node* insert(Node* root, uint64_t key, bool* alreadyThere);
 Node* insert(Node* root, Node* key, bool* alreadyThere);
 const Node* search(const Node* root, uint64_t key);
 void inorder(const Node* root);

@@ -40,7 +40,7 @@ template <class A> void Ht_subspace_condition_expanding(
 	for (uint64_t i = start; i < end; i++) {
 		//Ht
 		std::vector<sType> proj_Ht;
-		Ht(sArr->getAt(i), &proj_Ht, &sArr->sys_hubP);
+		Ht(sArr->get_at(i), &proj_Ht, &sArr->sys_hubP);
 		//Add to sArr
 		for (uint64_t j = 0; j < proj_Ht.size(); j++) {
 			//Possible accept condition
@@ -49,6 +49,8 @@ template <class A> void Ht_subspace_condition_expanding(
 		}
 	}
 }
+
+double compute_mu(float mu, Electrons elec);
 
 template<class T, class U> void write_state_with_double(
     std::vector<T>* fund, U* states, unsigned int sites, double keep=1) {
@@ -85,14 +87,14 @@ template<class T, class U> void write_state_with_double(
 	  
 	// Apply the sorting to keys and values
     std::vector<T> sorted_fund(fund->size());
-    std::vector<uLong> sorted_states(states->getLength());
+    std::vector<uLong> sorted_states(states->get_length());
     for (uLong i = 0; i < indices.size(); ++i) {
         sorted_fund[i] = fund->at(indices[i]);
-        sorted_states[i] = states->getAt(indices[i]);
+        sorted_states[i] = states->get_at(indices[i]);
     }
 
 	//Removing old arrays
-	states->removeAll();
+	states->remove_all();
 	fund->clear();
 
 	//Creates a string to store the sorted fund
