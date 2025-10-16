@@ -60,10 +60,6 @@ void Ht(sType state, std::vector<sType>* proj_states, hubbardParam* hubP) {
     *                                       states after the Hamiltonian
 	* hubP			: (hubbardParam*) System parameters
 	*
-	* Templates:
-	* ----------
-	* T				: int, short, long, unsigned
-	*
 	* Returns
 	* -------
 	* NONE
@@ -74,15 +70,18 @@ void Ht(sType state, std::vector<sType>* proj_states, hubbardParam* hubP) {
 	proj_states->reserve(2 * sites);
 
 	const sType state_num = state;
+    //Where the electron is
 	sType from_down = one << (sites - 1);
     sType from_up = one << (2 * sites - 1);
 
 	for(unsigned char i = 0; i < sites; i++){
+        //Where the electron is going
 		sType to_down = one << (sites - 1);
         sType to_up = one << (2 * sites - 1);
 
 		for(unsigned char j = 0; j < sites; j++){
-			if (hubP->tMatrix[i * sites + j] == 0){
+            //Skips the iteration if the jump has no amplitude in the t matrix
+			if (hubP->t_matrix[i * sites + j] == 0){
 				to_down >>= 1;
 				to_up >>= 1;
 				continue;
@@ -237,7 +236,7 @@ void t_jump_energy(sType right_state, std::vector<sType>* states,
 	for (int i = 0; i < sites; i++) {//From
 		for (int j = i+1; j < sites; j++) {//To
 			//Jump energy
-			double jumpFactor = hubP->tMatrix.at(i * sites + j);
+			double jumpFactor = hubP->t_matrix.at(i * sites + j);
 			if (jumpFactor == 0) continue; 
 			
 			for (int k = 0; k < 2; k++) {//Iteration over spins
@@ -283,5 +282,4 @@ void t_jump_energy(sType right_state, std::vector<sType>* states,
 	}
 }
 
-//void Ht_subspace_condition_expanding(A* sArr, uint64_t start, uint64_t end)
 //void writeStateWithDouble(std::vector<T>* fund, U* states, unsigned int sites, double keep=1)

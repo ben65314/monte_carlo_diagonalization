@@ -28,7 +28,7 @@ private:
 
 		float fermi_mu = max_nU;
 
-		uLong remainingStates = this->sys_sP.samplingSize;
+		uLong remainingStates = this->sys_sP.sampling_size;
 		
 		//Computes the number of states for each double occupation level
 		for (uShort i = 0; i <= max_nU; i++) {
@@ -39,7 +39,7 @@ private:
 			//std::cout<<"REMAINS:"<<remainingStates<<std::endl;
 			remainingStates -= combinations;
 			//Here we use > because remaindingStates is uLong and once it is < 0 it will become very big
-			if (remainingStates > this->sys_sP.samplingSize /*|| remainingStates == 0*/) {
+			if (remainingStates > this->sys_sP.sampling_size /*|| remainingStates == 0*/) {
 				fermi_mu = i-1;
 				break;
 			}
@@ -78,7 +78,7 @@ private:
 
 		StatesR_T<StateType,VectorType>* nextStepEval = new StatesR_T<StateType,VectorType>(50);
 
-		while (MH_size < this->sys_sP.samplingSize) {
+		while (MH_size < this->sys_sP.sampling_size) {
 			for (uLong i = 0; i < currentStates->getLength(); i++) {
 
 				//We dont need to know how many double occupation we have before the jump because we dont set the accepation factor with the differnce of energy but only the energy of the jumped state according to the Fermi-Dirac distribution. But we need it if we use Boltzmann's distribution
@@ -104,9 +104,9 @@ private:
 						}
 					}
 					
-					if (MH_size >= this->sys_sP.samplingSize) break;
+					if (MH_size >= this->sys_sP.sampling_size) break;
 				}
-				if (MH_size >= this->sys_sP.samplingSize) break;
+				if (MH_size >= this->sys_sP.sampling_size) break;
 			}
 
 			StatesR_T<StateType,VectorType>* temp = currentStates;
@@ -318,7 +318,7 @@ public:
 	//Samplings
 	void sampling_MH(){
 		allocateMEM(this->electrons,this->sys_hubP.n_sites);
-		MHSamplingOfStates_r(this->sys_sP.samplingSize, this->sys_sP.beta_MH, this->sys_sP.reticle);
+		MHSamplingOfStates_r(this->sys_sP.sampling_size, this->sys_sP.beta_MH, this->sys_sP.reticle);
 	}
 	void sampling_least_energy(){
 		FermiDiracDistributionSampling_r();

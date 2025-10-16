@@ -368,7 +368,7 @@ template <class T, class StatesArrType> void computeQMatrixBandLanczos(int spin,
 	//////Wrtiting the Q-Matrix and the eigen values in a txt file
 	Electrons elec = states_array->electrons;
 	float percUsed = (float)states_array->getLength() / (comb(sites,elec.up) * comb(sites,elec.down));
-	std::string writtenQMatrix = writeQ_System(fundE, (double)gP.g_EtaValue, elec, &states_array->sys_hubP, percUsed);
+	std::string writtenQMatrix = writeQ_System(fundE, (double)gP.g_eta, elec, &states_array->sys_hubP, percUsed);
 
 	writtenQMatrix += "\n# Eigen values E -- Q-Matrixes E\n";
 
@@ -446,7 +446,7 @@ template <class StatesArrType> void computeGreen_long(int spin, std::vector<doub
 	//////Wrtiting the Q-Matrix and the eigen values in a txt file
 	Electrons elec = states_array->electrons;
 	float percUsed = (float)states_array->getLength() / (comb(sites,elec.up) * comb(sites,elec.down));
-	std::string writtenQMatrix = writeQ_System(fundE, (double)gP.g_EtaValue, elec, &states_array->sys_hubP, percUsed);
+	std::string writtenQMatrix = writeQ_System(fundE, (double)gP.g_eta, elec, &states_array->sys_hubP, percUsed);
 	
 	//Vectors
 	//ELECTONS

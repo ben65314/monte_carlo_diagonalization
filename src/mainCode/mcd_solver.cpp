@@ -41,9 +41,9 @@ int main(int argc, char *argv[]){
 	//Sampling size verification
 	sType gotSubSpaceLen = 0;
 	//std::cout<<INIT STATE
-	Electrons elec = transform_NSz(jMV.hubP.nElec,jMV.hubP.totSpin);
+	Electrons elec = transform_NSz(jMV.hubP.N_e,jMV.hubP.S_z);
 
-	if(jMV.sP.reticle == 0) jMV.sP.reticle = jMV.sP.samplingSize;
+	if(jMV.sP.reticle == 0) jMV.sP.reticle = jMV.sP.sampling_size;
 
 	std::string fundStateString;
 	//Start computing 
@@ -54,8 +54,8 @@ int main(int argc, char *argv[]){
 	MH_Block.electrons = elec;
 
 	//Add the initial states
-	for (uLong i = 0; i < jMV.sP.initState.size(); i++) {
-		MH_Block.add(jMV.sP.initState.at(i));
+	for (uLong i = 0; i < jMV.sP.init_state.size(); i++) {
+		MH_Block.add(jMV.sP.init_state.at(i));
 	}
 
 	auto step2_1 = std::chrono::high_resolution_clock::now();
@@ -95,10 +95,10 @@ int main(int argc, char *argv[]){
 		auto step2_5 = std::chrono::high_resolution_clock::now();
 		if(verbose > 0){std::cout << "Step 3:Green functions..."; std::cout.flush();}
 		if (MH_Block.sys_hubP.n_sites < 5 ) {
-			computeGreen_long(gP.g_AddedSpin, &fundState, fundE, &MH_Block, gP, deg);
+			computeGreen_long(gP.g_added_spin, &fundState, fundE, &MH_Block, gP, deg);
 		}
 		else { 
-			computeQMatrixBandLanczos(gP.g_AddedSpin, fundState.data(), fundE, &MH_Block, gP,deg);
+			computeQMatrixBandLanczos(gP.g_added_spin, fundState.data(), fundE, &MH_Block, gP,deg);
 		}
 		//computeGreen_long(gP.g_AddedSpin, &fundState, fundE, &MH_Block, gP, deg);
 		//computeGreen_continued_fraction(gP.g_AddedSpin,fundState.data(),fundE,&MH_Block,gP,deg);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]){
 	std::time_t end_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::string writes = (std::string)"\nRun Parameters: --" + std::ctime(&end_time) + (std::string)"#Sites = "+ to_string_p(MH_Block.sys_hubP.n_sites,1)+"\tu = "+to_string_p(MH_Block.sys_hubP.u,1)+"\tmu = "+ to_string_p(MH_Block.sys_hubP.mu,1) + "\n";
 	float per = (float)MH_Block.getLength() / (comb(MH_Block.sys_hubP.n_sites,elec.up) * comb(MH_Block.sys_hubP.n_sites,elec.down));
-	writes +="Initial State = " + write_vector(MH_Block.sys_sP.initState.data(),MH_Block.sys_sP.initState.size());
+	writes +="Initial State = " + write_vector(MH_Block.sys_sP.init_state.data(),MH_Block.sys_sP.init_state.size());
 	writes +="\nSampling Size  = " + to_string_p(MH_Block.getLength(),0) + "(" + to_string_p(per,4) +")\tReticle = "+ to_string_p(MH_Block.sys_sP.reticle,1) +"\tBeta = " + to_string_p(MH_Block.sys_sP.beta_MH,3) + "\n";
 	if(verbose == 2) {writes += "States taken = " + MH_Block.showAllStatesString()+"\n";}
 

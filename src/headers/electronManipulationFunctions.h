@@ -15,9 +15,8 @@ sType create_anti_ferro(unsigned int sites, int n_up, int n_down);
 
 Electrons transform_NSz(int nElec, int spin);
 
-//JUMP ENERGIES
-void t_jump_energy(sType, std::vector<sType>*, std::vector<double>*, 
-                 hubbardParam*);
+void t_jump_energy(sType right_state, std::vector<sType>* states,
+                   std::vector<double>* energies, hubbardParam* hubP);
 
 template <class A> void Ht_subspace_condition_expanding(
         A* sArr, uint64_t start, uint64_t end){

@@ -59,7 +59,7 @@ int main(int argc, char *argv[]){
             if (i == j && i == 0) continue;
 
             //Block size
-			sP.reticle = sP.samplingSize = comb(jMV.hubP.n_sites, i)
+			sP.reticle = sP.sampling_size = comb(jMV.hubP.n_sites, i)
 				*comb(jMV.hubP.n_sites,j);
 
 			Electrons elec;
@@ -77,7 +77,7 @@ int main(int argc, char *argv[]){
 
             //Find ground state
 			std::vector<vType> fundState = std::vector<vType>(
-				sP.samplingSize,0);
+				sP.sampling_size,0);
 			LanczosSolver<vType,arrType> LS;
 			int deg = 1;
 			double fundE = LS.fundEnergy(&fundState, 
