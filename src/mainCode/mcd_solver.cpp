@@ -95,13 +95,12 @@ int main(int argc, char *argv[]){
 		auto step2_5 = std::chrono::high_resolution_clock::now();
 		if(verbose > 0){std::cout << "Step 3:Green functions..."; std::cout.flush();}
 		if (MH_Block.sys_hubP.n_sites < 5 ) {
-			computeGreen_long(gP.g_added_spin, &fundState, fundE, &MH_Block, gP, deg);
+			compute_green_long(gP.g_added_spin, &fundState, fundE, &MH_Block, gP, deg);
 		}
 		else { 
-			computeQMatrixBandLanczos(gP.g_added_spin, fundState.data(), fundE, &MH_Block, gP,deg);
+			compute_q_matrix_band_lanczos(gP.g_added_spin, fundState.data(), fundE, &MH_Block, gP,deg);
 		}
-		//computeGreen_long(gP.g_AddedSpin, &fundState, fundE, &MH_Block, gP, deg);
-		//computeGreen_continued_fraction(gP.g_AddedSpin,fundState.data(),fundE,&MH_Block,gP,deg);
+		//compute_green_continued_fraction(gP.g_AddedSpin,fundState.data(),fundE,&MH_Block,gP,deg);
 
 		auto step2_6 = std::chrono::high_resolution_clock::now();
 		if(verbose > 0){std::cout << "(Completed) " << time_formating(step2_5,step2_6)<<std::endl;}

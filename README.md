@@ -76,7 +76,7 @@ In `/examples/` there are preset file parameters ready to be execute. There is d
 
 All data used in this article is present in `/examples/published_data`.
 # Authors
-This package was made and published by **Benjamin Bernard** and **Maxime Charelbois**. If you have any question about the code, contact us.
+This package was made and published by **Benjamin Bernard** and **Maxime Charlebois**. If you have any question about the code, contact us.
 - <benjamin.bernard@uqtr.ca>
 - <maxime.charlebois@uqtr.ca>
 
