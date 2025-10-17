@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
 		"* =2 : Prints Array of State\n"<<
 		"* =3 Print Means and deviation\n"<<
 		"* >5 : All prints\n"; exit(0);}
-	else if (argc == 3){verbose = std::stoi(argv[2]);}
+	else if (argc == 3) verbose = std::stoi(argv[2]);
 
 	//Initialize seed
 	srand(clock());
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]){
 	auto step1 = std::chrono::high_resolution_clock::now();
 
 	//Read file of parameters
-	justManyVariables jMV = readParameters("/"+(std::string)argv[1]);
+	justManyVariables jMV = readParameters("/" + (std::string)argv[1]);
     
     //Present to the user the number of bytes allowed for states and threads
 	if (verbose > 0) std::cout << "Bytes for a state:" << sizeof(sType) <<
@@ -80,11 +80,10 @@ int main(int argc, char *argv[]){
 				sP.sampling_size,0);
 			LanczosSolver<vType,arrType> LS;
 			int deg = 1;
-			double fundE = LS.fund_energy(&fundState, 
-				                         &states_block, &deg);
+			double fundE = LS.fund_energy(&fundState, &states_block, &deg);
             
-            if (verbose > 4) std::cout << "The bloc ("<<i<<","<<j
-                <<") energy is "<<fundE<<std::endl;
+            if (verbose > 4) std::cout << "The bloc (" << i << "," << j
+                <<") energy is "<< fundE << std::endl;
             //Look for minimum energy
 			if (fundE < minEnergy) {
 				minEnergy = fundE;
@@ -97,18 +96,15 @@ int main(int argc, char *argv[]){
     //Information on min_block
 	int N = min_block_electrons.up + min_block_electrons.down;
 	int S = min_block_electrons.up - min_block_electrons.down;
-	std::cout<<"\nThe fundamental block is N"<<N<<"S"<<S<<
-		"\nThe fundamental energy is "<<minEnergy<<'\n'<<std::endl;
+	std::cout << "\nThe fundamental block is N" << N << "S" << S <<
+		"\nThe fundamental energy is " << minEnergy << '\n' << std::endl;
 
 
 	//End time
 	if (verbose > 0) {
-		std::cout << "Reading time : " << time_formating(step1, step2) 
-			<< std::endl;
-		std::cout << "Compute time : " << time_formating(step2, step3) 
-			<< std::endl;
-		std::cout << "Total time : " << time_formating(step1, step3) 
-			<< std::endl;
+		std::cout << "Reading time : " << time_formating(step1, step2) << '\n';
+		std::cout << "Compute time : " << time_formating(step2, step3) << '\n';
+		std::cout << "Total time : " << time_formating(step1, step3) << '\n';
 	}
 	return 0;
 }

@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import numpy as np
-import matplotlib.pyplot as plt
 import sys;
 import csv
 
@@ -9,8 +8,8 @@ data_file = sys.argv[1]
 out_file = "av_" + data_file
 
 x = []
-y_data = [[]] 
-y_data2 = [[]] 
+y_data_e = [[]] 
+y_data_h = [[]] 
 index = 0
 xRead = False
 
@@ -21,16 +20,16 @@ with open(data_file) as file:
     reader = csv.reader(file,delimiter='\t')
     for lines in reader:
         #Ignores comments
-        if(lines[0].startswith('#')):
+        if lines[0].startswith('#') :
             continue;
-        elif(lines[0].startswith('NEXT_SITE')):
+        elif lines[0].startswith('NEXT_SITE') :
             index += 1
-            y_data.append([])
-            y_data2.append([])
+            y_data_e.append([])
+            y_data_h.append([])
             xRead  = True
 
 
-        elif(lines[0].startswith('PARAMETERS')):
+        elif lines[0].startswith('PARAMETERS') :
             param.append(int(lines[1]))
             param.append(float(lines[2])) 
             param.append(float(lines[3]))
@@ -42,27 +41,32 @@ with open(data_file) as file:
             if not xRead :
                 x.append(float(lines[0]))
 
-            y_data[index].append(float(lines[1]))
-            y_data2[index].append(float(lines[2]))
+            y_data_e[index].append(float(lines[1]))
+            y_data_h[index].append(float(lines[2]))
 
-    y_data.pop(-1)
-    y_data2.pop(-1)
+    y_data_e.pop(-1)
+    y_data_h.pop(-1)
 
-max_shift = -len(y_data)*(len(y_data)-1)/2
-av_data = np.array([max_shift for i in range(len(x))])
-av_data2 = np.array([max_shift for i in range(len(x))])
-for i,(y,y2) in enumerate(zip(y_data,y_data2)):
-    av_data += np.array(y)
-    av_data2 += np.array(y2)
-    plt.plot(x,y)
-av_data/=len(y_data)
-av_data2/=len(y_data2)
+max_shift = -len(y_data_e)*(len(y_data_e) - 1) / 2
+av_data_e = np.array([max_shift for i in range(len(x))])
+av_data_h = np.array([max_shift for i in range(len(x))])
 
-print(param)
-lineString = "PARAMETERS\t" + str(param[0]) + "\t" + str(param[1]) + "\t" + str(param[2]) + "\t" + str(param[3]) + "\t" + str(param[4]) + "\t" + str(param[5]) + "\n#OMEGA\tVALUE\n";
+# Sums the average of the curves
+for i, (y_e, y_h) in enumerate(zip(y_data_e, y_data_h)):
+    av_data_e += np.array(y_e)
+    av_data_h += np.array(y_h)
+
+av_data_e /= len(y_data_e)
+av_data_h /= len(y_data_h)
+
+# Writing
+lineString = ("PARAMETERS\t" + str(param[0]) + "\t" + str(param[1]) + "\t" 
+            + str(param[2]) + "\t" + str(param[3]) + "\t" + str(param[4]) 
+            + "\t" + str(param[5]) + "\n#OMEGA\tVALUE\n")
+
 file = open(out_file,'w')
-for x,y,y2 in zip(x,av_data,av_data2):
-    lineString += str(x)+"\t"+str(y)+"\t"+str(y2)+"\n"
+for x, y_e, y_h in zip(x, av_data_e, av_data_h):
+    lineString += str(x) + "\t" + str(y_e) + "\t" + str(y_h) + "\n"
 lineString += 'NEXT_SITE'
 file.write(lineString)
 
