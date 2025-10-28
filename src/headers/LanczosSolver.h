@@ -239,7 +239,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 
 
 	std::vector<double> band_lanczos_algorithm(
-        std::vector<double>* vk, uInt n_bk, unsigned long len_bk, 
+        std::vector<double>* vk, uInt n_bk, sType len_bk, 
         StatesArrType* sArr, uInt* nIter, 
         std::vector<double>* sub_space_vectors, 
         std::vector<double>* product_c_omega, double dtol = 10e-10){
@@ -250,7 +250,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		* ----------
 		* vk				: (std::vector<double>*) The n_bk initial vectors
 		* n_bk				: (uInt) number of band vectors
-		* len_bk			: (unsigned long) length of the vectors
+		* len_bk			: (sType) length of the vectors
 		* sArr				: (StatesArrType*) states array
 		* nIter				: (uInt*) band lanczos iteration done
 		* sub_space_vectors	: (std::vector<double>* ) 

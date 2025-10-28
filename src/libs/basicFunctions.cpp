@@ -104,7 +104,7 @@ unsigned long comb(uLong n, uLong r) {
 	if (n < 1 && r > 0) result = 0 ;
 	return result;
 }
-unsigned long comb_specified(uLong nU, uLong sites, uLong up, uLong down) {
+unsigned long comb_specified(int nU, int sites, int up, int down) {
 	/*****************************************
 	* Calculates the combination term for a specified number of up electrons,
     * down electrons and double occupation
@@ -128,7 +128,7 @@ unsigned long comb_specified(uLong nU, uLong sites, uLong up, uLong down) {
 
 	up -= nU;
 	down -= nU;
-	uLong result = comb(sites,nU) * comb(sites-nU,up) * comb(sites-nU-up,down);
+	sType result = comb(sites,nU) * comb(sites-nU,up) * comb(sites-nU-up,down);
 
 	return result;
 }
@@ -201,7 +201,7 @@ double calculate_sd(std::vector<double> data) {
 	double sd = sqrt(standard_deviation / data.size());
 	return sd;
 }
-int deg_fundamental_check(double* eV, uLong n, double eps) {
+int deg_fundamental_check(double* eV, sType n, double eps) {
 	/*********************************************************
 	* Checks the degeneracy level of the fundamental
 	*
@@ -216,7 +216,7 @@ int deg_fundamental_check(double* eV, uLong n, double eps) {
 	* NONE
 	*******************************************************/
 	int deg_degree = 1;
-	for (uLong i = 1; i < n; i++) {
+	for (sType i = 1; i < n; i++) {
 		//Increase counter if energies are the same
 		if (abs(eV[i-1]-eV[i]) < eps) deg_degree++;
 		else break;
@@ -385,8 +385,8 @@ sType rotr(sType bit_vec, unsigned char rot_index, unsigned char size) {
 	return new_bit_vec;
 }
 
-void combination_recursive(std::vector<uShort> empty_spaces, sType current_num, 
-                           uShort left_to_place, sType* all_comb, 
+void combination_recursive(std::vector<int> empty_spaces, sType current_num, 
+                           int left_to_place, sType* all_comb, 
                            sType* placed, sType* it){
 	/****************************************************************
 	* Creates the combinations of the number specified <left_to_place> to each 
@@ -414,8 +414,8 @@ void combination_recursive(std::vector<uShort> empty_spaces, sType current_num,
 	}
 	
 	for (uInt i = 0; i < empty_spaces.size(); i++) {
-		uLong added_num = current_num ^ (1ul << empty_spaces.at(i));
-		std::vector<uShort> updated_empty_spaces = empty_spaces;
+		sType added_num = current_num ^ (1ul << empty_spaces.at(i));
+		std::vector<int> updated_empty_spaces = empty_spaces;
 		updated_empty_spaces.erase(updated_empty_spaces.begin(),
                                    updated_empty_spaces.begin() + i + 1);
 
@@ -426,7 +426,7 @@ void combination_recursive(std::vector<uShort> empty_spaces, sType current_num,
 }
 
 void combination_double_occupation(
-        uShort N, uShort sites, std::vector<sType>* all_double_occupation) {
+        int N, int sites, std::vector<sType>* all_double_occupation) {
 	/****************************************************************
 	* Creates all the combinations of states with <N> double electron 
     * occupation in a system of <sites> sites. This will coutain only the <N> 
@@ -434,8 +434,8 @@ void combination_double_occupation(
 	* 
 	* Parameters
 	* ----------
-	* N					   : (uShort) Number of required double occupation
-	* sites				   : (uShort) Number of sites of the system
+	* N					   : (int) Number of required double occupation
+	* sites				   : (int) Number of sites of the system
 	* all_double_occupation: (std::vector) all the <N> double occupation states
 	*
 	* Returns
@@ -444,16 +444,16 @@ void combination_double_occupation(
 	*****************************************************************/
 	uint64_t combU = comb(sites, N);
 	*all_double_occupation = std::vector<sType>(combU, 0);
-	uLong placed = 0;
+	sType placed = 0;
 
 	//All sites accessible
-	std::vector<uint16_t> chosenSites(sites);
+	std::vector<int> chosenSites(sites);
 	std::iota(chosenSites.begin(), chosenSites.end(), 0);
 	uint64_t current_num = 0;
 
 	//Recursive combination function
     //FIXME:Does 'it' do anything?
-	uLong it = 0; 
+	sType it = 0; 
 	combination_recursive(chosenSites, current_num, N, 
                           all_double_occupation->data(), &placed, &it);
 
@@ -465,8 +465,8 @@ void combination_double_occupation(
 }
 
 void combination_recursive_adding_single(
-    std::vector<uShort> empty_spaces_up, std::vector<uShort> empty_spaces_down,
-    sType current_num, uShort n_up, uShort n_down, uShort sites,
+    std::vector<int> empty_spaces_up, std::vector<int> empty_spaces_down,
+    sType current_num, int n_up, int n_down, int sites,
     sType* all_comb, sType* placed) {
 	/****************************************************************
 	* Completes the <currentNum> with <nUp> and <nDown> single occupation 
@@ -477,9 +477,9 @@ void combination_recursive_adding_single(
 	* empty_spaces_up	: (std::vector) Where we can place an up electron
 	* empty_spaces_down	: (std::vector) Where we can place a down electron
 	* current_num		: (ulong) coutains the previously placed electrons
-	* n_up				: (uShort) number of up electrons to place
-	* n_down			: (uShort) number of down electrons to place
-	* sites				: (uShort) number of sites of the system
+	* n_up				: (int) number of up electrons to place
+	* n_down			: (int) number of down electrons to place
+	* sites				: (int) number of sites of the system
 	* all_comb			: (sType*) Countains all the possible spaces
 	* placed			: (unsigned long*) Number of elements placed in allComb
 	*
@@ -493,14 +493,14 @@ void combination_recursive_adding_single(
 		(*placed) += 1;
 		return;
 	}
-	uLong added_num = current_num;
+	sType added_num = current_num;
 
 	if (n_up > 0) {	//Add an up electron
 		for (uint i = 0; i < empty_spaces_up.size(); i++) {
 			added_num = current_num ^ (1ul << (empty_spaces_up.at(i) + sites));
 
-			std::vector<uShort> updated_empty_spaces_up = empty_spaces_up;
-			std::vector<uShort> updated_empty_spaces_down = empty_spaces_down;
+			std::vector<int> updated_empty_spaces_up = empty_spaces_up;
+			std::vector<int> updated_empty_spaces_down = empty_spaces_down;
 			//Remove the access for down electrons to be put here
 			updated_empty_spaces_down.erase(
                 std::remove(updated_empty_spaces_down.begin(), 
@@ -522,7 +522,7 @@ void combination_recursive_adding_single(
 		for (uint i = 0; i < empty_spaces_down.size(); i++) {
 			added_num = current_num ^ (1ul << empty_spaces_down.at(i));
 
-			std::vector<uShort> updated_empty_spaces_down = empty_spaces_down;
+			std::vector<int> updated_empty_spaces_down = empty_spaces_down;
 			//Remove the access for down electrons to be put here
 			updated_empty_spaces_down.erase(updated_empty_spaces_down.begin(), 
                                    updated_empty_spaces_down.begin() + i + 1);
@@ -535,7 +535,7 @@ void combination_recursive_adding_single(
 
 	}
 }
-void combination_all(uShort n_up, uShort n_down, uShort sites, uShort nU, 
+void combination_all(int n_up, int n_down, int sites, int nU, 
                      std::vector<sType>* all_states) {
 	/****************************************************************
 	* Computes the combinations of the states countaining <nUp> electrons up 
@@ -544,10 +544,10 @@ void combination_all(uShort n_up, uShort n_down, uShort sites, uShort nU,
 	* 
 	* Parameters
 	* ----------
-	* n_up		: (uShort) number of up electrons to place
-	* n_down	: (uShort) number of down electrons to place
-	* sites		: (uShort) number of sites of the system
-	* nU		: (uShort) number of double occupation
+	* n_up		: (int) number of up electrons to place
+	* n_down	: (int) number of down electrons to place
+	* sites		: (int) number of sites of the system
+	* nU		: (int) number of double occupation
 	* all_states: (vector<sType>*) Countains all the possible states
 	*
 	* Returns
@@ -555,11 +555,11 @@ void combination_all(uShort n_up, uShort n_down, uShort sites, uShort nU,
 	* NONE
 	*****************************************************************/
 	//Number of states with specified nU, nUp, nDown values
-	uLong combU_up_down = comb_specified(nU, sites, n_up, n_down);
+	sType combU_up_down = comb_specified(nU, sites, n_up, n_down);
 	
 	//Different ways to placed the double occupation
-	uLong comb_U = comb(sites, nU);
-	uLong comb_else = combU_up_down / comb_U;
+	sType comb_U = comb(sites, nU);
+	sType comb_else = combU_up_down / comb_U;
 	*all_states = std::vector<sType>(combU_up_down, 0);
 
 	if (n_up < nU || n_down < nU) {
@@ -583,19 +583,18 @@ void combination_all(uShort n_up, uShort n_down, uShort sites, uShort nU,
 	}
 
 	if (n_up > 0 || n_down > 0) {
-		uLong placed = 0;
-		#pragma omp parallel default(none) shared(states_double_occupation,\
-        all_states, sites, comb_else, n_up, n_down) private(placed)
+		sType placed = 0;
+		#pragma omp parallel default(none) shared(states_double_occupation,all_states, sites, comb_else, n_up, n_down) private(placed)
 		{
-		#pragma omp for  
-		for (uLong i = 0; i < states_double_occupation.size(); i++) {
+		#pragma omp for
+		for (sType i = 0; i < states_double_occupation.size(); i++) {
 			placed = 0;
-			uLong current_num = states_double_occupation.at(i);
+			sType current_num = states_double_occupation.at(i);
 
 			//Finds where electron can still be placed
-			std::vector<uShort> left_places;
-			uLong one = 1; 
-			for (uShort j = 0; j < sites; j++) {
+			std::vector<int> left_places;
+			sType one = 1; 
+			for (int j = 0; j < sites; j++) {
 				if((current_num & one) == 0) {
 					left_places.push_back(j);
 				}	
@@ -610,9 +609,9 @@ void combination_all(uShort n_up, uShort n_down, uShort sites, uShort nU,
 		}//End of pragma omp parallel
 
 		if (nU == 0) {
-			std::vector<uShort> chosen_sites(sites);
+			std::vector<int> chosen_sites(sites);
 			std::iota(chosen_sites.begin(), chosen_sites.end(), 0);
-			uLong current_num = 0;
+			sType current_num = 0;
 			placed = 0;
 			combination_recursive_adding_single(
                 chosen_sites, chosen_sites, current_num, n_up, n_down, sites, 
@@ -621,7 +620,7 @@ void combination_all(uShort n_up, uShort n_down, uShort sites, uShort nU,
 		}
 	}
 	else { //If there is no loose electron
-		for (uLong i = 0; i < states_double_occupation.size(); i++) {
+		for (sType i = 0; i < states_double_occupation.size(); i++) {
 			all_states->at(i) = (states_double_occupation.at(i));
 		}
 	}

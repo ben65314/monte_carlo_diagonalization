@@ -12,11 +12,11 @@ double findMinOfArray(std::vector<double> array);
 
 //Maths
 unsigned long comb(uLong n, uLong r);
-unsigned long comb_specified(uLong nU, uLong sites, uLong up, uLong down);
+unsigned long comb_specified(int nU, int sites, int up, int down);
 double fermi_dirac_function(float x, float beta,float mu);
 double boltzmann_distribution_function(float dE, float beta);
 double calculate_sd(std::vector<double> data);
-int deg_fundamental_check(double* eigen_energies, uLong n,double eps = 10e-10);
+int deg_fundamental_check(double* eigen_energies, sType n, double eps = 10e-10);
 template <class T, class R> void make_identity(T* matrix, R rows){
 	/*****************************************
 	* Creates the identity matrix out of the square matrix given
@@ -250,17 +250,17 @@ sType rotr(sType bitVec, unsigned char rotIndex, unsigned char size);
 
 
 
-void combination_recursive(std::vector<uShort> empty_spaces, sType current_num, 
-                           uShort left_to_place, sType* all_comb, sType placed, 
+void combination_recursive(std::vector<int> empty_spaces, sType current_num, 
+                           int left_to_place, sType* all_comb, sType placed, 
                            sType* it);
 
-void combination_double_occupation(uShort N, uShort sites, 
+void combination_double_occupation(int N, int sites, 
                                    std::vector<sType>* all_double_occupation);
 void combination_recursive_adding_single(
-    std::vector<uShort> empty_spaces_up, std::vector<uShort> empty_spaces_down, 
-    sType current_num, uShort n_up, uShort n_down, uShort sites, 
+    std::vector<int> empty_spaces_up, std::vector<int> empty_spaces_down, 
+    sType current_num, int n_up, int n_down, int sites, 
     sType* all_comb, sType* placed);
-void combination_all(uShort n_up, uShort n_down, uShort sites, uShort nU, 
+void combination_all(int n_up, int n_down, int sites, int nU, 
                      std::vector<sType>* all_states);
 
 bool accept_function(sType state, float acceptQuota=0.5);

@@ -37,7 +37,6 @@ extern "C" {
 
 //BLAS
 void dscal_(sType* n, double* alpha, double* x, int* incx);
-//void dscal_(int, double, double*, int);
 double dnrm2_(sType*, double*, int*);
 void daxpy_(sType*, double*, double*, int*, double*, int*);
 double ddot_(sType*, double*, int*, double*, int*);
