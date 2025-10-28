@@ -31,7 +31,7 @@
 #include <vector>
 //
 //For more than 16 sites
-typedef uint64_t sType;		
+typedef uint8_t sType;		
 
 extern "C" {
 

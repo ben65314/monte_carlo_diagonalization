@@ -446,7 +446,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
                 
 				//Checks if the lowest eigen value has converged
 				if (abs(current_energy - previous_energy) < dtol 
-                        || ((len_bk - jj) < n_bk)) {
+                        || (((int)len_bk - jj) < (int)n_bk)) {
 					delete[] eigen_values;
 					break;
 				}

@@ -587,7 +587,7 @@ void combination_all(int n_up, int n_down, int sites, int nU,
 		#pragma omp parallel default(none) shared(states_double_occupation,all_states, sites, comb_else, n_up, n_down) private(placed)
 		{
 		#pragma omp for
-		for (sType i = 0; i < states_double_occupation.size(); i++) {
+		for (sType i = 0; i < (sType)states_double_occupation.size(); i++) {
 			placed = 0;
 			sType current_num = states_double_occupation.at(i);
 
