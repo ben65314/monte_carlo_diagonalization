@@ -3,6 +3,9 @@
 #include "ModulesStates/StatesR_T.h"
 #include "ModulesStates/StatesR_H.h"
 
+int ONE = 1;
+double ALPHA_D = 1;
+double BETA_D = 0;
 
 //GENERIC TEMPLATE
 template<class T, class StatesArrType> class LanczosSolver;
@@ -37,7 +40,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		* NONE
 		*******************************************************/
         //Number of states
-		int size = sArr->get_length();
+		sType size = sArr->get_length();
 		//Sets size of alpha and beta
 		alpha->clear();	alpha->reserve(*iter);
 		beta->clear();	beta->reserve(*iter);
@@ -50,32 +53,35 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		double prev_iter_energy = 10e10;
 		double energy = 10e5;
 		
-		int current_iteration = 1;
+		sType current_iteration = 1;
 		bool converged = false;
 
 		while (!converged) {
             //Normalization
 			if (beta->size()) {
-				cblas_dscal(size, 1/beta->back(), r.data(), 1);
-				cblas_dscal(size, -beta->back(), q.data(), 1);
+                double beta_m1 = 1/beta->back();
+                double minus_beta = -beta->back();
+			    dscal_(&size, &beta_m1, r.data(), &ONE);
+			    dscal_(&size, &minus_beta, q.data(), &ONE);
 			}
 
 			std::vector<double> H_tmp(size);
 			//Applies the vector r on the matrix H and stores it in H_tmp
 			sArr->H(H_tmp.data(), r.data());
-
-			cblas_daxpy(size, 1, H_tmp.data(), 1, q.data(), 1);	//q = q + H*r
+            
+			daxpy_(&size, &ALPHA_D, H_tmp.data(), &ONE, q.data(), &ONE);//q = q + H*r
             
 			//swap q <-> r
-			cblas_dswap(size, q.data(), 1, r.data(), 1);
+			dswap_(&size, q.data(), &ONE, r.data(), &ONE);
 
-			double dot_product = cblas_ddot(size,q.data(), 1, r.data(), 1);
+			double dot_product = ddot_(&size, q.data(), &ONE, r.data(), &ONE);
 			alpha->push_back(dot_product);
 
             //r = r - q*alpha
-			cblas_daxpy(size, -alpha->back(), q.data(), 1, r.data(), 1);	
+            double minus_alpha = -alpha->back();
+			daxpy_(&size, &minus_alpha, q.data(), &ONE, r.data(), &ONE);	
 
-			beta->push_back(cblas_dnrm2(size, r.data(), 1));
+			beta->push_back(dnrm2_(&size, r.data(), &ONE));
 
 			//Arrays for tridiag solve
 			double* arr_a = new double[alpha->size()];
@@ -87,12 +93,11 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 			char jobs = 'V'; 
 			int n = current_iteration; 
 			int info;
-			double tt = 1.0;
 			double* vecs = new double[n*n];
 			double* work = new double[2*n];
 
 			//Solving Energy
-			dstev_(&jobs, &n, arr_a, arr_b, vecs, &n, work, &info, tt);
+			dstev_(&jobs, &n, arr_a, arr_b, vecs, &n, work, &info);
 			//Fund energy
 
 			prev_iter_energy = energy;
@@ -151,25 +156,27 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		* -------
 		* NONE
 		*******************************************************/
-		int size = sArr->get_length();
+		sType size = sArr->get_length();
 		int size_proj = alpha->size();
 
 		std::vector<double> r(gs, gs + size);
 		std::vector<double> q(size);
 
-		for (int d = 0; d < *deg; d++)
-		cblas_dscal(size, fundState_lanczos_basis->at(size_proj*d),
-                    gs + d*size, 1);
+		for (int d = 0; d < *deg; d++) {
+            double scal = fundState_lanczos_basis->at(size_proj*d);
+            dscal_(&size, &scal, gs + d*size, &ONE);
+        }
 
 
 		for (unsigned int j = 1; j < fundState_lanczos_basis->size(); j++) {
 			std::vector<double> H_tmp(size);
 			sArr->H(H_tmp.data(), r.data());
-
-			cblas_daxpy(size, 1, H_tmp.data(), 1, q.data(), 1);	//q = q + H*r
+            
+			daxpy_(&size, &ALPHA_D, H_tmp.data(), &ONE, q.data(), &ONE);	//q = q + H*r
             
             //r = r - q*alpha
-			cblas_daxpy(size,-alpha->at(j-1), r.data(), 1, q.data(), 1);	
+            double minus_alpha = -alpha->at(j-1);
+			daxpy_(&size, &minus_alpha, r.data(), &ONE, q.data(), &ONE);	
 			for (unsigned int i = 0; i < r.size(); i++) {
 				double tmp = r[i];
 				r[i] = q[i]/beta->at(j-1);
@@ -179,7 +186,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 			for (int d = 0; d < *deg; d++) {
 				double scal = fundState_lanczos_basis->at(j + size_proj*d);
                 //r = r - q*alpha
-				cblas_daxpy(size, scal, r.data(), 1, gs + d*size, 1);
+				daxpy_(&size, &scal, r.data(), &ONE, gs + d*size, &ONE);
 			}
 			if (j%10 == 0 && verbose > 4) {
 				std::cout << "Lanczos Vector current iteration :" 
@@ -293,13 +300,13 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
                 << "Band Lanczos current iteration :"<< j << std::endl;	
 			if(verbose > 99){
 				for (int i = 0; i < M0; i++){
-					double nn = cblas_dnrm2(len_bk, vk->data() + i*len_bk, 1);
+					double nn = dnrm2_(&len_bk, vk->data() + i*len_bk, &ONE);
 					std::cout << "vec[" << i << "] = " << to_string_pq(nn)
                         << std::endl;
 				}
 			}
 			//(3) Norm of the v_j vector
-			double v_norm = cblas_dnrm2(len_bk, vk->data() + (j%M0)*len_bk, 1);
+			double v_norm = dnrm2_(&len_bk, vk->data() + (j%M0)*len_bk, &ONE);
 			//(4) Is the v_j vector negligeable
 			if (v_norm <= dtol) {
 				if (verbose > 9) std::cout << "DELFLATION" << std::endl;
@@ -322,7 +329,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 			}
 			//(5) Normalize v_j
 			double t_m1 = 1 / v_norm;
-			cblas_dscal(len_bk, t_m1, vk->data() + (j%M0) * len_bk, 1);
+			dscal_(&len_bk, &t_m1, vk->data() + (j%M0) * len_bk, &ONE);
 		
 			//Add terms to t matrix 
 			if (j >= pc) {t_jpc[j * iterations + j - pc] = v_norm;}
@@ -330,8 +337,8 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 			//Qmatrix product requirements <phi|c_mu|Omega>
 			double dot_product;
 			for (uInt k = 0; k < n_bk; k++) {
-				dot_product = cblas_ddot(len_bk, bk.data() + k * len_bk, 1,
-                                         vk->data() + (j%M0) * len_bk, 1);
+				dot_product = ddot_(&len_bk, bk.data() + k * len_bk, &ONE,
+                                         vk->data() + (j%M0) * len_bk, &ONE);
 				
 				(*product_c_omega)[k * *nIter + j] = dot_product;
 			}
@@ -340,13 +347,13 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 			for (int k = j + 1; k < j + pc; k++) {
 				//Dot product between vj and vk
 				double vjvk;
-				vjvk = cblas_ddot(len_bk, vk->data() + (j%M0) * len_bk, 1, 
-                                  vk->data() + (k%M0) * len_bk, 1);
+				vjvk = ddot_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, 
+                                  vk->data() + (k%M0) * len_bk, &ONE);
 				
 				//Makes orthogonality
 				double a = - vjvk;
-				cblas_daxpy(len_bk, a, vk->data() + len_bk * (j%M0), 1, 
-                            vk->data() + len_bk * (k%M0), 1);
+				daxpy_(&len_bk, &a, vk->data() + len_bk * (j%M0), &ONE, 
+                      vk->data() + len_bk * (k%M0), &ONE);
 
 				//Adding to the new element matrix
 				if (k >= pc) {t_jpc[j * iterations + k - pc] = vjvk;}
@@ -365,8 +372,8 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 				//Makes t_jpc hermitian
 				t_jpc[k * iterations + j] = t_jpc[j * iterations + k];
 				double a = -t_jpc[k * iterations + j];
-				cblas_daxpy(len_bk, a, vk->data() + len_bk * (k%M0), 1,
-                            vk->data() + len_bk * ((j + pc)%M0), 1);
+			    daxpy_(&len_bk, &a, vk->data() + len_bk * (k%M0), &ONE,
+                      vk->data() + len_bk * ((j + pc)%M0), &ONE);
 			}
 		
 			//(9) Removes from the new vector created in (9), 
@@ -378,26 +385,25 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 				if(index_array.at(k) != j) continue;
 
 				double dot_product;
-				dot_product = cblas_ddot(
-                    len_bk, vk->data() + (index_array.at(k)%M0) * len_bk, 1,
-                    vk->data() + ((j + pc)%M0) * len_bk, 1);
+				dot_product = ddot_(
+                    &len_bk, vk->data() + (index_array.at(k)%M0) * len_bk, &ONE,
+                    vk->data() + ((j + pc)%M0) * len_bk, &ONE);
 				t_jpc[index_array.at(k) * iterations + j] = dot_product;
 
 				double a = -t_jpc[index_array.at(k) * iterations + j];
-				cblas_daxpy(
-                    len_bk, a, vk->data() + len_bk * (index_array.at(k)%M0), 1,
-                    vk->data() + len_bk * ((j + pc)%M0), 1);
+				daxpy_(&len_bk, &a, vk->data() + len_bk * (index_array.at(k)%M0), 
+                      &ONE, vk->data() + len_bk * ((j + pc)%M0), &ONE);
 			}
 
 			////Diag element t(j,j)
 			double VkVjpc, temp_minus;
-			VkVjpc = cblas_ddot(len_bk, vk->data() + (j%M0) * len_bk, 1, 
-                                vk->data() + ((j + pc)%M0) * len_bk, 1);
+			VkVjpc = ddot_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, 
+                                vk->data() + ((j + pc)%M0) * len_bk, &ONE);
 			t_jpc[j *iterations +j] = VkVjpc;
 			
 			temp_minus = -VkVjpc;
-			cblas_daxpy(len_bk, temp_minus, vk->data() + len_bk * (j%M0), 1, 
-                        vk->data() + len_bk * ((j + pc)%M0), 1);
+			daxpy_(&len_bk, &temp_minus, vk->data() + len_bk * (j%M0), &ONE, 
+                  vk->data() + len_bk * ((j + pc)%M0), &ONE);
 
 			//(10) Manages Deflation
 			for (unsigned long k = 0; k < index_array.size(); k++) {
@@ -422,7 +428,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 				
 				//(12) Solve T_j to check for convergence only eigen values
 				double* eigen_values = new double[jj];
-				//Tools for dsyev_
+				//Tools for dsyev
 				char jobs = 'N', uplo='U';
 				int lwork = (jj)*(jj+1);
 				double* work = new double[lwork];
@@ -430,10 +436,10 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 				int info;
 
 				dsyev_(&jobs, &uplo, &jj, T_jPr, &jj, eigen_values, work, 
-                       &lwork, &info, 1, 1);
+                       &lwork, &info);
 
 				delete[] T_jPr;
-				//Delete dsyev_ tools
+				//Delete dsyev tools
 				delete[] work; delete[] rwork;
 				
 				double current_energy = eigen_values[0];	
@@ -473,7 +479,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		double* rwork = new double[lwork];
 		int info;
 
-		dsyev_(&jobs,&uplo,&jj,T_jPr,&jj,eigen_values,work,&lwork,&info,1,1);
+		dsyev_(&jobs,&uplo,&jj,T_jPr,&jj,eigen_values,work,&lwork,&info);
 		///Delete tools for dsyev
 		delete[] work; delete[] rwork;
 		
@@ -528,7 +534,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 			double* rwork = new double[lwork];
 			int info;
 			dsyev_(&jobs, &uplo, &rows, H, &rows, eigen_values, work, &lwork,
-                   &info, 1, 1);
+                   &info);
 
 			fund_energy = eigen_values[0];
 			delete[] work; delete[] rwork;

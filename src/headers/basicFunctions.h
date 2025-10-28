@@ -94,8 +94,9 @@ template <class R> void normalize(double* vec, R size) {
 	* NONE
 	*************************************************************/
 	//Normalisation of vec
-	double norm = 1 / cblas_dnrm2(size, vec, 1);
-	cblas_dscal(size,norm,vec,1);
+    int one = 1;
+	double norm = 1 / dnrm2_(&size, vec, &one);
+	dscal_(&size, &norm, vec, &one);
 }
 template <class R> void initial_vector(
         R const SIZE, double* v, uInt seed=clock()) {

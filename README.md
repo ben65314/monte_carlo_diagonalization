@@ -17,7 +17,6 @@ python3, openmp, lapack-blas are required.
 ```shell
 sudo apt update
 sudo apt install git liblapack-dev libblas-dev libopenmpt-dev python3 
-sudo apt install lablapacke-dev
 ```
 The python3 packages numpy, matplotlib and scipy are needed.
 ```shell

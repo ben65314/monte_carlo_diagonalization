@@ -491,17 +491,17 @@ template <class StatesArrType> void compute_green_long(
 
 			//Eigen values of hE|E> = E|E>
 			dsyev_(&jobs, &uplo, &new_space_len_e, hE, &new_space_len_e,
-                   eigen_value_e, work, &lwork, &info, 1, 1);
+                   eigen_value_e, work, &lwork, &info);
 
 			delete[] work; 
 
 			eigen_e = std::vector<double>(eigen_value_e, 
                                             eigen_value_e + new_space_len_e);
 			//<OMEGA|c Ue
-			cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, sites, 
-                        new_space_len_e, new_space_len_e, ALPHA_D, arr_BL_e, 
-                        new_space_len_e, hE, new_space_len_e, BETA_D,
-                        q_matrix_e.data(), new_space_len_e);
+            char trans_a = 'N', trans_b = 'T';
+			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_e, &new_space_len_e, &ALPHA_D, 
+                  arr_BL_e, &new_space_len_e, hE, &new_space_len_e, &BETA_D,
+                  q_matrix_e.data(), &new_space_len_e);
 
 			delete[] hE; delete[] arr_BL_e;	delete[] eigen_value_e; 	
 		}
@@ -545,17 +545,17 @@ template <class StatesArrType> void compute_green_long(
 
 			//Eigen values of hH|E> = E |E>
 			dsyev_(&jobs, &uplo, &new_space_len_h, hH, &new_space_len_h, 
-                   eigen_value_h, work, &lwork, &info, 1, 1);
+                   eigen_value_h, work, &lwork, &info);
 
 			delete[] work; 
 			
 			eigen_h = std::vector<double>(eigen_value_h, 
                                             eigen_value_h + new_space_len_h);
 			//<OMEGA|c Uh
-			cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, sites, 
-                        new_space_len_h, new_space_len_h, ALPHA_D, arr_BL_h,
-                        new_space_len_h, hH, new_space_len_h, BETA_D, 
-                        q_matrix_h.data(), new_space_len_h);
+            char trans_a = 'N', trans_b = 'T';
+			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_h, &new_space_len_h, &ALPHA_D, 
+                  arr_BL_h, &new_space_len_h, hH, &new_space_len_h, &BETA_D, 
+                  q_matrix_h.data(), &new_space_len_h);
 
 			delete[] hH; delete[] arr_BL_h; delete[] eigen_value_h; 
 		}

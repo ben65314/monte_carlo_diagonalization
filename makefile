@@ -11,8 +11,8 @@ OPT=-O3 -ftree-vectorize -lprofiler
 # generate files that encode make rules for the .h dependencies
 DEPFLAGS=-MP -MD
 # automatically add the -I onto each include directory
-WWD = -Wall -Wextra -Wpedantic -g -Wno-unused-parameter 
-GCC = -llapack -llapacke -lblas -fopenmp #-lgfortran 
+WWD = -Wall -Wextra -Wpedantic -g 
+GCC = -llapack -lblas -fopenmp 
 CXXFLAGS=-I$(foreach D,$(INCDIRS),-I$(D)) $(OPT) $(DEPFLAGS) $(WWD)  
 
 # for-style iteration (foreach) and regular expression completions (wildcard)
@@ -49,7 +49,7 @@ av_combine:
 # only want the .c file dependency here, thus $< instead of $^.
 #
 %.o:%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $< $(GCC)
+	$(CXX) $(CXXFLAGS) -c $< $(GCC) -o $@
 	
 OBJDIR:
 	if [ ! -d $(OBJDIR) ]; then \

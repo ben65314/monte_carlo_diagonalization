@@ -9,10 +9,7 @@ const long PERMISSION = 500000;
 const int LANCZOS_SIZE = 5;
 const uInt BAND_LANCZOS_MAX_ITERATIONS = 1500;
 const uInt NUM_THREADS_USED = 0.9 * omp_get_max_threads();
-const double ALPHA_D = 1;
-const double BETA_D = 0;
 
-const int INCXY = 1;
 
 struct hubbardParam{ //Hubbard parameters
 	int n_sites;
