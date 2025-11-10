@@ -31,7 +31,7 @@
 #include <vector>
 //
 //For more than 16 sites
-typedef uint8_t sType;		
+typedef uint64_t sType;
 
 extern "C" {
 
@@ -42,16 +42,16 @@ void daxpy_(sType*, double*, double*, int*, double*, int*);
 double ddot_(sType*, double*, int*, double*, int*);
 void dswap_(sType*, double*, int*, double*, int*);
 
-void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, 
+void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*,
           int*, double*, double*, int*);
 
 //LAPACK
 /* Subroutine */ int dsyev_(char *jobz, char *uplo, int *n, double *a,
-	int *lda, double *w, double *work, int *lwork, 
+	int *lda, double *w, double *work, int *lwork,
 	int *info);
 
-/* Subroutine */ int dstev_(char *jobz, int *n, double *d__, 
-	double *e, double *z__, int *ldz, double *work, 
+/* Subroutine */ int dstev_(char *jobz, int *n, double *d__,
+	double *e, double *z__, int *ldz, double *work,
 	int *info);
 }
 
@@ -68,7 +68,7 @@ void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*,
 //typedef uint32_t sType;
 
 
-//Type of the vector 
+//Type of the vector
 typedef double vType;
 
 

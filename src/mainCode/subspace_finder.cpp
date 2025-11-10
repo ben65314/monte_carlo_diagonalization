@@ -1,3 +1,4 @@
+#include "basicFunctions.h"
 #include "paramReader.h"
 
 //Type to use in code
@@ -19,13 +20,13 @@ int main(int argc, char *argv[]){
 
 	//Initialize seed
 	srand(clock());
-	
+
 	//Start time reading and prep time
 	auto step1 = std::chrono::high_resolution_clock::now();
 
 	//Read file of parameters
 	justManyVariables jMV = readParameters("/" + (std::string)argv[1]);
-    
+
     //Present to the user the number of bytes allowed for states and threads
 	if (verbose > 0) std::cout << "Bytes for a state:" << sizeof(sType) <<
 		"\tMax threads:" << NUM_THREADS_USED << std::endl;
@@ -38,17 +39,17 @@ int main(int argc, char *argv[]){
         omp_set_num_threads(1);
     }
 
-	//Start computing 
+	//Start computing
 	auto step2 = std::chrono::high_resolution_clock::now();
-	
+
     //Minimum energy
 	double minEnergy = 1e10;
 	Electrons min_block_electrons;
-    
+
     //Sampling parameters
     samplingParam sP;
     sP.beta_MH = 0;
-    sP.nHapply = 0; 
+    sP.nHapply = 0;
     sP.beta_Happly = 0;
 
 	//Test for a number of electrons up
@@ -76,13 +77,19 @@ int main(int argc, char *argv[]){
 			states_block.sampling_MH();
 
             //Find ground state
-			std::vector<vType> fundState = std::vector<vType>(
-				sP.sampling_size,0);
+			std::vector<vType> fund_state = std::vector<vType>(sP.sampling_size,0);
+            initial_vector(sP.sampling_size, fund_state.data());
+			std::vector<vType> fund_state_lanczos_basis;
 			LanczosSolver<vType,arrType> LS;
 			int deg = 1;
-			double fundE = LS.fund_energy(&fundState, &states_block, &deg);
-            
-            if (verbose > 4) std::cout << "The bloc (" << i << "," << j
+			double fundE;
+            int iter = 0;
+            std::vector<double> alpha, beta;
+
+            LS.lanczos_energy(&fund_state_lanczos_basis, fund_state.data(),
+                            &states_block, &alpha, &beta, &fundE, &iter, &deg);
+
+            if (verbose > 2) std::cout << "The bloc (" << i << "," << j
                 <<") energy is "<< fundE << std::endl;
             //Look for minimum energy
 			if (fundE < minEnergy) {
