@@ -65,8 +65,8 @@ int main(int argc, char *argv[]){
 	if (verbose > 0) std::cout << "Step 1:Choosing States...";	
 
 	//Sampling methods
-	//MH_Block.sampling_MH();
-	MH_Block.sampling_least_energy();
+	MH_Block.sampling_MH();
+	//MH_Block.sampling_least_energy();
 
 	auto step2_2 = std::chrono::high_resolution_clock::now();
 	if (verbose > 0) {

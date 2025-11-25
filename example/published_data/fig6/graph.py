@@ -1,6 +1,7 @@
 
 #!/usr/bin/python3
 import csv
+from os import wait
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
@@ -9,12 +10,17 @@ from matplotlib.ticker import AutoMinorLocator
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 import numpy as np
+import matplotlib.ticker as mticker
 
 import scipy.stats as stats
 
 from matplotlib.legend_handler import HandlerBase
 from matplotlib.colors import LinearSegmentedColormap
 
+from PIL import Image
+import svgutils.compose as sc
+
+plt.style.use('tableau-colorblind10')
 
 def chi(exp_value, obs_value, dx):
     chi2 = 0
@@ -22,26 +28,8 @@ def chi(exp_value, obs_value, dx):
         chi2 += dx*(obs-exp)**2
     return chi2
 
-def cum_curve(exp_values,obs_values,x=None,name = ''):
-    cum_sum_exp = np.cumsum(exp_values)
-    cum_sum_obs = np.cumsum(obs_values)
-
-    #if(x!=None):
-
-    #    fig,ax = plt.subplots(1, 1,figsize=(6,3),constrained_layout=True)
-    #    ax.plot(x,cum_sum_exp)
-    #    ax.plot(x,cum_sum_obs)
-
-    #    fig.savefig('csum'+name+'.png')
-    chi2 = chi(cum_sum_exp,cum_sum_obs)
-    return chi2
-
-
-def norm(data):
-    return (data)/(max(data)-min(data))
-
 def reader(file_name):
-    #print(file_name)
+    print(file_name)
     x = []
     y = []
     #y = []
@@ -53,7 +41,6 @@ def reader(file_name):
             x.append(float(lines[0]))
             #y.append(float(lines[1])+float(lines[2]))
             y.append(float(lines[1])+float(lines[2]))
-            #print
     return x,y
 
 ##Curves information
@@ -65,7 +52,7 @@ pos_x_name = 0.005
 pos_y_name = 0.975
 
 #data
-#JUST NEED TO CHANGE THOSE VALUES, works up to 4 graphs 
+#JUST NEED TO CHANGE THOSE VALUES, works up to 4 graphs
 data_perc = ['100','05']
 data_r = ['1', '09999', '0999', '099', '09']
 data_r_float_w = ['1.0000', '0.9999', '0.999', '0.99', '0.9']
@@ -87,9 +74,10 @@ m_size = [70,40]
 #line_width = [2,2,2,2,1]
 #Colors #states
 cmap = plt.get_cmap('viridis')
-colorsa = np.linspace(0.2,0.9,num=len(data_r)-1);
+colorsa = np.linspace(0,1,num=len(data_r)-1);
 colors = [cmap(i) for i in colorsa]
-colors.insert(0,'k') 
+colors.insert(0,'k')
+colors[-1]='goldenrod'
 
 
 #legend labels
@@ -97,7 +85,7 @@ labels = []
 letters = ['a) ','b) ','c) ','d) ']
 for j in data_perc:
     labels.append('{:.2f}'.format(float(j)/100))
-labels.append('')
+labels.append(r'$\chi^2(w_t)$')
 handles = []
 
 #Set font family
@@ -118,18 +106,23 @@ for i in data_perc:
 
 #print(q_matrix_files)
 # Create subplots with shared x-axis
-fig = plt.figure(figsize=(6,3),constrained_layout=True)
-L, R, T, B = 0.002, 0.002, 0.0, 0.0
-#fig.get_layout_engine().set(w_pad=0.1,h_pad=0.03,wspace=0.,rect=(L, B, 1 - L - R, 1 - B - T))
+fig = plt.figure(figsize=(6,3.5),constrained_layout=True)
+L, R, T, B = 0.002, 0.002, 0.08, 0.0
+fig.get_layout_engine().set(w_pad=0.05,h_pad=0.03,wspace=0.,rect=(L, B, 1 - L - R, 1 - B - T))
 #mpl.layout_engine.ConstrainedLayoutEngine.set(,w_pad=0.0)
 #mpl.layout_engine.ConstrainedLayoutEngine(w_pad=0.0)
 #mpl.layout_engine.ConstrainedLayoutEngine.execute(fig)
 
-gs = gridspec.GridSpec(2, 2, figure=fig,width_ratios=[3, 1])
-axes = [fig.add_subplot(gs[0,0])]
-axes.append(fig.add_subplot(gs[1,0]))
-axes.append(fig.add_subplot(gs[:,1]))
-#fig, axes = plt.subplots(2, 2, figsize=(6, 3),constrained_layout=True)
+#fig, axes = plt.subplots(2# Create main axes for a) and b)
+gs = gridspec.GridSpec(2, 1, figure=fig, height_ratios=[1, 1])
+axes = [fig.add_subplot(gs[0, 0])]  # a)
+axes.append(fig.add_subplot(gs[1, 0]))  # b)
+
+# Create inset axis (for c)) positioned relative to the lower plot
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+rect = 0.42,0.40,0.16,0.30
+inset_ax = fig.add_axes(rect)
+axes.append(inset_ax)  # c), 2, figsize=(6, 3),constrained_layout=True)
 #Shared x-axes
 axes[1].sharex(axes[0])
 axes[0].label_outer()   # hides x labels on top row
@@ -153,7 +146,7 @@ A_omega = [r"$A(\omega)$",r"$A(\omega)_{reduced}$"]
 #SPECTRAL FUNCTIONS
 for i,ax in enumerate(axes):
 
-    if i < 2 : 
+    if i < 2 :
         q_files = q_matrix_files[i]
         #print(q_files)
         x_ref,y_ref = reader(q_files[0])
@@ -168,12 +161,12 @@ for i,ax in enumerate(axes):
             ax.set_xlim(xlims_min,xlims_max)
             ax.tick_params(axis='x',labelsize=size_text)
             ax.set_yticks([0, ylims[i]])  # Tick only at 0 and 1 and 2
-            
+
             #Vert line at 0
             ax.axvline(c='k',ls='--',lw=0.75)
 
             ax.scatter(xlims_max*0.95,ylims[i]*0.9,marker=markers[i],color='dimgray',s=50)
-            
+
             #Remove y tick labels
             ax.set_yticklabels([])
             if i == 0 :#and j!=0:  # Add legend only to the first plot
@@ -183,59 +176,55 @@ for i,ax in enumerate(axes):
             if j > 0 :
                 ks = stats.kstest(y,y_ref)
                 chi_2 = chi(y_ref,y,x[1]-x[0])
-                #print(ks)
-                #chi_2 = ks[0]
-                #print(chi_2)
+                print(chi_2)
 
 
                 axes[2].scatter(float(data_r_float[j]),chi_2,color=colors[j], marker=markers[i],s=m_size[i])
-                # Move y-axis to the right
-                axes[2].yaxis.set_label_position("right")
-                axes[2].yaxis.tick_right()
-                #ax.set_ylim(0, float(ylims[i]))
-                #ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-                #ax.set_xlim(xlims_min,xlims_max)
-                #axes[2].set_ylim(bottom=-0.4,top = 15.4)
-                axes[2].tick_params(axis='x',labelsize=size_text)
-                axes[2].tick_params(axis='y', labelsize=size_text)
-                axes[2].set_xscale('log')
-                #axes[2].set_yscale('log')
-                axes[2].minorticks_off()
-                axes[2].axhline(0,c='k',lw=0.7,linestyle='--')
-                #axes[2].set_xlim(float(data_r_float[-1])-0.02,1.02)
-                #axes[2].set_xticks([10e-4,10e-2,])  # Tick only at 0 and 1 and 2
-                #axes[2].set_xticklabels([data_r_fl])  # Tick only at 0 and 1 and 2
 
     # Optionally add individual titles a), b), ...
-    if i == 2 : shift = 0.025 
+    if i == 2 : shift = 0.025
     else :shift = 0
     f = ["$f$=","$f$=",""]
     ax.text(pos_x_name+shift,pos_y_name,letters[i] + f[i]+ labels[i],fontsize=size_text,ha='left',va='top', transform=ax.transAxes)
 
 #Reverse handles
+h0, = axes[0].plot(0, 1,label='$w_t$',alpha=0)
 reverse_handle = []
 for i in handles:
     reverse_handle.insert(0,i)
+reverse_handle.insert(0,h0)
 handles = reverse_handle
 
 # Set x-axis label on the bottom subplot only
-fig.legend(handles=handles,loc='upper left',
-        title='$w_t$',title_fontsize=size_text,
-        bbox_to_anchor=(0.70,1),
+leg = fig.legend(handles=handles,loc='upper center',
+        bbox_to_anchor=(0.5,1.01),
         #bbox_to_anchor=(0.725,0.16),
         #bbox_to_anchor=(0.66,0.5828),
-        fontsize=size_text,ncol=1,
+        fontsize=size_text,ncol=6,
         columnspacing=0.5,labelspacing=0.1,
-        handletextpad=0.2,handlelength=0.65,borderpad=0.2,
+        handletextpad=0.2,handlelength=0.65,borderpad=0.1,
         frameon=True, markerfirst=True)
 axes[1].set_xlabel('$\omega$',fontsize = size_text)
-axes[2].set_xlabel('1-$w_t$',fontsize = size_text)
-axes[2].set_ylabel('$\chi^2$',fontsize = size_text,rotation=0)
 
+#axes[2].set_xlabel('1-$w_t$',fontsize = size_text-4,labelpad=0)
+#axes[2].set_ylabel('$\chi^2$',fontsize = size_text-4,rotation=0)
+axes[2].set_facecolor((1, 1, 1, 0.8))  # RGBA, alpha=0.5
+axes[2].set_xscale('log')
+axes[2].tick_params(
+    axis='both',        # both x and y
+    which='both',       # major and minor
+    bottom=False,       # remove bottom ticks
+    top=False,          # remove top ticks
+    left=False,         # remove left ticks
+    right=False,        # remove right ticks
+    labelbottom=False,  # remove x labels
+    labelleft=False     # remove y labels
+)
+axes[2].set_xlim(2e-1,5e-5)
+axes[2].set_ylim(-0.005,0.13)
+axes[2].axhline(0,c='k',lw=0.7,linestyle='--')
 
 # Shared legend placed outside the plots (bottom center)
 #plt.tight_layout()
 plt.savefig('further_truncation.pdf')
-
-#plt.show()
 

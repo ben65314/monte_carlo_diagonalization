@@ -1,3 +1,4 @@
+###2D
 #!/usr/bin/python3
 import csv
 import matplotlib.pyplot as plt
@@ -41,14 +42,14 @@ class HandlerDiscreteColormap(HandlerBase):
 
 if (len(sys.argv) == 1): exit
 def reduce_data(data,start=0,keep=1):
-    n = len(data[0]) #Initial 
+    n = len(data[0]) #Initial
     k = int((1-keep) * n) #Reduce
     indices_to_remove = np.linspace(start, n - 1, k, dtype=int)
-    
+
     # Remove the selected indices
     mask = np.ones(n, dtype=bool)
     mask[indices_to_remove] = False
-    
+
     return_data = []
     for d in data:
         print('d:',len(d))
@@ -66,9 +67,9 @@ size_text = 14
 
 # Color maps for each
 cmap_red   = plt.get_cmap("Reds")
-cmap_yellow= plt.get_cmap("YlOrBr")
+cmap_yellow= plt.get_cmap("Blues")
 cmap_green = plt.get_cmap("Greens")
-cmap_blue  = plt.get_cmap("Blues") 
+cmap_blue  = plt.get_cmap("YlOrBr")
 cmaps = [cmap_red,cmap_yellow,cmap_green,cmap_blue]
 
 # Markers
@@ -123,7 +124,7 @@ for i in range(len(q_ghost_files)):
 
     #Ghost outline (gray)
     ax.plot(n_states,cumul_weight,color='k',alpha=0.2,lw=9,zorder=-100)
-    
+
 # Data points
 for i in range(len(q_matrix_files)):
     #Color map used
@@ -137,7 +138,7 @@ for i in range(len(q_matrix_files)):
     cumul_nU = []
     n_states = []
     data_file_name = q_matrix_files[i]
-    
+
     # READING
     with open(data_file_name) as file:
         reader = csv.reader(file)
@@ -155,14 +156,14 @@ for i in range(len(q_matrix_files)):
     n_states = list(n_states)
     cumul_weight = list(cumul_weight)
     cumul_nU = list(cumul_nU)
-    
+
     # Seperate data according to its nU value
     cw = [[] for l in range(max(cumul_nU)+1)]#[[]]*(max(cumul_nU)+1)
     cs = [[] for l in range(max(cumul_nU)+1)]#[[]]*(max(cumul_nU)+1)
     for j, nu in enumerate(cumul_nU):
         cw[nu].append(cumul_weight[j])
         cs[nu].append(n_states[j])
-    
+
     # Scatter plot
     for m, (c_weight, c_states) in enumerate(zip(cw,cs)):
         using_c = colors[m]
@@ -182,7 +183,8 @@ for i in range(len(q_matrix_files)):
     x_c = np.linspace(10000,len(colors)+100001,len(colors))
     y_c = [0.5]*len(colors)
     cm2 = truncate_colormap_discrete(cmaps[i],min_color,max_color,len(colors))
-    ax.scatter(x_c,y_c,c=colors,cmap=cm2)
+    #ax.scatter(x_c,y_c,c=colors,cmap=cm2)
+    ax.scatter(x_c,y_c,c=colors)
 
     # Dummy handle with colormap info
     gradient_patch = mpl.cm.ScalarMappable(cmap=cm2)
@@ -213,7 +215,7 @@ legend_sites = ax.legend(color_legend, sites_label, loc='lower right',
             labelspacing=0.1,
             handletextpad=0.2,
             handlelength=1.,
-            borderpad=0.2, frameon=True, 
+            borderpad=0.2, frameon=True,
             title=r'$N_c$')
 legend_sites._legend_box.align = "center"
 
