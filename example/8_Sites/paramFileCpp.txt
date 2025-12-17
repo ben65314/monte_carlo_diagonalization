@@ -2,13 +2,13 @@
 # Parameters of the Hubbard Hamiltonian in the sites formalism
 #
 #This template requires you to change the value between {}.
-#We suggest to copy a template below if you want to add a site or an 
+#We suggest to copy a template below if you want to add a site or an
 #allowed jump for the electrons.
 #
 #The reader is very picky when reading this file it is suggested to make a copy and
-#keep this one as an example. 
+#keep this one as an example.
 #
-#If a vital parameter is missing or incomplete its value will be zero 
+#If a vital parameter is missing or incomplete its value will be zero
 ####################################################################################
 
 ############################### UNIVERSAL PARAMETERS ###############################
@@ -40,13 +40,13 @@ Sz: {0}
 beta: {0}
 
 #	Reticle of the breadth sampling. 0 will be set the reticle to its maximum value
-reticle: {0}						
+reticle: {0}
 
 #	Size of the truncated space
 sampling_space_size: {4900}
 
-#	After fundamental truncating. After the fundamental is found will keep the most dominant 
-#	states until the Truncated_Cutoff value is met. A value of 1, will not change to space. 
+#	After fundamental truncating. After the fundamental is found will keep the most dominant
+#	states until the Truncated_Cutoff value is met. A value of 1, will not change to space.
 #	0 < Truncated_Cutoff < 1
 truncated_cutoff: {1}
 

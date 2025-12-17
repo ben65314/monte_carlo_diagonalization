@@ -1,4 +1,5 @@
 #include "basicFunctions.h"
+#include <cstdint>
 
 struct hubbardParam;
 
@@ -22,7 +23,7 @@ void is_success(bool status) {
 	else {
 		result = "FAIL";
 		std::cout << "\033[1;6;31m~FAIL\033[0m\n";
-	}	
+	}
 }
 void cct(std::string text, int color) {
     /*****************************************
@@ -37,7 +38,7 @@ void cct(std::string text, int color) {
 	* -------
 	* NONE
 	*****************************************/
-	std::cout << "\033[1;" << color << "m" << text << "\033[0m";	
+	std::cout << "\033[1;" << color << "m" << text << "\033[0m";
 }
 int get_number_of_blocks(int sites) {
 	/*****************************************
@@ -55,10 +56,38 @@ int get_number_of_blocks(int sites) {
 	nbr_blocks *= nbr_blocks;
 	return nbr_blocks;
 }
+void print_bin_from_dec(sType decimal_number, int resolution) {
+	/*****************************************
+	* Prints the given number in binary.
+	*
+	* Parameters
+	* ----------
+	* decimal_number : (sType) Number of sites of the system.
+    * resolution     : (int) Number of bits to use.
+	*
+	* Returns
+	* -------
+	* NONE
+    ******************************************/
+    bool not_zero = false;
+    for (int i = resolution; i >= 0; i--){
+        int64_t power = pow(2,i);
+        if ((int64_t)decimal_number-power >= 0){
+            decimal_number -= power;
+            printf("%d",1);
+            not_zero = true;
+        }
+        else {
+            if (not_zero) {
+                printf("%d",0);
+            }
+        }
+    }
+}
 double find_min_of_array(std::vector<double> array) {
 	/*****************************************
 	* Finds the minimum value of an array by just looking every element
-	* 
+	*
 	* Parameters
 	* ----------
 	* array : (std::vector<double>) array to search through
@@ -86,7 +115,7 @@ unsigned long comb(uLong n, uLong r) {
 	*
 	* Returns
 	* -------
-	* result: (unsigned long) possible combinations 
+	* result: (unsigned long) possible combinations
 	****************************************/
 	unsigned long num = 1;
 	unsigned long den = 1;
@@ -97,7 +126,7 @@ unsigned long comb(uLong n, uLong r) {
 	}
 	else {
 		for (uLong i = n; i > r; i--) num *= i;
-		
+
 		for (uLong i = (n-r); i > 1; i--) den *= i;
 	}
 	unsigned long result = num / den;
@@ -118,7 +147,7 @@ unsigned long comb_specified(int nU, int sites, int up, int down) {
 	*
 	* Returns
 	* -------
-	* result: (unsigned long) possible combinations 
+	* result: (unsigned long) possible combinations
 	****************************************/
 	if (up < nU || down < nU) {
 		std::cout << "WARNING - number of electrons inferior to number" <<
@@ -134,7 +163,7 @@ unsigned long comb_specified(int nU, int sites, int up, int down) {
 }
 double fermi_dirac_function(float x, float beta, float mu) {
 	/*****************************************
-	* Evaluates the point x of a a Fermi-Dirac distribution with 
+	* Evaluates the point x of a a Fermi-Dirac distribution with
     * parameters beta and mu given
 	*
 	* Parameters
@@ -154,7 +183,7 @@ double fermi_dirac_function(float x, float beta, float mu) {
 }
 double boltzmann_distribution_function(float dE, float beta) {
 	/*****************************************
-	* Evaluates the probability of change of the energy dE in a 
+	* Evaluates the probability of change of the energy dE in a
     * Boltzmann distribution with parameter beta given
 	*
 	* Parameters
@@ -191,7 +220,7 @@ double calculate_sd(std::vector<double> data) {
 	}
 
 	mean = sum / data.size();
-    
+
     //Standard deviation^2
 	for (unsigned int i = 0; i < data.size(); ++i) {
 		double temp = data.at(i) - mean;
@@ -207,9 +236,9 @@ int deg_fundamental_check(double* eV, sType n, double eps) {
 	*
 	* Parameters
 	* ----------
-	* eV	: (double*) eigen values computed 
+	* eV	: (double*) eigen values computed
 	* n		: (unsigned long) number of ev
-	* eps	: (double) precision for degeneracy 
+	* eps	: (double) precision for degeneracy
 	*
 	* Returns
 	* -------
@@ -288,15 +317,15 @@ template <> double remove_zeros(double a){
 	* -------
 	* a: (double) number with near zero ->  zero
 	****************************************/
-	if (abs(a) < 10e-13){a = 0;}	
+	if (abs(a) < 10e-13){a = 0;}
 	return a;
 }
 
 //std::string write_vector(const double* vec, R size) in header file
-//std::string write_matrix(const double* mat, R rows, R cols, 
+//std::string write_matrix(const double* mat, R rows, R cols,
 //                         int integers, int precision) in header file
 //std::string print_vector(const T* vec, R size) in header file
-//std::string print_matrix(const T* mat, R rows, R cols, 
+//std::string print_matrix(const T* mat, R rows, R cols,
 //                         int integers, int precision) in header file
 
 std::string time_formating(
@@ -317,7 +346,7 @@ std::string time_formating(
 	std::string time="";
 	double min, sec, ms, mus;
 	min = sec = ms = mus = 0;
-    
+
     using namespace std::chrono;
 
 	//Minutes
@@ -350,7 +379,7 @@ unsigned int one_counter(sType num) {
 	* Parameters
 	* ----------
 	* num	: (sType) pointer of the complex matrix to stringify
-	* 
+	*
 	* Returns
 	* -------
 	* count : (unsigned int) number of ones.
@@ -374,7 +403,7 @@ sType rotr(sType bit_vec, unsigned char rot_index, unsigned char size) {
 	* bit_vec	 : (sType) number to rotr
 	* rot_index	 : (unsigned char) move to right number of times
 	* size		 : (unsigned char) number of bit string
-	* 
+	*
 	* Returns
 	* -------
     * new_bit_vec: (sType) shifted bit_vec
@@ -385,14 +414,14 @@ sType rotr(sType bit_vec, unsigned char rot_index, unsigned char size) {
 	return new_bit_vec;
 }
 
-void combination_recursive(std::vector<int> empty_spaces, sType current_num, 
-                           int left_to_place, sType* all_comb, 
+void combination_recursive(std::vector<int> empty_spaces, sType current_num,
+                           int left_to_place, sType* all_comb,
                            sType* placed, sType* it){
 	/****************************************************************
-	* Creates the combinations of the number specified <left_to_place> to each 
-    * location accessible <empty_spaces>. This function is specially used when 
+	* Creates the combinations of the number specified <left_to_place> to each
+    * location accessible <empty_spaces>. This function is specially used when
     * creating double occupation states.
-	* 
+	*
 	* Parameters
 	* ----------
 	* empty_spaces	: (std::vector) Emplacement where we can place an electron
@@ -405,14 +434,14 @@ void combination_recursive(std::vector<int> empty_spaces, sType current_num,
 	* -------
 	* NONE
 	*****************************************************************/
-	
+
 	if (left_to_place == 0){
 		(*it) += 1;
 		*(all_comb + *placed) = current_num;
 		(*placed) += 1;
 		return;
 	}
-	
+
 	for (uInt i = 0; i < empty_spaces.size(); i++) {
 		sType added_num = current_num ^ (1ul << empty_spaces.at(i));
 		std::vector<int> updated_empty_spaces = empty_spaces;
@@ -428,10 +457,10 @@ void combination_recursive(std::vector<int> empty_spaces, sType current_num,
 void combination_double_occupation(
         int N, int sites, std::vector<sType>* all_double_occupation) {
 	/****************************************************************
-	* Creates all the combinations of states with <N> double electron 
-    * occupation in a system of <sites> sites. This will coutain only the <N> 
+	* Creates all the combinations of states with <N> double electron
+    * occupation in a system of <sites> sites. This will coutain only the <N>
     * double occupation without any single electron occupation on any site.
-	* 
+	*
 	* Parameters
 	* ----------
 	* N					   : (int) Number of required double occupation
@@ -453,8 +482,8 @@ void combination_double_occupation(
 
 	//Recursive combination function
     //FIXME:Does 'it' do anything?
-	sType it = 0; 
-	combination_recursive(chosenSites, current_num, N, 
+	sType it = 0;
+	combination_recursive(chosenSites, current_num, N,
                           all_double_occupation->data(), &placed, &it);
 
 	//Shift the states found to create the double occupation
@@ -469,9 +498,9 @@ void combination_recursive_adding_single(
     sType current_num, int n_up, int n_down, int sites,
     sType* all_comb, sType* placed) {
 	/****************************************************************
-	* Completes the <currentNum> with <nUp> and <nDown> single occupation 
+	* Completes the <currentNum> with <nUp> and <nDown> single occupation
     * electrons
-	* 
+	*
 	* Parameter
 	* ----------
 	* empty_spaces_up	: (std::vector) Where we can place an up electron
@@ -503,8 +532,8 @@ void combination_recursive_adding_single(
 			std::vector<int> updated_empty_spaces_down = empty_spaces_down;
 			//Remove the access for down electrons to be put here
 			updated_empty_spaces_down.erase(
-                std::remove(updated_empty_spaces_down.begin(), 
-                            updated_empty_spaces_down.end(), 
+                std::remove(updated_empty_spaces_down.begin(),
+                            updated_empty_spaces_down.end(),
                             empty_spaces_up.at(i)),
                 updated_empty_spaces_down.end());
 			//Remove the access for up electrons to be put here
@@ -524,7 +553,7 @@ void combination_recursive_adding_single(
 
 			std::vector<int> updated_empty_spaces_down = empty_spaces_down;
 			//Remove the access for down electrons to be put here
-			updated_empty_spaces_down.erase(updated_empty_spaces_down.begin(), 
+			updated_empty_spaces_down.erase(updated_empty_spaces_down.begin(),
                                    updated_empty_spaces_down.begin() + i + 1);
 
 			//Recursive
@@ -535,13 +564,13 @@ void combination_recursive_adding_single(
 
 	}
 }
-void combination_all(int n_up, int n_down, int sites, int nU, 
+void combination_all(int n_up, int n_down, int sites, int nU,
                      std::vector<sType>* all_states) {
 	/****************************************************************
-	* Computes the combinations of the states countaining <nUp> electrons up 
-    * and <nDown> electrons down, while there is <nU> double occupation in a 
+	* Computes the combinations of the states countaining <nUp> electrons up
+    * and <nDown> electrons down, while there is <nU> double occupation in a
     * system of <sites> sites.
-	* 
+	*
 	* Parameters
 	* ----------
 	* n_up		: (int) number of up electrons to place
@@ -556,14 +585,14 @@ void combination_all(int n_up, int n_down, int sites, int nU,
 	*****************************************************************/
 	//Number of states with specified nU, nUp, nDown values
 	sType combU_up_down = comb_specified(nU, sites, n_up, n_down);
-	
+
 	//Different ways to placed the double occupation
 	sType comb_U = comb(sites, nU);
 	sType comb_else = combU_up_down / comb_U;
 	*all_states = std::vector<sType>(combU_up_down, 0);
 
 	if (n_up < nU || n_down < nU) {
-		std::cout << "Not enough electron up or down for" << 
+		std::cout << "Not enough electron up or down for" <<
             " the double occupation required" << std::endl;
 		exit(1);
 	}
@@ -574,7 +603,7 @@ void combination_all(int n_up, int n_down, int sites, int nU,
 	//Independent electron number
 	n_up -= nU;
 	n_down -= nU;
-	
+
 	std::vector<sType> states_double_occupation;
 
 	//Places the double occupation through the lattice
@@ -593,16 +622,16 @@ void combination_all(int n_up, int n_down, int sites, int nU,
 
 			//Finds where electron can still be placed
 			std::vector<int> left_places;
-			sType one = 1; 
+			sType one = 1;
 			for (int j = 0; j < sites; j++) {
 				if((current_num & one) == 0) {
 					left_places.push_back(j);
-				}	
+				}
 				one <<= 1;
 			}
 			//Add the leftover electron without double occupation
 			combination_recursive_adding_single(
-                    left_places, left_places, current_num,n_up, n_down, sites, 
+                    left_places, left_places, current_num,n_up, n_down, sites,
                     all_states->data() + i * comb_else, &placed);
 
 		}//End of pragma omp for
@@ -614,7 +643,7 @@ void combination_all(int n_up, int n_down, int sites, int nU,
 			sType current_num = 0;
 			placed = 0;
 			combination_recursive_adding_single(
-                chosen_sites, chosen_sites, current_num, n_up, n_down, sites, 
+                chosen_sites, chosen_sites, current_num, n_up, n_down, sites,
                 all_states->data(), &placed);
 
 		}

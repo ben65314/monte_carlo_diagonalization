@@ -7,7 +7,7 @@ struct justManyVariables readParameters(const std::string file) {
 		//printf("Current working dir: %s\n", cwd);
 	} else {
 		perror("getcwd() error");
-   	}	
+   	}
 	//File Name
 	std::string data_file = cwd+file;
 	//Variables read
@@ -23,13 +23,13 @@ struct justManyVariables readParameters(const std::string file) {
 	jump_energy.reserve(5);
 
 	float percentage_of_states = 1;
-	
+
 	//Struct countaining all the variables that will be passed to the program
 	justManyVariables send_info;
 
 	bool use_specified=false;
 	std::vector<sType> init_state;
-	
+
 	//Recherche du fichier ayant les donnees necessaire
 	std::string lines;
 	std::fstream my_file;
@@ -49,13 +49,13 @@ struct justManyVariables readParameters(const std::string file) {
 			int del2 = lines.find(',', del1 + 1);
 
             //If the current line has brakets {} to read into
-			bool has_brackets = (start_info != -1) 
-                            && (end_info != -1) 
+			bool has_brackets = (start_info != -1)
+                            && (end_info != -1)
                             && (end_info - start_info > 1);
             //If the current line has parentheses () for vector to read into
-			bool has_vector = (startP != -1) 
-                          && (endP != -1) 
-                          && (del1 != -1) 
+			bool has_vector = (startP != -1)
+                          && (endP != -1)
+                          && (del1 != -1)
                           && (del1 != -1);
 
             //Values read
@@ -76,7 +76,7 @@ struct justManyVariables readParameters(const std::string file) {
 				}
 				else {
                     //Read value int or float
-					value_str = lines.substr(start_info + 1, 
+					value_str = lines.substr(start_info + 1,
                                              end_info - start_info - 1);
 					try {value_int = std::stoll(value_str);} catch(...){}
 					try {value_float = std::stof(value_str);} catch(...){}
@@ -118,7 +118,7 @@ struct justManyVariables readParameters(const std::string file) {
 			}
 			else if (lines.find("reticle") != std::string::npos) {
 				send_info.sP.reticle = value_int;
-			}	
+			}
 			else if (lines.find("truncated_cutoff") != std::string::npos) {
 				send_info.sP.fund_tc = value_float;
 			}
@@ -132,7 +132,7 @@ struct justManyVariables readParameters(const std::string file) {
 				int startB = lines.find('{', endP);
 				int endB = lines.find('}', startB);
 				if (startB > -1 || endB > -1) {
-					double tempo = std::stof(lines.substr(startB + 1, 
+					double tempo = std::stof(lines.substr(startB + 1,
                                                     endB - (startB + 1)));
 					mu_array.push_back(tempo);
 				}
@@ -142,7 +142,7 @@ struct justManyVariables readParameters(const std::string file) {
 				allowed_jump.insert(allowed_jump.end(), value_vector.begin(),
                                    value_vector.end());
 				number_of_allowed_jump++;
-        
+
                 //Adds the energy according to the jump
 				int startB = lines.find('{', endP);
 				int endB = lines.find('}', startB);
@@ -163,7 +163,7 @@ struct justManyVariables readParameters(const std::string file) {
 						break;
 					}
 					coma_index.push_back(i);
-					
+
 				}
 				coma_index.push_back(end_info);
 
@@ -174,7 +174,7 @@ struct justManyVariables readParameters(const std::string file) {
 				else{
 					continue;
 				}
-				
+
 				//Extract states
 				std::vector<sType> temp_initial_state_num;
 				for(unsigned int i = 0; i < coma_index.size()-1; i++){
@@ -183,7 +183,7 @@ struct justManyVariables readParameters(const std::string file) {
 					temp_initial_state_num.push_back(std::strtoll(a.c_str(),
                                                                NULL, 0));
 
-				}	
+				}
 				init_state = temp_initial_state_num;
 			}
 			else if (lines.find("added_site") != std::string::npos) {
@@ -207,12 +207,12 @@ struct justManyVariables readParameters(const std::string file) {
 		}
 		my_file.close();
 	}
-	else { 
+	else {
         std::cout << "Unable to open the parameter file named : "
-            << file << std::endl; 
+            << file << std::endl;
         exit(1);
     }
-	
+
 	//Verification of entered parameters
 	//n_sites = 0
 	if(send_info.hubP.n_sites == 0) {
@@ -221,52 +221,52 @@ struct justManyVariables readParameters(const std::string file) {
     }
 	// N > 2*sites
 	if (N > send_info.hubP.n_sites * 2) {
-        std::cout << "ERROR : Too many electrons\n" 
-            << "You have put more electrons than twice the number of sites" 
-            << std::endl; 
+        std::cout << "ERROR : Too many electrons\n"
+            << "You have put more electrons than twice the number of sites"
+            << std::endl;
         exit(1);
     }
 	// sites != site position entered
 	if(send_info.hubP.n_sites != current_site){
-		std::cout << "ERROR : The number of sites entered doesn't match the" 
+		std::cout << "ERROR : The number of sites entered doesn't match the"
             << " number of sites location" << std::endl;
 		exit(1);
 	}
 	//Percentage not between 0 and 1
 	if (percentage_of_states < 0 || percentage_of_states > 1) {
-		std::cout << "ERROR : Percentage of states R entered" 
+		std::cout << "ERROR : Percentage of states R entered"
             << " not between 0 and 1" << std::endl;
 		exit(1);
 	}
-	
-	float up_f = (N+Sz) / 2;
-	float down_f = (N-Sz) / 2;
+
+	float up_f = (float)(N+Sz) / 2;
+	float down_f = (float)(N-Sz) / 2;
 	if ((up_f != (int)up_f) || (down_f != (int)down_f)) {
-		std::cout << "N and Sz are incompatible!" << std::endl;	
+		std::cout << "N and Sz are incompatible!" << std::endl;
 		exit(1);
 	}
 	elec.up = up_f;
 	elec.down = down_f;
-	
+
 	//Creating tMatrix
-	double* t_matrix = new double[send_info.hubP.n_sites 
+	double* t_matrix = new double[send_info.hubP.n_sites
                                             * send_info.hubP.n_sites]();
-	for (unsigned char i = 0; i < send_info.hubP.n_sites; i++) {	
+	for (unsigned char i = 0; i < send_info.hubP.n_sites; i++) {
 		for (unsigned char j = i; j < send_info.hubP.n_sites; j++) {
 			if (i == j) {
 				t_matrix[i*send_info.hubP.n_sites+j]=0;
 				continue;
 			}
-			int jumpX = sites_pos.at(i*3 + 0) - sites_pos.at(j*3 + 0); 	
-			int jumpY = sites_pos.at(i*3 + 1) - sites_pos.at(j*3 + 1); 
+			int jumpX = sites_pos.at(i*3 + 0) - sites_pos.at(j*3 + 0);
+			int jumpY = sites_pos.at(i*3 + 1) - sites_pos.at(j*3 + 1);
 			int jumpZ = sites_pos.at(i*3 + 2) - sites_pos.at(j*3 + 2);
 
 			for (int k = 0; k < number_of_allowed_jump; k++) {
-				bool good_jump =(jumpX == allowed_jump.at(k*3 + 0) 
-                              && jumpY == allowed_jump.at(k*3 + 1) 
+				bool good_jump =(jumpX == allowed_jump.at(k*3 + 0)
+                              && jumpY == allowed_jump.at(k*3 + 1)
                               && jumpZ == allowed_jump.at(k*3 + 2))
-							 || (jumpX == -allowed_jump.at(k*3 + 0) 
-                              && jumpY == -allowed_jump.at(k*3 + 1) 
+							 || (jumpX == -allowed_jump.at(k*3 + 0)
+                              && jumpY == -allowed_jump.at(k*3 + 1)
                               && jumpZ == -allowed_jump.at(k*3 + 2));
 				if (good_jump) {
 					t_matrix[i*send_info.hubP.n_sites + j] = jump_energy.at(k);
@@ -275,7 +275,7 @@ struct justManyVariables readParameters(const std::string file) {
 			}
 		}
 	}
-	
+
 	send_info.hubP.t_matrix = std::vector<double>(
         t_matrix, t_matrix + (send_info.hubP.n_sites*send_info.hubP.n_sites));
 	delete[] t_matrix;
@@ -284,18 +284,18 @@ struct justManyVariables readParameters(const std::string file) {
 
 	std::vector<sType> temp;
 	temp.push_back(init);
-	
+
 	//Using entered or calculated states
 	if (percentage_of_states > 1) percentage_of_states = 1;
 	if (use_specified) send_info.sP.init_state = init_state;
 	else send_info.sP.init_state = temp;
-	
-	
+
+
 	send_info.hubP.N_e = N;
 	send_info.hubP.S_z = Sz;
 
 	if(send_info.sP.sampling_size <=0) send_info.sP.sampling_size = 1;
 
 	return send_info;
-	
+
 }

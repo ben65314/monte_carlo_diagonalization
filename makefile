@@ -11,9 +11,9 @@ OPT=-O3 -ftree-vectorize -lprofiler
 # generate files that encode make rules for the .h dependencies
 DEPFLAGS=-MP -MD
 # automatically add the -I onto each include directory
-WWD = -Wall -Wextra -Wpedantic -g 
-GCC = -llapack -lblas -fopenmp 
-CXXFLAGS=-I$(foreach D,$(INCDIRS),-I$(D)) $(OPT) $(DEPFLAGS) $(WWD)  
+WWD = -Wall -Wextra -Wpedantic -g
+GCC = -llapack -lblas -fopenmp
+CXXFLAGS=-I$(foreach D,$(INCDIRS),-I$(D)) $(OPT) $(DEPFLAGS) $(WWD)
 
 # for-style iteration (foreach) and regular expression completions (wildcard)
 CXXFILES=$(foreach D,$(LIBSDIR),$(wildcard $(D)/*.cpp))
@@ -38,7 +38,7 @@ mcd_solver: $(OBJECTS) $(MAINDIR)/mcd_solver.o
 	$(CXX) -o $@ $^ $(GCC)
 subspace_finder: $(OBJECTS) $(MAINDIR)/subspace_finder.o
 	$(CXX) -o $@ $^ $(GCC)
-	
+
 qMatrixGreenCompute:
 	cp -p $(GREENGRAPHFILE)/qMatrixGreenCompute.py ./build/qMatrixGreenCompute.py
 graphGreen:
@@ -50,7 +50,7 @@ av_combine:
 #
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) -c $< $(GCC) -o $@
-	
+
 OBJDIR:
 	if [ ! -d $(OBJDIR) ]; then \
 		mkdir $(OBJDIR); \

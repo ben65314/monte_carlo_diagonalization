@@ -7,6 +7,9 @@ void cct(std::string text, int color);
 
 int getNumberOfBlocks(int sites);
 
+//Number manipulation
+void print_bin_from_dec(sType decimal_number, int resolution);
+
 //Array search
 double findMinOfArray(std::vector<double> array);
 
@@ -29,7 +32,7 @@ template <class T, class R> void make_identity(T* matrix, R rows){
 	* Templates
 	* ---------
 	* T		: int, long, float, double, std::complex<double>
-	* R		: int, long, unsigned 
+	* R		: int, long, unsigned
 	*
 	* Returns
 	* -------
@@ -55,7 +58,7 @@ template <class T, class U> void make_tri_diag(
 	* Templates
 	* ---------
 	* T		: int, long, float, double, std::complex<double>
-	* U		: int, long, unsigned 
+	* U		: int, long, unsigned
 	*
 	* Returns
 	* -------
@@ -87,8 +90,8 @@ template <class R> void normalize(double* vec, R size) {
 	*
 	* Templates
 	* ---------
-	* R		: int, long, unsigned 
-	* 
+	* R		: int, long, unsigned
+	*
 	* Returns
 	* -------
 	* NONE
@@ -138,7 +141,7 @@ template <class T> T remove_zeros(T a);
 //Print vec and matrix
 template <class T, class R> std::string write_vector(const T* vec, R size){
 	/*****************************************
-	* Writes a double vector has a string 
+	* Writes a double vector has a string
 	*
 	* Parameters
 	* ----------
@@ -163,10 +166,10 @@ template <class T, class R> std::string write_vector(const T* vec, R size){
 	return write;
 }
 template <class R> std::string write_matrix(
-        const double* mat, R rows, R cols, 
+        const double* mat, R rows, R cols,
         int integers = 2, int precision = 0){
 	/*****************************************
-	* Writes a double matrix has a string 
+	* Writes a double matrix has a string
 	*
 	* Parameters
 	* ----------
@@ -197,7 +200,7 @@ template <class R> std::string write_matrix(
 
 template <class T, class R> void print_vector(const T* vec, R size){
 	/*****************************************
-	* Prints a given vector 
+	* Prints a given vector
 	*
 	* Parameters
 	* ----------
@@ -215,7 +218,7 @@ template <class T, class R> void print_vector(const T* vec, R size){
 	****************************************/
 	std::cout << write_vector(vec, size);
 }
-template <class R> void print_matrix(const double* mat, R rows, R cols, 
+template <class R> void print_matrix(const double* mat, R rows, R cols,
                                      int integers = 2, int precision = 0){
 	/*****************************************
 	* Prints the given matrix
@@ -241,26 +244,26 @@ template <class R> void print_matrix(const double* mat, R rows, R cols,
 }
 
 std::string time_formating(
-    std::chrono::time_point<std::chrono::system_clock> start, 
+    std::chrono::time_point<std::chrono::system_clock> start,
     std::chrono::time_point<std::chrono::system_clock> end);
 
-unsigned int one_counter(sType num); 
+unsigned int one_counter(sType num);
 //Bit operations
 sType rotr(sType bitVec, unsigned char rotIndex, unsigned char size);
 
 
 
-void combination_recursive(std::vector<int> empty_spaces, sType current_num, 
-                           int left_to_place, sType* all_comb, sType placed, 
+void combination_recursive(std::vector<int> empty_spaces, sType current_num,
+                           int left_to_place, sType* all_comb, sType placed,
                            sType* it);
 
-void combination_double_occupation(int N, int sites, 
+void combination_double_occupation(int N, int sites,
                                    std::vector<sType>* all_double_occupation);
 void combination_recursive_adding_single(
-    std::vector<int> empty_spaces_up, std::vector<int> empty_spaces_down, 
-    sType current_num, int n_up, int n_down, int sites, 
+    std::vector<int> empty_spaces_up, std::vector<int> empty_spaces_down,
+    sType current_num, int n_up, int n_down, int sites,
     sType* all_comb, sType* placed);
-void combination_all(int n_up, int n_down, int sites, int nU, 
+void combination_all(int n_up, int n_down, int sites, int nU,
                      std::vector<sType>* all_states);
 
 bool accept_function(sType state, float acceptQuota=0.5);
