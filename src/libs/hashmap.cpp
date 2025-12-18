@@ -7,7 +7,7 @@ Hashmap::Hashmap(sType* array_to_hash) {
 
 Hashmap::~Hashmap(){}
 
-void Hashmap::set_hash_parameters(uChar sites, uChar n_up, 
+void Hashmap::set_hash_parameters(uChar sites, uChar n_up,
                                   uChar n_down, uLong size) {
 	/*******************************************************
 	* Sets the parameters needed for the hash function
@@ -61,12 +61,12 @@ sType Hashmap::hash_function(sType item) const {
 	int upCount = 0, downCount = 0;
 	sType adderUp, adderDown, indexUp = 0, indexDown = 0;
 
-	// Checks where are the up and down electrons to get the markers 
+	// Checks where are the up and down electrons to get the markers
     // information to generate the hashkey
 	for (unsigned char i = 0; i < this->sites; i++) {
 		checkUp>>=1;
 		checkDown>>=1;
-        
+
         // Found electron
 		bool locateUp = ((item & checkUp) != 0);
 		bool locateDown = ((item & checkDown) != 0);
@@ -116,7 +116,7 @@ void Hashmap::hash_set(sType item) {
 	hashValue %= this->hash_size;
 
 	// Resolves hash conflict
-	while(this->hash_array[hashValue] != 0 
+	while(this->hash_array[hashValue] != 0
           && this->hash_array[hashValue] != item) {
         if (verbose > 10) std::cout << "conflict ";
 		hashValue ++;
@@ -140,7 +140,7 @@ bool Hashmap::hash_find(sType item, sType* index) const {
 	*
 	* Returns
 	* -------
-	* true	: if the element was found else false 
+	* true	: if the element was found else false
 	*******************************************************/
 	// Get hashvalue
 	sType hashValue = hash_function(item);
@@ -221,7 +221,7 @@ void Hashmap::create_comb_markers() {
 				this->combMarkersUp[i * this->sites + j] = 0;
             }
             else {
-                this->combMarkersUp[i * this->sites + j] 
+                this->combMarkersUp[i * this->sites + j]
                     = comb(this->sites - j - 1, this->up - i - 1);
             }
 		}
@@ -234,28 +234,11 @@ void Hashmap::create_comb_markers() {
 				this->combMarkersDown[i * this->sites + j] = 0;
             }
             else {
-                this->combMarkersDown[i * this->sites + j] 
+                this->combMarkersDown[i * this->sites + j]
                     = comb(this->sites - j - 1, this->down - i - 1);
             }
 		}
 	}
 
-    //std::cout<<"aaaCREATED UP MARKERS"<<std::endl;
-    //for (int i = 0; i < this->up; i++){
-    //    for (int j = 0; j < this->sites; j++){
-    //        std::cout<<combMarkersUp[i*this->sites+j]<<"\t";
-    //    
-    //    }
-    //    std::cout<<"\n";
-    //}
-
-    //std::cout<<"aaaCREATED DOWN MARKERS"<<std::endl;
-    //for (int i = 0; i < this->down; i++){
-    //    for (int j = 0; j < this->sites; j++){
-    //        std::cout<<combMarkersDown[i*this->sites+j]<<"\t";
-    //    
-    //    }
-    //    std::cout<<"\n";
-    //}
 }
 

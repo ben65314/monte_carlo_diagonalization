@@ -13,7 +13,7 @@ DEPFLAGS=-MP -MD
 # automatically add the -I onto each include directory
 WWD = -Wall -Wextra -Wpedantic -g
 GCC = -llapack -lblas -fopenmp
-CXXFLAGS=-I$(foreach D,$(INCDIRS),-I$(D)) $(OPT) $(DEPFLAGS) $(WWD)
+CXXFLAGS=$(foreach D,$(INCDIRS),-I$(D)) $(OPT) $(DEPFLAGS) $(WWD)
 
 # for-style iteration (foreach) and regular expression completions (wildcard)
 CXXFILES=$(foreach D,$(LIBSDIR),$(wildcard $(D)/*.cpp))

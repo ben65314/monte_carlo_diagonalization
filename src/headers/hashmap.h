@@ -21,8 +21,8 @@ public:
 	Hashmap(sType* arrayToHash);
 	Hashmap();
 	~Hashmap();
-	
-	void set_hash_parameters(uChar sites, uChar nUp, 
+
+	void set_hash_parameters(uChar sites, uChar nUp,
                              uChar nDown, uLong size = 0);
 	void hash_set(sType item);
 	bool hash_find(sType item, sType* index) const;

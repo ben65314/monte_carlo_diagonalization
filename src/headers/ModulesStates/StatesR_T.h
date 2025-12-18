@@ -194,7 +194,7 @@ private:
             nb_state_per_nu.push_back(n_states);
         }
 
-        int filled_nu_layer = 0;
+        int filled_nu_layer = -1;
 
         //StatesArr* currentState = this->clone();
         decltype(this) current_state = new StatesR_T(50);
@@ -217,8 +217,11 @@ private:
 		//StatesArr* nextStepEval = this->clone();
 		decltype(this) next_step_eval = new StatesR_T(50);
 
-        sType proposed = 0;
+        //Only used when verbose needs it to be
         std::vector<sType> proposed_array (nu_poss_value, 0);
+        std::vector<sType> current_nu_state (nu_poss_value, 0);
+        decltype(this) possible_state = new StatesR_T(50);
+        //
 
 		unsigned int g = 0;
 		auto step1 = std::chrono::high_resolution_clock::now();
@@ -227,17 +230,20 @@ private:
 
 			size_current_step_eval = current_state->get_length();
 
-            std::vector<sType> current_nu_state (nu_poss_value, 0);
-
-            for (unsigned long i = 0; i < size_current_step_eval;i++)
-            {
-                int this_nu = Hu(current_state->get_at(i),this->sys_hubP.n_sites);
-                current_nu_state[this_nu]++;
-
-            }
 
 			step2 = std::chrono::high_resolution_clock::now();
             if (verbose > 4) {
+                for (unsigned long i = 0; i < size_current_step_eval;i++)
+                {
+                    int this_nu = Hu(current_state->get_at(i),this->sys_hubP.n_sites);
+                    current_nu_state[this_nu]++;
+                }
+                for (unsigned long i = 0; i < possible_state->get_length();i++)
+                {
+                    int this_nu = Hu(possible_state->get_at(i),this->sys_hubP.n_sites);
+                    proposed_array[this_nu]++;
+                }
+
                 printf("Sampled(%5ld/%5ld) [",MH_size,sampling_size);
                 for (int i = 0; i < nu_poss_value; i++) {
                     printf("%6ld/%ld", nu_state_counter[i],
@@ -247,23 +253,23 @@ private:
                 for (int i = 0; i < nu_poss_value; i++) {
                     printf("%6ld ",current_nu_state[i]);
                 }
-                printf("] \033[42m|\033[0m size_prop:%8ld [", proposed);
+                printf("] \033[42m|\033[0m size_prop:%8ld [", possible_state->get_length());
                 for (int i = 0; i < nu_poss_value; i++) {
                     printf("%6ld ",proposed_array[i]);
                 }
                 printf("] \033[42m|\033[0m dt = %s\n",time_formating(step1,step2).c_str());
+
+                proposed_array = std::vector<sType>(nu_poss_value, 0);
+                possible_state->remove_all();
+                current_nu_state = std::vector<sType>(nu_poss_value, 0);
             }
 			step1 = std::chrono::high_resolution_clock::now();
 
-            proposed = 0;
-            proposed_array = std::vector<sType>(nu_poss_value, 0);
 
             bool big_sample = reticle * size_current_step_eval > sampling_size;
 			size_next_step_eval = big_sample ? sampling_size :
                 reticle * size_current_step_eval;
 
-			if(verbose > 5) std::cout << "Next step eval size:"
-                                        << size_next_step_eval << std::endl;
 			next_step_eval->remove_all();
 			next_step_eval->allocate_more_nodes(size_next_step_eval);
 			g++;
@@ -280,14 +286,13 @@ private:
 				Ht(current_state->get_at(i), &possible_new_state,
                         &this->sys_hubP);
 
-                //Compute proposed states for print
-                proposed+= possible_new_state.size();
-                for (unsigned long i = 0; i < possible_new_state.size();i++)
-                {
-                    int this_nu = Hu(possible_new_state.at(i),this->sys_hubP.n_sites);
-                    proposed_array[this_nu]++;
+                if (verbose > 4) {
+                    //Compute proposed states for print
+                    for (unsigned long i = 0; i < possible_new_state.size();i++)
+                    {
+                        possible_state->add(possible_new_state.at(i));
+                    }
                 }
-
 
 
 				if (possible_new_state.size() != 0) {
@@ -314,7 +319,7 @@ private:
 
 						//Energy MONTE CARLO Condition
 						if (accepted){
-                            if (new_nu >= filled_nu_layer ) {
+                            if (new_nu >= filled_nu_layer) {
                                 all_accepted_states.push_back(new_state);
                             }
 						}
@@ -374,7 +379,7 @@ private:
                                 // Prevents already filled sampling
                                 if (nu_state_counter[new_nu] \
                                     == nb_state_per_nu[new_nu]) {
-                                    filled_nu_layer = new_nu;
+                                    filled_nu_layer++;
                                     if (verbose > 4) std::cout<<"FILLED : " <<filled_nu_layer<<std::endl;
                                 }
                                 //print_vector(nu_state_counter.data(),nu_state_counter.size());
