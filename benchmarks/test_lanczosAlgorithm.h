@@ -36,12 +36,12 @@ bool t_lanczosAlgorithm(bool details) {
 
 	allStatus = status1 && status2;
 
-	cct("lanczos_algorithm", 33); std::cout << " -------------------------------------";
+	cct("lanczos_algorithm", 33); std::cout << " ------------------------------------";
 	if (details) {
 
 		std::cout << "\nTest energy 2 sites ----- "; is_success(status2);
 		std::cout << "Test fund state 2 sites ----- "; is_success(status1);
-		std::cout << "------------------------------------- ";
+		std::cout << "------------------------------------ ";
         cct("lanczos_algorithm", 33);
 	}
 	is_success(allStatus);
@@ -124,7 +124,7 @@ bool t_bandLanczosAlgorithm(bool details){
 
 
 	allStatus = status1 && status2 && status3;
-	cct("bandLanczosAlgorithm", 33); std::cout << " ---------------------------------";
+	cct("band_lanczos_algorithm", 33); std::cout << " -------------------------------";
 	if (details) {
 
 		std::cout << "\nTest 6x6 energy ----------------------- "; is_success(status1);
@@ -133,7 +133,7 @@ bool t_bandLanczosAlgorithm(bool details){
 		std::cout << "REF: "<<refE2<<"\tComputed value: "<<energies36.at(0)<<std::endl;
 		std::cout << "Test 24x24 energy (e.excitation)------- "; is_success(status3);
 		std::cout << "REF: "<<refE3<<"\tComputed value: "<<energies24.at(0)<<std::endl;
-		std::cout << "--------------------------------- "; cct("bandLanczosAlgorithm", 33);
+		std::cout << "------------------------------- "; cct("band_lanczos_algorithm", 33);
 	}
 	is_success(allStatus);
 
@@ -179,13 +179,13 @@ bool t_fundEnergy(bool details) {
 	status2 = (abs(fE2 - fE2_ref) < pow(10, -5));
 
 	allStatus = status1 && status2;
-	cct("fund_energy", 33); std::cout << " -------------------------------------------";
+	cct("fund_energy", 33); std::cout << " ------------------------------------------";
 	if (details) {
 		std::cout << "\nTest 4X4 ------- "; is_success(status1);
 		std::cout << "REF: "<<fE1_ref<<"\tComputed value: "<<fE1<<std::endl;
 		std::cout << "Test 36X36 ----- "; is_success(status2);
 		std::cout << "REF: "<<fE2_ref<<"\tComputed value: "<<fE2<<std::endl;
-		std::cout << "------------------------------------------- ";
+		std::cout << "------------------------------------------ ";
         cct("fund_energy", 33);
 	}
 	is_success(allStatus);

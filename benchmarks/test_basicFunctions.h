@@ -203,6 +203,64 @@ bool t_calculate_sd(bool details) {
 	is_success(allStatus);
 	return (allStatus);
 }
+bool t_combination_all(bool details) {
+	bool status1, status2, status3, allStatus;
+
+    // Test 4 sites
+    int up = 2, down = 2, sites = 4;
+    int nu_1 = 0, nu_2 = 1, nu_3 = 2;
+
+    std::vector<sType> gen_states_1;
+    std::vector<sType> gen_states_2;
+    std::vector<sType> gen_states_3;
+
+    combination_all(up, down, sites, nu_1, &gen_states_1);
+    combination_all(up, down, sites, nu_2, &gen_states_2);
+    combination_all(up, down, sites, nu_3, &gen_states_3);
+
+
+    std::vector<sType> ref_states_1 = {105,60,90,165,195,150};
+    std::vector<sType> ref_states_2 = {172,166,99,108,57,54,201,86,202,101,53,169,163,197,149,147,198,156,89,106,83,92,58,154};
+    std::vector<sType> ref_states_3 = {85,102,51,153,170,204};
+
+    status1 = (gen_states_1.size() == ref_states_1.size());
+    for (unsigned int i = 0; i < ref_states_1.size(); i++){
+        auto it = std::find(gen_states_1.begin(),gen_states_1.end(), ref_states_1.at(i));
+        if (it == gen_states_1.end()) {
+            status1 = false;
+            break;
+        }
+    }
+    status2 = (gen_states_2.size() == ref_states_2.size());
+    for (unsigned int i = 0; i < ref_states_2.size(); i++){
+        auto it = std::find(gen_states_2.begin(),gen_states_2.end(), ref_states_2.at(i));
+        if (it == gen_states_2.end()) {
+            status2 = false;
+            break;
+        }
+    }
+    status3 = (gen_states_3.size() == ref_states_3.size());
+    for (unsigned int i = 0; i < ref_states_3.size(); i++){
+        auto it = std::find(gen_states_3.begin(),gen_states_3.end(), ref_states_3.at(i));
+        if (it == gen_states_3.end()) {
+            status3 = false;
+            break;
+        }
+    }
+
+	allStatus = status1 && status2 && status3;
+
+	cct("combination_all", 33); std::cout << " --------------------------------------";
+	if (details) {
+
+		std::cout << "\nTest 1 ----- "; is_success(status1);
+		std::cout << "Test 2 ----- "; is_success(status2);
+		std::cout << "Test 3 ----- "; is_success(status3);
+		std::cout << "-------------------------------------- "; cct("combination_all", 33);
+	}
+	is_success(allStatus);
+	return (allStatus);
+}
 
 bool allTests_basicFunctions(bool details) {
 	bool result = 1;
@@ -215,6 +273,7 @@ bool allTests_basicFunctions(bool details) {
 	result &= t_normalize(details);
 	result &= t_comb(details);
 	result &= t_calculate_sd(details);
+	result &= t_combination_all(details);
 	cct("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", 44);
 	is_success(result);
 

@@ -4,7 +4,7 @@
 //#include "test_statesArr.h"
 
 int main(){
-	bool details = true;
+	bool details = false;
 	allTests_basicFunctions(details);
 	allTests_electronManipulationFunctions(details);
 	allTests_lanczosAlgorithm(details);

@@ -243,12 +243,12 @@ bool t_compute_mu(bool details) { //TO DO
 
 	allStatus = status1 && status2 && status3;
 
-	cct("compute_mu", 33); std::cout << " --------------------------------------------";
+	cct("compute_mu", 33); std::cout << " -------------------------------------------";
 	if (details) {
 		std::cout << "\nTest 1 ----- "; is_success(status1);
 		std::cout << "Test 2 ----- "; is_success(status2);
 		std::cout << "Test 3 ----- "; is_success(status2);
-		std::cout << "-------------------------------------------- ";
+		std::cout << "------------------------------------------- ";
         cct("compute_mu", 33);
 	}
 	is_success(allStatus);
@@ -283,7 +283,7 @@ bool t_create_anti_ferro(bool details) {
     status3 = (s3_ref == val_3);
 
 	allStatus = status1 && status2 && status3;
-	cct("create_anti_ferro", 33); std::cout << " ------------------------------------------";
+	cct("create_anti_ferro", 33); std::cout << " ------------------------------------";
 	if (details) {
 		std::cout << "\nTest 2 sites ----- "; is_success(status1);
 		std::cout<<" REF:"<<s1_ref<<"\tVALUE:"<<val_1<<std::endl;
@@ -291,7 +291,7 @@ bool t_create_anti_ferro(bool details) {
 		std::cout<<" REF:"<<s2_ref<<"\tVALUE:"<<val_2<<std::endl;
 		std::cout << "Test 4 sites ----- "; is_success(status3);
 		std::cout<<" REF:"<<s3_ref<<"\tVALUE:"<<val_3<<std::endl;
-		std::cout << "------------------------------------------ ";
+		std::cout << "------------------------------------ ";
         cct("create_anti_ferro", 33);
 	}
 	is_success(allStatus);
