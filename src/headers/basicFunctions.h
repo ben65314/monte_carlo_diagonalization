@@ -2,16 +2,16 @@
 #include "binarySearchTree.h"
 
 
-void isSuccess(bool status);
+void is_success(bool status);
 void cct(std::string text, int color);
 
-int getNumberOfBlocks(int sites);
+int get_number_of_blocks(int sites);
 
 //Number manipulation
 void print_bin_from_dec(sType decimal_number, int resolution);
 
 //Array search
-double findMinOfArray(std::vector<double> array);
+double find_min_of_array(std::vector<double> array);
 
 //Maths
 unsigned long comb(uLong n, uLong r);

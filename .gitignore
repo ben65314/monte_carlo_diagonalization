@@ -3,4 +3,7 @@
 *.pdf
 build/
 .config/
+.cache/
+.clangd
 *.json
+unit_test

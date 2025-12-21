@@ -55,8 +55,8 @@ double compute_mu(float mu, Electrons elec);
 template<class T, class U> void write_state_with_double(
     std::vector<T>* fund, U* states, unsigned int sites, double keep=1) {
 	/*******************************************************
-	* Sort the states according to their fund weight, creates a reduced 
-    * subspace keeping only the most dominant elements and write everything in 
+	* Sort the states according to their fund weight, creates a reduced
+    * subspace keeping only the most dominant elements and write everything in
     * a .txt file
 	*
 	* Parameters
@@ -75,7 +75,7 @@ template<class T, class U> void write_state_with_double(
 	* -------
 	* NONE
 	********************************************************/
-	
+
 	// Create index vector: [0, 1, 2, 3]
     std::vector<uLong> indices(fund->size());
     std::iota(indices.begin(), indices.end(), 0);
@@ -84,7 +84,7 @@ template<class T, class U> void write_state_with_double(
     std::sort(indices.begin(), indices.end(), [&](size_t i, size_t j) {
         return abs(fund->at(i)) > abs(fund->at(j));
     });
-	  
+
 	// Apply the sorting to keys and values
     std::vector<T> sorted_fund(fund->size());
     std::vector<uLong> sorted_states(states->get_length());
@@ -110,7 +110,7 @@ template<class T, class U> void write_state_with_double(
 		//Create reduced sampling size
 		if (cummul < keep || keep==1) {
 			if(verbose > 99) {
-                std::cout << cummul << "\tADD:"<< 
+                std::cout << cummul << "\tADD:"<<
                 sorted_states.at(i) << "\t" << sorted_fund.at(i) << std::endl;
             }
 			states->add(sorted_states.at(i));
