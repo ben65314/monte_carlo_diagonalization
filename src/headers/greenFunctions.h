@@ -4,11 +4,11 @@
 #define __greenFunctions_h__
 
 template <class StatesArrType> void c_subspace(
-        StatesArrType* const sub_space, int location, int spin, bool creation, 
+        StatesArrType* const sub_space, int location, int spin, bool creation,
         StatesArrType* c_sub_space) {
 	/****************************************************************
 	* Applies a c operator on an entire space of states
-	* 
+	*
 	* Parameters
 	* ----------
 	* sub_space	: (StatesArrType*) States who will be applied the c operator
@@ -23,22 +23,22 @@ template <class StatesArrType> void c_subspace(
 	*****************************************************************/
 	unsigned int sites = sub_space->sys_hubP.n_sites;
 	unsigned long len = sub_space->get_length();
-	
+
 	int index = sites - location - 1 + spin * sites;
     //Creates
 	if (creation) {
 		for (unsigned long i = 0; i < len; i++) {
 			sType temp = sub_space->get_at(i);
-			if (c_operator(&temp, index)) { 
+			if (c_operator(&temp, index)) {
 				c_sub_space->add(temp);
 			}
 		}
 	}
-    //Annihilates 
+    //Annihilates
 	else {
 		for (unsigned long i = 0; i < len; i++) {
 			sType temp = sub_space->get_at(i);
-			if (c_dag_operator(&temp, index)) { 
+			if (c_dag_operator(&temp, index)) {
 				c_sub_space->add(temp);
 			}
 		}
@@ -46,16 +46,16 @@ template <class StatesArrType> void c_subspace(
 }
 
 template <class StatesArrType> void green_space_projection(
-        StatesArrType* const origin_sub_space, int spin, bool creation, 
+        StatesArrType* const origin_sub_space, int spin, bool creation,
         StatesArrType* proj_sub_space) {
 	/****************************************************************
 	* Applies all the possible c_mu to create all the states of the projected space
-	* 
+	*
 	* Parameter
 	* ----------
-	* origin_sub_space : (StatesArrType) States who will be applied 
+	* origin_sub_space : (StatesArrType) States who will be applied
     *                                    the c operators
-	* spin			   : (int) value of the spin created 
+	* spin			   : (int) value of the spin created
     *                          or destroyed (1=up, 0=down)
 	* creation		   : (bool) Is c a creation or annihilation operator
 	* proj_sub_space   : (StatesArrType) States resulting of the c application
@@ -82,12 +82,12 @@ std::string write_q_system(double fundE, double eta, Electrons elec,
                           hubbardParam* hubP_to_write, float perc_states) {
 	/****************************************************************
 	* Writes the system parameters for the qMatrices.txt file
-	* 
+	*
 	* Parameters
 	* ----------
 	* fundE			: (double) Fundamental Energy
 	* eta			: (double) Width of the Lorentz
-	* elec			: (Electrons) Electrons of the bloc system 
+	* elec			: (Electrons) Electrons of the bloc system
 	* hubP_to_write : (hubbardParam*) System parameters to write
 	* perc_states	: (float) {ercentage of states taken
 	*
@@ -110,8 +110,8 @@ std::string write_q_system(double fundE, double eta, Electrons elec,
 template <class T> std::string write_q_matrix_string(
         std::vector<T>* QM, std::vector<double>* eigen_val, int ns) {
 	/****************************************************************
-	* Writes the Q-matrices of the system 
-	* 
+	* Writes the Q-matrices of the system
+	*
 	* Parameter
 	* ----------
 	* QM		: (std::vector<T>*) Q-matrix
@@ -130,7 +130,7 @@ template <class T> std::string write_q_matrix_string(
 	for (uInt j = 0; j < eigen_val->size(); j++) {
 		text += to_string_pq(eigen_val->at(j),5,12) + "\t";
 		for (int i = 0; i < ns; i++) {
-			text += to_string_pq(QM->at(i * eigen_val->size() + j), 4, 14) 
+			text += to_string_pq(QM->at(i * eigen_val->size() + j), 4, 14)
                     + "\t";
 		}
 		if (j < eigen_val->size()-1) text+="\n";
@@ -142,27 +142,27 @@ template <class T> std::string write_q_matrix_string(
 
 
 template <class T, class StatesArrType> void excited_vector_projection(
-        bool create, unsigned int site, int spin, const T* initial_vector, 
-        const StatesArrType* initial_states, StatesArrType* projected_states, 
+        bool create, unsigned int site, int spin, const T* initial_vector,
+        const StatesArrType* initial_states, StatesArrType* projected_states,
         T* projected_vector) {
 	/****************************************************************
-	* Transform a vector countained in a space to the according vector 
-    * in the excited space. 
-	* 
+	* Transform a vector countained in a space to the according vector
+    * in the excited space.
+	*
 	* Parameters
 	* ----------
-	* create			: (bool) Are we creating or annihilating an electron 
+	* create			: (bool) Are we creating or annihilating an electron
     *                            to get to the excited space
 	* site				: (int) which site is the electron or hole created
-	* spin				: (int) value of the spin created 
+	* spin				: (int) value of the spin created
     *                           or destroyed (1=up, 0=down)
-	* initial_vector	: (const T*) the initial vector in 
+	* initial_vector	: (const T*) the initial vector in
     *                                the initial_states space
 	* initial_states	: (const StatesArr*) the initial state space
 	* projected_states	: (StatesArr*) the projected state space
-	* projected_vector	: (T*) the projected vector in 
+	* projected_vector	: (T*) the projected vector in
     *                               the projected_states space
-	* 
+	*
 	* Templates:
 	* ----------
 	* T					: double, std::complex<double>
@@ -175,7 +175,7 @@ template <class T, class StatesArrType> void excited_vector_projection(
 	sType current_state;
 	int ns = initial_states->sys_hubP.n_sites; //number of sites
 	int index = ns - site - 1 + spin * ns;
-	
+
 	for(long unsigned i = 0; i < initial_states->get_length(); i++){
 		//Exciting the state
 		current_state = initial_states->get_at(i);
@@ -205,19 +205,19 @@ template <class T, class StatesArrType> void excited_vector_projection(
 	}
 }
 
-template <class T> void q_vector_creation(T* q_vector, T* prod_c_omega, 
+template <class T> void q_vector_creation(T* q_vector, T* prod_c_omega,
                                 int sspace_vec_size, T* subspace_evectors) {
 	if(verbose < -9) std::cout << "Q_vector_creation(...)";
 	/***************************************************************
 	* Calculates the Q row (of the Q matrix) corresponding to the c_mu
-	* 
+	*
 	* Parameters
 	* ----------
 	* q_vector			: (T*) Array of the Q values linked to c_mu
-	* prod_c_omega		: (T*) Fundamental state vector applied on c_mu 
+	* prod_c_omega		: (T*) Fundamental state vector applied on c_mu
     *                          (calculated before entering the function)
-	* sspace_vec_size   : (int) Size of the subspace 
-	* subspace_evectors : (T*) the eigen vectors of the subSpace matrix 
+	* sspace_vec_size   : (int) Size of the subspace
+	* subspace_evectors : (T*) the eigen vectors of the subSpace matrix
 	*
 	* Templates:
 	* ----------
@@ -239,11 +239,11 @@ template <class T> void q_vector_creation(T* q_vector, T* prod_c_omega,
 }
 
 template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
-        std::vector<T>* q_matrix, bool creation, int spin, 
+        std::vector<T>* q_matrix, bool creation, int spin,
         T* fund_state, StatesArrType* states_array) {
 	/***************************************************************
 	* Calculates the Q matrix
-	* 
+	*
 	* Parameters
 	* ----------
 	* q_matrix		: (std::vector<T>*) Q-Matrix
@@ -267,7 +267,7 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 	///Declare variables before parallization
 	unsigned long new_space_len;
 	uInt BL_space_size = BAND_LANCZOS_MAX_ITERATIONS;
-	T* arr_BL; 
+	T* arr_BL;
 	std::vector<T> vec_BL;
 	std::vector<T> prod_c_omega;
 	//Eigen values of the BL subspace
@@ -276,7 +276,7 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 	//Eigen vectors of the BL subspace
 	std::vector<T> BL_space_evectors;
 
-	//Projected excited states 
+	//Projected excited states
 	StatesArrType* states_excited = states_array->clone();
 	//Modify the number of  electrons
 	states_excited->electrons.up += ((int)creation * 2 - 1) * spin ;
@@ -284,14 +284,14 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 
 	//Projected Space
 	green_space_projection(states_array, spin, creation, states_excited);
-	
+
 	//Number of times H is applied to generate new states
-	if (verbose > 9) std::cout << "Before H excitation : " 
+	if (verbose > 9) std::cout << "Before H excitation : "
                                << states_excited->get_length() << std::endl;
 
 	states_excited->subspace_condition_expanding();
-	
-	if (verbose > 9) std::cout << "After H excitation : " 
+
+	if (verbose > 9) std::cout << "After H excitation : "
                                << states_excited->get_length() << std::endl;
 
 	new_space_len = states_excited->get_length();
@@ -307,23 +307,23 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 
 	vec_BL = std::vector<T>(arr_BL, arr_BL + new_space_len * sites);
 	//Band lanczos
-	LanczosSolver<T,StatesArrType> LS;	
+	LanczosSolver<T,StatesArrType> LS;
 	BL_space_evalues = LS.band_lanczos_algorithm(
-        &vec_BL, sites, new_space_len, states_excited, &BL_space_size, 
+        &vec_BL, sites, new_space_len, states_excited, &BL_space_size,
         &BL_space_evectors, &prod_c_omega);
 
 	//Clear mem
 	std::vector<T>().swap(vec_BL);
 	states_excited->remove_all();
 	delete[] arr_BL;
-	
+
 	//Repeat for each nu/mu pair
 	//All Green values vector
 	if(verbose > 9) std::cout << "Q MATRIX STARTING" << std::endl;
 	*q_matrix = std::vector<T>(sites * BL_space_size, 0);
 
 	for (int j = 0; j < sites; j++) {
-		q_vector_creation(q_matrix->data() + BL_space_size * j, 
+		q_vector_creation(q_matrix->data() + BL_space_size * j,
                     prod_c_omega.data() + j * BL_space_size, BL_space_size,
                     BL_space_evectors.data());
 
@@ -335,11 +335,11 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 
 //Greens
 template <class T, class StatesArrType> void compute_q_matrix_band_lanczos(
-        int spin, T* fund_state, double fundE, 
-        StatesArrType* const states_array, greenParam gP,int deg) { 
+        int spin, T* fund_state, double fundE,
+        StatesArrType* const states_array, greenParam gP,int deg) {
 	/***************************************************************
 	* Calculates the Q matrix and writes them in a qMatrices.txt
-	* 
+	*
 	* Parameters
 	* ----------
 	* spin			: (int) spin to create/destroy (1=up, 0=down)
@@ -358,7 +358,7 @@ template <class T, class StatesArrType> void compute_q_matrix_band_lanczos(
 	* -------
 	* NONE
 	*****************************************************************/
-	if (verbose < -4) std::cout << "compute_q_matrix_band_lanczos(...)" 
+	if (verbose < -4) std::cout << "compute_q_matrix_band_lanczos(...)"
                                 << std::endl;
 
 	int size = states_array->get_length();
@@ -366,7 +366,7 @@ template <class T, class StatesArrType> void compute_q_matrix_band_lanczos(
 
 	//////Wrtiting the Q-Matrix and the eigen values in a txt file
 	Electrons elec = states_array->electrons;
-	float perc_used = (float)states_array->get_length() / 
+	float perc_used = (float)states_array->get_length() /
                         (comb(sites, elec.up) * comb(sites, elec.down));
 	std::string written_q_matrix = write_q_system(fundE, (double)gP.g_eta, elec,
                                             &states_array->sys_hubP, perc_used);
@@ -389,7 +389,7 @@ template <class T, class StatesArrType> void compute_q_matrix_band_lanczos(
 		written_q_matrix += write_q_matrix_string(
             &q_matrix_h, &BL_space_evalues_h, sites)+"\n";
 	}
-	
+
 	char cwd[PATH_MAX];
 	if(!getcwd(cwd, sizeof(cwd))) std::cout << "Problem occured getting CWD"
                                             << std::endl;
@@ -404,11 +404,11 @@ template <class T, class StatesArrType> void compute_q_matrix_band_lanczos(
 }
 
 template <class StatesArrType> void compute_green_long(
-        int spin, std::vector<double>* fund_state, double fundE, 
+        int spin, std::vector<double>* fund_state, double fundE,
         StatesArrType* const states_array, greenParam gP, int deg){
 	/***************************************************************
 	* Calculates the Q matrix and writes them in a qMatrices.txt
-	* 
+	*
 	* Parameters
 	* ----------
 	* spin			: (int) spin to create/destroy (1=up, 0=down)
@@ -429,14 +429,14 @@ template <class StatesArrType> void compute_green_long(
 	if(verbose < -4) std::cout<<"computeGreen_long(...)"<<std::endl;
 
 	int sites = states_array->sys_hubP.n_sites;
-	//Projected excited states 
+	//Projected excited states
 	StatesArrType* states_excited_e = states_array->clone();
 	states_excited_e->electrons.up += spin ;
 	states_excited_e->electrons.down += (1-spin);
 	StatesArrType* states_excited_h = states_array->clone();
 	states_excited_h->electrons.up -= spin ;
 	states_excited_h->electrons.down -= (1-spin);
-	
+
 	//Projected Space
 	green_space_projection(states_array, spin, true, states_excited_e);
 	green_space_projection(states_array, spin, false, states_excited_h);
@@ -453,11 +453,11 @@ template <class StatesArrType> void compute_green_long(
 
 	//Wrtiting the Q-Matrix and the eigen values in a txt file
 	Electrons elec = states_array->electrons;
-	float perc_used = (float)states_array->get_length() / 
+	float perc_used = (float)states_array->get_length() /
                             (comb(sites, elec.up) * comb(sites, elec.down));
 	std::string written_q_matrix = write_q_system(fundE, (double)gP.g_eta, elec,
                                             &states_array->sys_hubP, perc_used);
-	
+
 	//Vectors
 	//ELECTONS
 	int new_space_len_e = states_excited_e->get_length();
@@ -473,9 +473,9 @@ template <class StatesArrType> void compute_green_long(
 			//Creation of the vectors c_mu^(dag)|Omega>
 			for (int i = 0; i < sites; i++){
 				excited_vector_projection(
-                    true, i, spin, 
+                    true, i, spin,
                     fund_state->data() + states_array->get_length() * m,
-                    states_array, states_excited_e, 
+                    states_array, states_excited_e,
                     arr_BL_e + i * new_space_len_e);
 			}
 
@@ -493,17 +493,17 @@ template <class StatesArrType> void compute_green_long(
 			dsyev_(&jobs, &uplo, &new_space_len_e, hE, &new_space_len_e,
                    eigen_value_e, work, &lwork, &info);
 
-			delete[] work; 
+			delete[] work;
 
-			eigen_e = std::vector<double>(eigen_value_e, 
+			eigen_e = std::vector<double>(eigen_value_e,
                                             eigen_value_e + new_space_len_e);
 			//<OMEGA|c Ue
             char trans_a = 'N', trans_b = 'T';
-			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_e, &new_space_len_e, &ALPHA_D, 
+			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_e, &new_space_len_e, &ALPHA_D,
                   arr_BL_e, &new_space_len_e, hE, &new_space_len_e, &BETA_D,
                   q_matrix_e.data(), &new_space_len_e);
 
-			delete[] hE; delete[] arr_BL_e;	delete[] eigen_value_e; 	
+			delete[] hE; delete[] arr_BL_e;	delete[] eigen_value_e;
 		}
 		written_q_matrix += write_q_matrix_string(
                                             &q_matrix_e, &eigen_e, sites)+"\n";
@@ -527,9 +527,9 @@ template <class StatesArrType> void compute_green_long(
 			//Creation of the vectors c_mu^(dag)|Omega>
 			for (int i = 0; i < sites; i++){
 				excited_vector_projection(
-                    false, i, spin, 
-                    fund_state->data() + states_array->get_length() * m, 
-                    states_array, states_excited_h, 
+                    false, i, spin,
+                    fund_state->data() + states_array->get_length() * m,
+                    states_array, states_excited_h,
                     arr_BL_h + i * new_space_len_h);
 			}
 
@@ -544,22 +544,22 @@ template <class StatesArrType> void compute_green_long(
 			int info;
 
 			//Eigen values of hH|E> = E |E>
-			dsyev_(&jobs, &uplo, &new_space_len_h, hH, &new_space_len_h, 
+			dsyev_(&jobs, &uplo, &new_space_len_h, hH, &new_space_len_h,
                    eigen_value_h, work, &lwork, &info);
 
-			delete[] work; 
-			
-			eigen_h = std::vector<double>(eigen_value_h, 
+			delete[] work;
+
+			eigen_h = std::vector<double>(eigen_value_h,
                                             eigen_value_h + new_space_len_h);
 			//<OMEGA|c Uh
             char trans_a = 'N', trans_b = 'T';
-			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_h, &new_space_len_h, &ALPHA_D, 
-                  arr_BL_h, &new_space_len_h, hH, &new_space_len_h, &BETA_D, 
+			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_h, &new_space_len_h, &ALPHA_D,
+                  arr_BL_h, &new_space_len_h, hH, &new_space_len_h, &BETA_D,
                   q_matrix_h.data(), &new_space_len_h);
 
-			delete[] hH; delete[] arr_BL_h; delete[] eigen_value_h; 
+			delete[] hH; delete[] arr_BL_h; delete[] eigen_value_h;
 		}
-		written_q_matrix += write_q_matrix_string(&q_matrix_h, 
+		written_q_matrix += write_q_matrix_string(&q_matrix_h,
                                                     &eigen_h, sites)+"\n";
 	}
 	delete states_excited_h;
@@ -575,6 +575,6 @@ template <class StatesArrType> void compute_green_long(
 	out_file << written_q_matrix;
 	out_file.close();
 	//////
-	
+
 }
 #endif

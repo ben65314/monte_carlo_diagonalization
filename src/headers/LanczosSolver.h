@@ -113,6 +113,14 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 				*fundState_lanczos_basis = std::vector<double>(vecs,
                                                               vecs + n*(*deg));
 			}
+            else if (current_iteration == size) {
+				converged = true;
+                //Check degeneracy
+				*deg = deg_fundamental_check(arr_a, n);
+				fundState_lanczos_basis->clear();
+				*fundState_lanczos_basis = std::vector<double>(vecs,
+                                                              vecs + n*(*deg));
+			}
 
 			delete[] vecs; delete[] work; delete[] arr_a; delete[] arr_b;
 
@@ -120,9 +128,6 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 				std::cout << "Lanczos Energy current iteration :"
                     << current_iteration << ":"
                     << abs(prev_iter_energy - energy)<< std::endl;
-			}
-			if (current_iteration == size) {
-				break;
 			}
 			current_iteration++;
 

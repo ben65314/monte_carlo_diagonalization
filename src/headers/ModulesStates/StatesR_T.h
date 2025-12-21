@@ -1,4 +1,5 @@
 #include "StatesArr.h"
+#include "Structures.h"
 #include "basicFunctions.h"
 #include "electronManipulationFunctions.h"
 
@@ -426,12 +427,15 @@ private:
 public:
 	//Constructors
 	StatesR_T(uInt reserve = 10) {this->arr.reserve(reserve);}
-	StatesR_T(const std::vector<StateType>* array_to_state){
+	StatesR_T(const std::vector<StateType>* array_to_state, hubbardParam hubP){
 		this->arr.reserve(array_to_state->size());
 		for (uint32_t i = 0; i < array_to_state->size(); i++) {
 			add(array_to_state->at(i));
 		}
-		this->electrons = findNumberOfElectron(this->arr[0].key,
+
+        this->set_hubbard_parameters(hubP);
+
+		this->electrons = find_number_of_electron(this->arr[0].key,
                                                 this->sys_hubP.n_sites);
 	}
 	//Destructors

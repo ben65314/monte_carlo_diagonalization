@@ -11,7 +11,7 @@ OPT=-O3 -ftree-vectorize -lprofiler
 DEPFLAGS=-MP -MD
 # automatically add the -I onto each include directory
 WWD = -Wall -Wextra -Wpedantic -g
-GCC = -llapack -lblas -fopenmp #-lgfortran
+GCC = -llapack -lblas #-fopenmp #-lgfortran
 CXXFLAGS=$(foreach D,$(INCDIRS),-I$(D)) $(OPT) $(DEPFLAGS) $(WWD)
 
 # for-style iteration (foreach) and regular expression completions (wildcard)

@@ -1,6 +1,6 @@
 #pragma once
 #include "../src/headers/basicFunctions.h"
-int ONE = 1;
+int ONE_BF = 1;
 
 
 bool t_get_number_of_blocks(bool details) {
@@ -72,7 +72,7 @@ bool t_initial_vector(bool details) {
 	ref[2] = (float)rand() / RAND_MAX;
 
 	status1 = !((abs(ref[0]-test[0])<10e-4)&&(abs(ref[1]-test[1])<10e-4)&&(abs(ref[2]-test[2])<10e-4));
-	float norm = dnrm2_(&ref_size_of_vector, test, &ONE);
+	float norm = dnrm2_(&ref_size_of_vector, test, &ONE_BF);
 	status2 = (1 == norm);
 	allStatus = status1 && status2;
 
@@ -110,16 +110,16 @@ bool t_normalize(bool details) {
 	double ref3[6] = {0.5677494215, 0.1661705624, 0.1800181092, 0.3600362185, 0.6785297964, 0.1661705624};
 	double minus = -1;
 
-	daxpy_(&size2, &minus, ref1, &ONE, test1, &ONE);
-	daxpy_(&size3, &minus, ref2, &ONE, test2, &ONE);
-	daxpy_(&size6, &minus, ref3, &ONE, test3, &ONE);
+	daxpy_(&size2, &minus, ref1, &ONE_BF, test1, &ONE_BF);
+	daxpy_(&size3, &minus, ref2, &ONE_BF, test2, &ONE_BF);
+	daxpy_(&size6, &minus, ref3, &ONE_BF, test3, &ONE_BF);
 	for (int i = 0; i < 2; i++){test1[i] = remove_zeros(test1[i]);}
 	for (int i = 0; i < 3; i++){test2[i] = remove_zeros(test2[i]);}
 	for (int i = 0; i < 6; i++){test3[i] = remove_zeros(test3[i]);}
 
-	status1 = (dnrm2_(&size2, test1, &ONE) < 10e-4);
-	status2 = (dnrm2_(&size3, test2, &ONE) < 10e-4);
-	status3 = (dnrm2_(&size6, test3, &ONE) < 10e-4);
+	status1 = (dnrm2_(&size2, test1, &ONE_BF) < 10e-4);
+	status2 = (dnrm2_(&size3, test2, &ONE_BF) < 10e-4);
+	status3 = (dnrm2_(&size6, test3, &ONE_BF) < 10e-4);
 
 	allStatus = status1 && status2 && status3;
 

@@ -8,7 +8,13 @@ const std::vector<double> EPSILON_NULL;
 const long PERMISSION = 500000;
 const int LANCZOS_SIZE = 5;
 const uInt BAND_LANCZOS_MAX_ITERATIONS = 1500;
-const uInt NUM_THREADS_USED = 0.9 * omp_get_max_threads();
+//const uInt NUM_THREADS_USED = 1;
+//
+#ifdef _OPENMP
+    const uInt NUM_THREADS_USED = 0.9 * omp_get_max_threads();
+#else
+    const uInt NUM_THREADS_USED = 1;
+#endif // _OPENMP
 
 
 struct hubbardParam{ //Hubbard parameters

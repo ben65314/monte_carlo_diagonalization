@@ -18,7 +18,7 @@ public:
 	void set_sampling_parameters(samplingParam sP) {sys_sP = sP;}
 
 	//Manipulation
-	virtual void add(StateType el) = 0;	
+	virtual void add(StateType el) = 0;
 	void remove_all(){
 		/***************************************
 		* Clear all the states countained
@@ -36,7 +36,7 @@ public:
 	void merge(const StatesArr* addedArray_1){
 		/***************************************
 		* Merge a StatesArr to the current one
-		* Doesn't sort them, if needed call sortStates() right after 
+		* Doesn't sort them, if needed call sortStates() right after
 		*
 		* Parameters:
 		* -----------
@@ -50,14 +50,14 @@ public:
 		for (unsigned int i = 0; i < addedArray_1->get_length(); i++) {
 			add(addedArray_1->get_at(i));
 		}
-	}	
+	}
 
 	//Accessing
 	virtual StateType get_at(StateType index) const = 0;
 	virtual StateType get_length() const{
 		/***************************************
 		* Get function of the number of elements in the array
-		* 
+		*
 		* Parameters:
 		* -----------
 		* NONE
@@ -66,12 +66,12 @@ public:
 		* --------
 		* arr.size() : (StateType) number of elements in the array
 		****************************************/
-		
+
 		return arr.size();
 	}
 	virtual bool countains_element(StateType el) const{
 		/***************************************
-		* Checks if a specified state is a part of the array (checks the nature 
+		* Checks if a specified state is a part of the array (checks the nature
         * and the number of the state)
 		*
 		* Parameters:
@@ -89,7 +89,7 @@ public:
 	virtual bool where_is_element(StateType el, StateType* index) const = 0;
 	void get_num_array(std::vector<StateType>* receptacle) const{
 		/***************************************
-		* Returns the vector countaining only the number of the states in 
+		* Returns the vector countaining only the number of the states in
         * the array will not sort the states.
 		*
 		* Parameters
@@ -107,7 +107,7 @@ public:
 			}
 		}
 	}
-	
+
 	//Presentation
 	void show_all_states() const{
 		/***************************************
@@ -116,13 +116,13 @@ public:
 		* Parameters:
 		* -----------
 		* NONE
-		*	
+		*
 		* Returns:
 		* --------
 		* NONE
 		****************************************/
 		std::cout << show_all_states_string();
-	}	
+	}
 	//void showAllStatesInorder() const;
 	virtual std::string show_all_states_string() const = 0;
 
