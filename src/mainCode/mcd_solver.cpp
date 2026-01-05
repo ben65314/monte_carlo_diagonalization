@@ -36,8 +36,10 @@ int main(int argc, char *argv[]){
                   << NUM_THREADS_USED << std::endl;
     }
 	//Parallel implementation
+#ifdef _OPENMP
     if (jMV.hubP.n_sites > 10) omp_set_num_threads(NUM_THREADS_USED);
 	else omp_set_num_threads(1);
+#endif // _OPENMP
 
 	//Variable declaring from the read file
 	greenParam gP = jMV.gP;

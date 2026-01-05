@@ -32,12 +32,10 @@ int main(int argc, char *argv[]){
 		"\tMax threads:" << NUM_THREADS_USED << std::endl;
 
 	//Parallel implementation
-	if(jMV.hubP.n_sites > 10){
-        omp_set_num_threads(NUM_THREADS_USED);
-    }
-	else {
-        omp_set_num_threads(1);
-    }
+#ifdef _OPENMP
+    if (jMV.hubP.n_sites > 10) omp_set_num_threads(NUM_THREADS_USED);
+	else omp_set_num_threads(1);
+#endif // _OPENMP
 
 	//Start computing
 	auto step2 = std::chrono::high_resolution_clock::now();
