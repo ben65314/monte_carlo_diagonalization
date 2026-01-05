@@ -7,6 +7,8 @@ void cct(std::string text, int color);
 
 int get_number_of_blocks(int sites);
 
+double rdm_number();
+
 //Number manipulation
 void print_bin_from_dec(sType decimal_number, int resolution);
 

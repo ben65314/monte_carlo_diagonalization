@@ -472,8 +472,7 @@ private:
             //print_vector(neighbor.data(), neighbor.size());
 
             //Generate a random state from the active ones
-            sType rdm_element_1 = ((float)rand() / (float)RAND_MAX)
-                                 * index_active.size();
+            sType rdm_element_1 = rdm_number() * (index_active.size()-1);
             sType rdm_index = index_active.at(rdm_element_1);
 
 			float current_energy = Hu(this->get_at(rdm_index),
@@ -482,8 +481,7 @@ private:
             //Generate a random accessible jumping state from the selected one.
 			std::vector<StateType> possible_new_state;
             Ht(this->get_at(rdm_index), &possible_new_state, &this->sys_hubP);
-            sType rdm_element_2 = ((float)rand() / (float)RAND_MAX)
-                                     * possible_new_state.size();
+            sType rdm_element_2 = rdm_number() * (possible_new_state.size()-1);
 
             //Generate the energy of the new state and the difference.
             int new_nu = Hu(possible_new_state.at(rdm_element_2),
@@ -492,7 +490,7 @@ private:
             float diff_energy = new_energy - current_energy;
 
             //Generate a random number for the boltzmann condition.
-            float rdm_element_3 = (float)rand() / (float)RAND_MAX;
+            float rdm_element_3 = rdm_number();
             bool accepted = exp(-beta * diff_energy) > rdm_element_3;
 
             //Accept condition

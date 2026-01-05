@@ -56,6 +56,25 @@ int get_number_of_blocks(int sites) {
 	nbr_blocks *= nbr_blocks;
 	return nbr_blocks;
 }
+
+double rdm_number() {
+	/*****************************************
+	* Generates a random number between 0 (inclusive) and 1 (inclusive)
+	*
+	* Parameters
+	* ----------
+    * NONE
+	*
+	* Returns
+	* -------
+	* rdm : (double) random number
+	* ****************************************/
+
+    double rdm = (double) rand() / RAND_MAX;
+    return rdm;
+}
+
+
 void print_bin_from_dec(sType decimal_number, int resolution) {
 	/*****************************************
 	* Prints the given number in binary.
