@@ -163,13 +163,13 @@ int main(int argc, char *argv[]){
 	writes += "\n----------------------------------------------\n";
 
 	//Out and writings in files
-	std::ofstream out_file;
-	out_file.open(out_file_dir, std::ios::app);
+    //std::ofstream out_file;
+	//out_file.open(out_file_dir, std::ios::app);
 
-	std::cout << writes << std::endl;
-	out_file << writes;
+	//std::cout << writes << std::endl;
+	//out_file << writes;
 
-	out_file.close();
+	//out_file.close();
 
 	//End time
 	auto step4 = std::chrono::high_resolution_clock::now();
