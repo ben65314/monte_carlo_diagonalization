@@ -245,6 +245,61 @@ template <class R> void print_matrix(const double* mat, R rows, R cols,
 	std::cout << write_matrix(mat, rows, cols, integers, precision);
 }
 
+template <class R> double* row2col_major(double* mat, R n_rows, R n_cols) {
+	/*****************************************
+	* Converts a row-major stocked array into a col-major stocked array.
+	*
+	* Parameters
+	* ----------
+	* mat	    : (double*) pointer of the matrix to convert.
+	* n_rows	: (R) number of rows of the matrix.
+	* n_cols	: (R) number od cols of the matrix.
+    *
+	* Templates
+	* ---------
+	* R		    : int, long, unsigned
+	*
+	* Returns
+	* -------
+	* new_mat   : (double*) pointer of the converted matrix.
+	****************************************/
+
+    double* new_mat = new double[n_rows*n_cols]();
+    for (int i = 0; i < n_rows; i++) {
+        for (int j = 0; j < n_cols; j++) {
+            new_mat[j*n_rows+i] = mat[i*n_cols+j];
+        }
+    }
+    return new_mat;
+}
+template <class R> double* col2row_major(double* mat, R n_rows, R n_cols) {
+	/*****************************************
+	* Converts a col-major stocked array into a row-major stocked array.
+	*
+	* Parameters
+	* ----------
+	* mat	    : (double*) pointer of the matrix to convert.
+	* n_rows	: (R) number of rows of the matrix.
+	* n_cols	: (R) number od cols of the matrix.
+    *
+	* Templates
+	* ---------
+	* R		    : int, long, unsigned
+	*
+	* Returns
+	* -------
+	* new_mat   : (double*) pointer of the converted matrix.
+	****************************************/
+    double* new_mat = new double[n_rows*n_cols]();
+    for (int i = 0; i < n_rows; i++) {
+        for (int j = 0; j < n_cols; j++) {
+            new_mat[i*n_cols+j] = mat[j*n_rows+i];
+        }
+    }
+    return new_mat;
+}
+
+
 std::string time_formating(
     std::chrono::time_point<std::chrono::system_clock> start,
     std::chrono::time_point<std::chrono::system_clock> end);

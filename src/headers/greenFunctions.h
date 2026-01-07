@@ -1,4 +1,5 @@
 #include "LanczosSolver.h"
+#include "basicFunctions.h"
 
 #ifndef __greenFunctions_h__
 #define __greenFunctions_h__
@@ -297,7 +298,7 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 	new_space_len = states_excited->get_length();
 	arr_BL = new T[new_space_len * sites]();
 
-	//Countains all the initial vectors for the band Lanczos algorithm
+//Countains all the initial vectors for the band Lanczos algorithm
 	//Creation of the p vectors for bandLanczos
 	for (int i = 0; i < sites; i++){
 		excited_vector_projection(creation, i, spin, fund_state, states_array,
@@ -441,8 +442,8 @@ template <class StatesArrType> void compute_green_long(
 	green_space_projection(states_array, spin, true, states_excited_e);
 	green_space_projection(states_array, spin, false, states_excited_h);
 
-	states_excited_e->subspace_condition_expanding();
-	states_excited_h->subspace_condition_expanding();
+    //states_excited_e->subspace_condition_expanding();
+	//states_excited_h->subspace_condition_expanding();
 
 	if (verbose > 99) {
 		std::cout<<"PROJ STATES E"<<std::endl;
@@ -497,13 +498,25 @@ template <class StatesArrType> void compute_green_long(
 
 			eigen_e = std::vector<double>(eigen_value_e,
                                             eigen_value_e + new_space_len_e);
+            //Convert arr_BL_e to col-major.
+            double* temp_array = row2col_major(arr_BL_e, sites, new_space_len_e);
+            delete[] arr_BL_e;
+            arr_BL_e = temp_array;
+
 			//<OMEGA|c Ue
-            char trans_a = 'N', trans_b = 'T';
+            char trans_a = 'N', trans_b = 'N';
 			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_e, &new_space_len_e, &ALPHA_D,
-                  arr_BL_e, &new_space_len_e, hE, &new_space_len_e, &BETA_D,
-                  q_matrix_e.data(), &new_space_len_e);
+                  arr_BL_e, &sites, hE, &new_space_len_e, &BETA_D,
+                  q_matrix_e.data(), &sites);
 
 			delete[] hE; delete[] arr_BL_e;	delete[] eigen_value_e;
+
+            double* temp_q = col2row_major(q_matrix_e.data(), sites,
+                                      new_space_len_e);
+            q_matrix_e.clear();
+            q_matrix_e = std::vector<double>(temp_q,
+                                             temp_q + sites*new_space_len_e);
+            delete[] temp_q;
 		}
 		written_q_matrix += write_q_matrix_string(
                                             &q_matrix_e, &eigen_e, sites)+"\n";
@@ -551,13 +564,26 @@ template <class StatesArrType> void compute_green_long(
 
 			eigen_h = std::vector<double>(eigen_value_h,
                                             eigen_value_h + new_space_len_h);
+            //
+            //Convert arr_BL_e to col-major.
+            double* temp_array = row2col_major(arr_BL_h, sites, new_space_len_h);
+            delete[] arr_BL_h;
+            arr_BL_h = temp_array;
+
 			//<OMEGA|c Uh
-            char trans_a = 'N', trans_b = 'T';
+            char trans_a = 'N', trans_b = 'N';
 			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_h, &new_space_len_h, &ALPHA_D,
-                  arr_BL_h, &new_space_len_h, hH, &new_space_len_h, &BETA_D,
-                  q_matrix_h.data(), &new_space_len_h);
+                  arr_BL_h, &sites, hH, &new_space_len_h, &BETA_D,
+                  q_matrix_h.data(), &sites);
 
 			delete[] hH; delete[] arr_BL_h; delete[] eigen_value_h;
+
+            double* temp_q = col2row_major(q_matrix_h.data(), sites,
+                                      new_space_len_h);
+            q_matrix_h.clear();
+            q_matrix_h = std::vector<double>(temp_q,
+                                             temp_q + sites*new_space_len_h);
+            delete[] temp_q;
 		}
 		written_q_matrix += write_q_matrix_string(&q_matrix_h,
                                                     &eigen_h, sites)+"\n";
