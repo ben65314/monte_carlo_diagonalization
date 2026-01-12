@@ -21,4 +21,7 @@ void inorder(const Node* root);
 void treeToVec(const Node* root, std::vector<uint64_t>* vec);
 uint64_t totalNodes(Node* root);
 Node* delNode(Node* root, uint64_t x);
+int height(Node *root);
+
+
 #endif

@@ -1,27 +1,29 @@
 #include "binarySearchTree.h"
+#include <vector>
 //Global variables
 int verbose = 0;
+int dept = 0;
 
 Node* insert(Node* node, Node* key, bool* alreadyThere) {
 	// If the tree is empty, return a new node
     if (node == NULL){
-        return key;    
+        return key;
 	}
     // If the key is already present in the tree,
     // return the node
-    if (node->key == key->key){ 
+    if (node->key == key->key){
 		*alreadyThere = true;
         return node;
 	}
     // Otherwise, recur down the tree/ If the key
     // to be inserted is greater than the node's key,
     // insert it in the right subtree
-    if (node->key < key->key){ 
+    if (node->key < key->key){
         node->right = insert(node->right, key,alreadyThere);
 	}
-    // If the key to be inserted is smaller than 
+    // If the key to be inserted is smaller than
     // the node's key,insert it in the left subtree
-    else { 
+    else {
         node->left = insert(node->left, key,alreadyThere);
 	}
     // Return the (unchanged) node pointer
@@ -30,8 +32,8 @@ Node* insert(Node* node, Node* key, bool* alreadyThere) {
 
 // function to search a key in a BST
 const Node* search(const Node* root, uint64_t key) {
-  
-    // Base Cases: root is null or key 
+
+    // Base Cases: root is null or key
     // is present at root
     if (root == NULL || root->key == key)
         return root;
@@ -68,17 +70,17 @@ uint64_t totalNodes(Node* root)
 {
     if (root == NULL)
         return 0;
- 
+
     int l = totalNodes(root->left);
     int r = totalNodes(root->right);
- 
+
     return 1 + l + r;
 }
 
 
 // Note that it is not a generic inorder
 // successor function. It mainly works
-// when right child is not empty which is 
+// when right child is not empty which is
 // the case wwe need in BST delete
 Node* getSuccessor(Node* curr)
 {
@@ -131,3 +133,13 @@ Node* delNode(Node* root, uint64_t x)
 }
 
 
+int height(Node *root) {
+    if (root == nullptr)
+        return -1;
+
+    // compute the height of left and right subtrees
+    int lHeight = height(root->left);
+    int rHeight = height(root->right);
+
+    return std::max(lHeight, rHeight) + 1;
+}

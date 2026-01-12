@@ -181,6 +181,7 @@ private:
 		* -------
         * None
 		*****************************************************************/
+        std::cout<<"MH_SAMPLING"<<std::endl;
 		//Initial states
 		allocate_more_nodes(sampling_size);
 
@@ -440,6 +441,7 @@ private:
 		* -------
         * None
 		*****************************************************************/
+        std::cout<<"MC_SAMPLING"<<std::endl;
 		//Initial states
 		allocate_more_nodes(sampling_size);
 
@@ -585,10 +587,11 @@ public:
 
 	//Samplings
 	void sampling_MH(){
-        std::cout<<"MH_SAMPLING"<<std::endl;
-		MC_sampling(this->sys_sP.sampling_size,this->sys_sP.beta_MH);
-//		MHSamplingOfStates(this->sys_sP.sampling_size,
-//                            this->sys_sP.beta_MH, this->sys_sP.reticle);
+		//MC_sampling(this->sys_sP.sampling_size,this->sys_sP.beta_MH);
+		MHSamplingOfStates(this->sys_sP.sampling_size,
+                            this->sys_sP.beta_MH, this->sys_sP.reticle);
+        std::cout<<"HEIGHT : "<<height(&this->arr.data()[0])<<std::endl;
+
 	}
 	void sampling_least_energy(){
 		FermiDiracDistributionSampling();
