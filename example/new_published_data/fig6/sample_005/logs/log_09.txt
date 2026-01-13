@@ -1,0 +1,2 @@
+Bytes for a state:8	Max threads:1
+Step 1:Choosing States...MH_SAMPLING
