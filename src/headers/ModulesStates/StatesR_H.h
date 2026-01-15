@@ -383,7 +383,7 @@ public:
 	}
 
 	//Samplings
-	void sampling_MH(){
+	void sampling(){
 		allocate_MEM(this->electrons,this->sys_hubP.n_sites);
 		MHSamplingOfStates_r(this->sys_sP.sampling_size,
                              this->sys_sP.beta_MH, this->sys_sP.reticle);

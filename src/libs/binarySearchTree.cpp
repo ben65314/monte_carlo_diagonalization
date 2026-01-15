@@ -1,4 +1,6 @@
 #include "binarySearchTree.h"
+#include "basicFunctions.h"
+#include "utilities.h"
 #include <vector>
 //Global variables
 int verbose = 0;
@@ -56,12 +58,25 @@ void inorder(const Node* root) {
 }
 
 // Puts the tree in a uint64_t vector
-void treeToVec(const Node* root, std::vector<uint64_t>* vec) {
+void treeToVec(const Node* root, std::vector<sType>* vec) {
 	if (root != NULL) {
 		treeToVec(root->left,vec);
 		vec->push_back(root->key);
 		treeToVec(root->right,vec);
 	}
+}
+void storeInorder(Node* root, std::vector<sType>* nodes) {
+    if (root == nullptr)
+        return;
+
+    // Traverse the left subtree
+    storeInorder(root->left, nodes);
+
+    // Store the node data
+    nodes->push_back(root->key);
+
+    // Traverse the right subtree
+    storeInorder(root->right, nodes);
 }
 
 // Function to get the count of nodes
@@ -143,3 +158,59 @@ int height(Node *root) {
 
     return std::max(lHeight, rHeight) + 1;
 }
+
+// Function to build a balanced BST from a sorted array
+Node* buildBalancedTree(std::vector<Node>* arr, std::vector<sType>* nodes, int start, int end) {
+
+    // Base case
+    if (start > end)
+        return nullptr;
+
+    // Get the middle element and make it the root
+    int mid = (start + end) / 2;
+    //Node* root = new Node(nodes->at(mid));
+    int loc = arr->size();
+    arr->push_back(Node(nodes->at(mid)));
+
+    // Recursively build the left and right subtrees
+    arr->at(loc).left = buildBalancedTree (arr, nodes, start, mid - 1);
+    arr->at(loc).right = buildBalancedTree(arr, nodes, mid + 1, end);
+
+    return &(arr->at(loc));
+}
+
+// Function to balance a BST
+void balanceBST(std::vector<Node>* arr) {
+    std::vector<sType> nodes;
+    // Store the nodes in sorted order
+    Node root = arr->at(0);
+    storeInorder(&root, &nodes);
+
+    arr->clear();
+
+    // Build the balanced tree from the sorted nodes
+    buildBalancedTree(arr, &nodes, 0, nodes.size() - 1);
+}
+
+void printBT(const std::string& prefix, const Node* node, bool isLeft)
+{
+    if( node != nullptr )
+    {
+        std::cout << prefix;
+
+        std::cout << (isLeft ? "├──" : "└──" );
+
+        // print the value of the node
+        std::cout << node->key << std::endl;
+
+        // enter the next tree level - left and right branch
+        printBT( prefix + (isLeft ? "│   " : "    "), node->left, node->right!=nullptr);
+        printBT( prefix + (isLeft ? "│   " : "    "), node->right, false);
+    }
+}
+
+void printBT(const Node* node)
+{
+    printBT("", node, false);
+}
+

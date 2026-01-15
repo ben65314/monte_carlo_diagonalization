@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
 			states_block.electrons = elec;
 
 			//Sampling methods
-			states_block.sampling_MH();
+			states_block.sampling();
 
             //Find ground state
 			std::vector<vType> fund_state = std::vector<vType>(sP.sampling_size,0);

@@ -2,8 +2,6 @@
 #include "Structures.h"
 #include "basicFunctions.h"
 #include "electronManipulationFunctions.h"
-#include <cstdint>
-#include <iterator>
 
 #ifndef __StatesR_T_h__
 #define __StatesR_T_h__
@@ -33,6 +31,7 @@ private:
 		//If the new MEM allocated is smaller than the current one doesn't change anything
 		if (new_MEM_allocated < this->arr.capacity()) return;
 
+
 		std::vector<StateType> augmented_nodes;
 		this->get_num_array(&augmented_nodes);
 		this->arr.clear();
@@ -41,6 +40,7 @@ private:
 			add(augmented_nodes.at(i));
 		}
 	}
+
 	void FermiDiracDistributionSampling() {
         /**************************************************
         * Samples states with a breadth-first-search monte carlo method
@@ -424,6 +424,7 @@ private:
 			next_step_eval->remove_all();
 		}
 
+        delete possible_state;
 		delete current_state;
 		delete next_step_eval;
 	}
@@ -586,12 +587,17 @@ public:
 	}
 
 	//Samplings
-	void sampling_MH(){
-		//MC_sampling(this->sys_sP.sampling_size,this->sys_sP.beta_MH);
-		MHSamplingOfStates(this->sys_sP.sampling_size,
-                            this->sys_sP.beta_MH, this->sys_sP.reticle);
-        std::cout<<"HEIGHT : "<<height(&this->arr.data()[0])<<std::endl;
+	void sampling(){
+		MC_sampling(this->sys_sP.sampling_size,this->sys_sP.beta_MH);
+		//MHSamplingOfStates(this->sys_sP.sampling_size,
+        //                    this->sys_sP.beta_MH, this->sys_sP.reticle);
+        //std::cout<<"HEIGHT : "<<height(&this->arr.data()[0])<<std::endl;
+        //auto step2_1 = std::chrono::high_resolution_clock::now();
+        balanceBST(&this->arr);
+        //auto step2_2 = std::chrono::high_resolution_clock::now();
+        //std::cout<<"Time rebalance tree " <<time_formating(step2_1, step2_2)<<std::endl;
 
+        printBT(&this->arr.data()[0]);
 	}
 	void sampling_least_energy(){
 		FermiDiracDistributionSampling();

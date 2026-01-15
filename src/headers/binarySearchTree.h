@@ -2,13 +2,13 @@
 #ifndef __binarySearchTree_h__
 #define __binarySearchTree_h__
 struct Node {
-	uint64_t key;
+	sType key;
 	Node* left;
 	Node* right;
 	Node() {
 		left = right = NULL;
 	}
-	Node(uint64_t item) {
+	Node(sType item) {
 		key = item;
 		left = right = NULL;
 	}
@@ -23,5 +23,7 @@ uint64_t totalNodes(Node* root);
 Node* delNode(Node* root, uint64_t x);
 int height(Node *root);
 
+void balanceBST(std::vector<Node>* arr);
+void printBT(const Node* node);
 
 #endif
