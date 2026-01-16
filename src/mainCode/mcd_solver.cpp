@@ -68,6 +68,7 @@ int main(int argc, char *argv[]){
 
 	//Sampling methods
 	MH_Block.sampling();
+    MH_Block.rebalance();
 
 	auto step2_2 = std::chrono::high_resolution_clock::now();
 	if (verbose > 0) {

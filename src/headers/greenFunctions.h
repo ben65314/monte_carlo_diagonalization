@@ -285,6 +285,7 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 
 	//Projected Space
 	green_space_projection(states_array, spin, creation, states_excited);
+    states_excited->rebalance();
 
 	//Number of times H is applied to generate new states
 	if (verbose > 9) std::cout << "Before H excitation : "
@@ -441,6 +442,8 @@ template <class StatesArrType> void compute_green_long(
 	//Projected Space
 	green_space_projection(states_array, spin, true, states_excited_e);
 	green_space_projection(states_array, spin, false, states_excited_h);
+    states_excited_e->rebalance();
+    states_excited_h->rebalance();
 
     //states_excited_e->subspace_condition_expanding();
 	//states_excited_h->subspace_condition_expanding();

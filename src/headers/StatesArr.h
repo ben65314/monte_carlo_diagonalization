@@ -140,6 +140,32 @@ public:
 
 	virtual void subspace_condition_expanding() = 0;
 
+    //Rebalance the binary tree
+    void rebalance(){
+		/***************************************
+		* Rebalance the arr so that it is easier to traverse when doing Lanczos or Band Lanczos.
+		*
+		* Parameters:
+		* -----------
+		* NONE
+		*
+		* Returns:
+		* --------
+		* NONE
+		****************************************/
+        int before_height = height(&this->arr.data()[0]);
+        auto step0 = std::chrono::high_resolution_clock::now();
+        balanceBST(&this->arr);
+        auto step1 = std::chrono::high_resolution_clock::now();
+        int after_height = height(&this->arr.data()[0]);
+
+        if (verbose > 4) {
+            printf("The tree height is %2d -> %2d",before_height,after_height);
+            std::cout<<"\t(" << time_formating(step0, step1) << ")"<<std::endl;
+        }
+
+
+    }
 };
 
 

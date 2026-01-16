@@ -591,13 +591,6 @@ public:
 		MC_sampling(this->sys_sP.sampling_size,this->sys_sP.beta_MH);
 		//MHSamplingOfStates(this->sys_sP.sampling_size,
         //                    this->sys_sP.beta_MH, this->sys_sP.reticle);
-        //std::cout<<"HEIGHT : "<<height(&this->arr.data()[0])<<std::endl;
-        //auto step2_1 = std::chrono::high_resolution_clock::now();
-        balanceBST(&this->arr);
-        //auto step2_2 = std::chrono::high_resolution_clock::now();
-        //std::cout<<"Time rebalance tree " <<time_formating(step2_1, step2_2)<<std::endl;
-
-        printBT(&this->arr.data()[0]);
 	}
 	void sampling_least_energy(){
 		FermiDiracDistributionSampling();
