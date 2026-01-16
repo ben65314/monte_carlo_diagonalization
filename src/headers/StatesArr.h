@@ -159,7 +159,7 @@ public:
         auto step1 = std::chrono::high_resolution_clock::now();
         int after_height = height(&this->arr.data()[0]);
 
-        if (verbose > 4) {
+        if (verbose > 5) {
             printf("The tree height is %2d -> %2d",before_height,after_height);
             std::cout<<"\t(" << time_formating(step0, step1) << ")"<<std::endl;
         }

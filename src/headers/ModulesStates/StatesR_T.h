@@ -469,6 +469,7 @@ private:
 
 
 		unsigned int g = 0;
+        int last_perc = -1;
 		while (MH_size < sampling_size) {
 			g++;
             //this->show_all_states();
@@ -531,7 +532,7 @@ private:
                                     sType last_index = index_active.back();
                                     index_active.pop_back();
                                     *remove_index = last_index;
-                                    if (verbose > 5) {
+                                    if (verbose > 9) {
                                         printf("Sampled(%5ld/%5ld) | ",MH_size, sampling_size);
                                         printf("Blocking state %5ld | %6ld states possibly generated \n",
                                                this->get_at(index_neighbor),index_active.size());
@@ -558,6 +559,14 @@ private:
                           << "sample size\n\t-A beta value too large\n";
 				break;
 			}
+
+            if (verbose > 4) {
+                int perc = (float)MH_size/sampling_size * 100;
+                if (last_perc < perc && perc%1==0) {
+                    print_progress((double)perc/100);
+                    last_perc = perc;
+                }
+            }
 		}
 	}
 public:

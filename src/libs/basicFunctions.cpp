@@ -684,3 +684,21 @@ bool accept_function(sType state, float acceptQuota){
 
 	return accepted;
 }
+
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+void print_progress(double percentage) {
+    int val = (int) (percentage * 100);
+    int lpad = (int) (percentage * 60);
+    int rpad = 60 - lpad;
+    printf("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+    fflush(stdout);
+}
+
+#define DOTS "..."
+void print_iteration(int iteration, const char* str, int show_freq) {
+
+    int lpad = iteration%(show_freq*3)/show_freq+1;
+    printf("\r%s %3d %.*s%.*s", str, iteration,lpad,DOTS,5-lpad,"         ");
+    fflush(stdout);
+}
+

@@ -2,6 +2,7 @@
 
 #include "ModulesStates/StatesR_T.h"
 #include "ModulesStates/StatesR_H.h"
+#include "basicFunctions.h"
 
 int ONE = 1;
 double ALPHA_D = 1;
@@ -125,15 +126,14 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 			delete[] vecs; delete[] work; delete[] arr_a; delete[] arr_b;
 
 			if (current_iteration%10 == 0 && verbose > 4) {
-				std::cout << "Lanczos Energy current iteration :"
-                    << current_iteration << ":"
-                    << abs(prev_iter_energy - energy)<< std::endl;
+                printf("\rLanczos energy iteration : %4ld\tdE = %1.5e",current_iteration,abs(prev_iter_energy - energy));
+                fflush(stdout);
 			}
 			current_iteration++;
 
 		}
 		if (verbose > 4) {
-			std::cout << "Lanczos iteration used:"
+			std::cout << "\nLanczos iteration used : "
                 << current_iteration << std::endl;
 		}
 		*iter = current_iteration;
@@ -194,8 +194,8 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 				daxpy_(&size, &scal, r.data(), &ONE, gs + d*size, &ONE);
 			}
 			if (j%10 == 0 && verbose > 4) {
-				std::cout << "Lanczos Vector current iteration :"
-                    << j << std::endl;
+
+                print_iteration(j,"Lanczos vector iteration :");
 			}
 		}
 	}
@@ -301,8 +301,8 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 
 		int j = 0;
 		for (j = 0; j < iterations; j++){
-			if(j%10 == 0 && verbose > 4) std::cout
-                << "Band Lanczos current iteration :"<< j << std::endl;
+			if(j%10 == 0 && verbose > 4)
+                print_iteration(j,"Band Lanczos iteration :");
 			if(verbose > 99){
 				for (int i = 0; i < M0; i++){
 					double nn = dnrm2_(&len_bk, vk->data() + i*len_bk, &ONE);
@@ -492,7 +492,7 @@ template<class StatesArrType> class LanczosSolver<double,StatesArrType>{
 		energies = std::vector<double>(eigen_values, eigen_values + jj);
 		*sub_space_vectors = std::vector<double>(T_jPr, T_jPr + jj * jj);
 
-		if(verbose > 4) std::cout << "Band Lanczos number of iteration until"
+		if(verbose > 4) std::cout << "\nBand Lanczos number of iteration until"
                                   << " convergence : "<< j+1 << std::endl;
 		for (int i = n_bk - 1; i >= 0; i--) {
 			product_c_omega->erase(product_c_omega->begin() + jj + i * *nIter,

@@ -324,3 +324,5 @@ void combination_all(int n_up, int n_down, int sites, int nU,
                      std::vector<sType>* all_states);
 
 bool accept_function(sType state, float acceptQuota=0.5);
+void print_progress(double percentage);
+void print_iteration(int iteration, const char* str, int show_freq=10);

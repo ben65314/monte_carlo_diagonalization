@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
 	}
 
 	auto step2_1 = std::chrono::high_resolution_clock::now();
-	if (verbose > 0) std::cout << "Step 1:Choosing States...";
+	if (verbose > 0) std::cout << "Step 1:Choosing States..."<<std::endl;
 
 	//Sampling methods
 	MH_Block.sampling();
@@ -72,13 +72,13 @@ int main(int argc, char *argv[]){
 
 	auto step2_2 = std::chrono::high_resolution_clock::now();
 	if (verbose > 0) {
-        std::cout << "(Completed)" << time_formating(step2_1, step2_2) << '\n';
+        std::cout << "\n(Completed)" << time_formating(step2_1, step2_2) << '\n';
     }
 	got_subspace_len = MH_Block.get_length();
 
 	//Finds the fundamental energy of the block
 	auto step2_3 = std::chrono::high_resolution_clock::now();
-	if (verbose > 0) std::cout << "Step 2:Fundamental state...";
+	if (verbose > 0) std::cout << "\nStep 2:Fundamental state..."<<std::endl;
 
 	std::vector<vType> fund_state = std::vector<vType>(got_subspace_len, 0);
 	int deg = 1;
@@ -103,12 +103,12 @@ int main(int argc, char *argv[]){
 
 	auto step2_4 = std::chrono::high_resolution_clock::now();
 	if (verbose > 0) {
-        std::cout << "(Completed)" << time_formating(step2_3, step2_4) << '\n';
+        std::cout << "\n(Completed)" << time_formating(step2_3, step2_4) << '\n';
     }
 
 	if (jMV.gP.g_compute) {
 		auto step2_5 = std::chrono::high_resolution_clock::now();
-		if (verbose > 0) std::cout << "Step 3:Green functions...";
+		if (verbose > 0) std::cout << "\nStep 3:Green functions..."<<std::endl;
 
 		if (MH_Block.sys_hubP.n_sites < 5 ) {
 			compute_green_long(gP.g_added_spin, &fund_state, fundE,
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
 
 		auto step2_6 = std::chrono::high_resolution_clock::now();
 		if (verbose > 0) {
-            std::cout << "(Completed) " << time_formating(step2_5, step2_6)
+            std::cout << "\n(Completed) " << time_formating(step2_5, step2_6)
                       << std::endl;
         }
 	}
