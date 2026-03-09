@@ -21,7 +21,7 @@ bool c_operator(sType* num, int index){
 		*num += cd_op;
 	}
 	else {
-		c_success =  false;	
+		c_success =  false;
 	}
 	return c_success;
 }
@@ -45,7 +45,7 @@ bool c_dag_operator(sType* num, int index){
 		*num -= cd_op;
 	}
 	else {
-		d_success = false;	
+		d_success = false;
 	}
 	return d_success;
 }
@@ -56,7 +56,7 @@ void Ht(sType state, std::vector<sType>* proj_states, hubbardParam* hubP) {
 	* Parameters
 	* ----------
 	* state			: (sType) initial state in the Fock formalism
-	* proj_states	: (std::vector<sType>*) Array of the possible accessible 
+	* proj_states	: (std::vector<sType>*) Array of the possible accessible
     *                                       states after the Hamiltonian
 	* hubP			: (hubbardParam*) System parameters
 	*
@@ -86,18 +86,18 @@ void Ht(sType state, std::vector<sType>* proj_states, hubbardParam* hubP) {
 				to_up >>= 1;
 				continue;
 			}
-			
+
             //Down electron jump
-			if (((from_down & state_num) != 0) 
+			if (((from_down & state_num) != 0)
                 && ((to_down & state_num ) == 0)) {
 				proj_states->push_back((state_num | to_down) ^ from_down);
 			}
-			
+
             //Up electron jump
 			if (((from_up & state_num) != 0) && ((to_up & state_num ) == 0)) {
 				proj_states->push_back((state_num | to_up) ^ from_up);
 			}
-			
+
 			to_down >>= 1;
 			to_up >>= 1;
 		}
@@ -119,7 +119,7 @@ int Hu(sType state, unsigned char sites) {
 	* -------
 	* nU	: (int) number of sites that have a double occupation
 	***********************************************************/
-	sType same_occupation = state & (state << sites); 
+	sType same_occupation = state & (state << sites);
 	int nU = one_counter(same_occupation);
 	return nU;
 }
@@ -140,7 +140,7 @@ Electrons find_number_of_electron(sType state, unsigned char sites) {
 	sType down_counter = 1;
 
 	Electrons elec;
-	
+
 	for (unsigned char j = 0; j < sites; j++){
 		elec.up += (state & up_counter) != 0;
 		elec.down += (state & down_counter) != 0;
@@ -164,7 +164,7 @@ sType create_anti_ferro(unsigned int sites, int n_up, int n_down){
 	*
 	* Returns
 	* -------
-	* bi_state : (sType) Anti-Ferro state 
+	* bi_state : (sType) Anti-Ferro state
 	*****************************************************************/
 	sType bi_state = 0;
 	unsigned long adder = 1;
@@ -194,14 +194,14 @@ sType create_anti_ferro(unsigned int sites, int n_up, int n_down){
 
 Electrons transform_NSz(int n_elec, int spin) {
 	/*****************************************
-	* Transforms the total number of electron of the system and the total spin 
+	* Transforms the total number of electron of the system and the total spin
     * in an Electrons structure countaining the number of ups and downs
 	*
 	* Parameters
 	* ----------
 	* n_elec: (int) Total number of electrons of the system
 	* spin	: (int) Total spin of the system
-	* 
+	*
 	* Returns
 	* -------
 	* elec	: (Electrons) countains the number of spin up and down
@@ -213,7 +213,7 @@ Electrons transform_NSz(int n_elec, int spin) {
 }
 
 //Jump ENERGIES
-void t_jump_energy(sType right_state, std::vector<sType>* states, 
+void t_jump_energy(sType right_state, std::vector<sType>* states,
                    std::vector<double>* energies, hubbardParam* hubP) {
 	/*******************************************************************
 	* Calculates the energy of a t jump between two given states
@@ -221,11 +221,11 @@ void t_jump_energy(sType right_state, std::vector<sType>* states,
 	* Parameters
 	* ----------
 	* right_state	: (sType) state to jump from
-	* states		: (std::vector<sType>*) receptacles of the states 
+	* states		: (std::vector<sType>*) receptacles of the states
     *                                       accessible from right_state
-	* energies		: (std::vector<double>*) receptacles of the energiesfor 
+	* energies		: (std::vector<double>*) receptacles of the energiesfor
     *                                        each states
-	* hubP		    : (hubbardParam*) System parameters 
+	* hubP		    : (hubbardParam*) System parameters
 	*
 	* Returns
 	* -------
@@ -237,8 +237,8 @@ void t_jump_energy(sType right_state, std::vector<sType>* states,
 		for (int j = i+1; j < sites; j++) {//To
 			//Jump energy
 			double jumpFactor = hubP->t_matrix.at(i * sites + j);
-			if (jumpFactor == 0) continue; 
-			
+			if (jumpFactor == 0) continue;
+
 			for (int k = 0; k < 2; k++) {//Iteration over spins
 				sType temp_stateJI = right_state;
 				sType temp_stateIJ = right_state;
@@ -246,7 +246,7 @@ void t_jump_energy(sType right_state, std::vector<sType>* states,
 				int indexJ = (sites-j-1 + k*sites);
 				int indexI = (sites-i-1 + k*sites);
 				//From J -> I
-				if (c_dag_operator(&temp_stateIJ, indexJ) 
+				if (c_dag_operator(&temp_stateIJ, indexJ)
                     && c_operator(&temp_stateIJ, indexI)) {
 					//Add to the receptacle
 					states->push_back(temp_stateIJ);
@@ -255,14 +255,14 @@ void t_jump_energy(sType right_state, std::vector<sType>* states,
 					temp_stateIJ >>= indexJ + 1;
 					char phase = 1;
 					for (int l = indexJ + 1; l < indexI; l++) {
-						if ((temp_stateIJ & 1) == 1) phase *= -1;  
-						temp_stateIJ >>= 1;	
+						if ((temp_stateIJ & 1) == 1) phase *= -1;
+						temp_stateIJ >>= 1;
 					}
 					//Add the energy to the receptacle
 					energies->push_back(jumpFactor * phase);
-				}	
+				}
 				//From I -> J
-				if (c_dag_operator(&temp_stateJI, indexI) 
+				if (c_dag_operator(&temp_stateJI, indexI)
                     && c_operator(&temp_stateJI, indexJ)) {
 					//Add to the receptacle
 					states->push_back(temp_stateJI);
@@ -272,7 +272,7 @@ void t_jump_energy(sType right_state, std::vector<sType>* states,
 					char phase = 1;
 					for (int l = indexJ + 1; l < indexI; l++) {
 						if ((temp_stateJI & 1) == 1) phase *= -1;
-						temp_stateJI >>= 1;	
+						temp_stateJI >>= 1;
 					}
 					//Add the energy to the receptacle
 					energies->push_back(jumpFactor * phase);
@@ -291,7 +291,7 @@ double compute_mu(float mu, Electrons elec){
 	* Parameters
 	* ----------
 	* mu: (float) mu value
-	* elec: (Electrons) number of electrons of the state  
+	* elec: (Electrons) number of electrons of the state
 	*
 	* Returns
 	* ------ -

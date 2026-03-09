@@ -45,7 +45,7 @@ allow_jump: {(15,0,0)} {-1}
 N: {16}
 Sz: {0}
 
-beta: {1.2}
+beta: {0.05}
 
 #	Reticle of the breadth sampling. 0 will be set the reticle to its maximum value
 reticle: {0}

@@ -31,7 +31,6 @@ private:
 		//If the new MEM allocated is smaller than the current one doesn't change anything
 		if (new_MEM_allocated < this->arr.capacity()) return;
 
-
 		std::vector<StateType> augmented_nodes;
 		this->get_num_array(&augmented_nodes);
 		this->arr.clear();
@@ -165,6 +164,200 @@ private:
 		delete next_step_eval;
 	}
 
+	void MHSamplingOfStates_OLD_VERSION(unsigned long sampling_size, float beta,
+                            unsigned long reticle) {
+		/****************************************************************
+		* Samples states arround the one given and grows a subspace
+        * around of desired size
+		*
+		* Parameters
+		* ----------
+		* sampling_size : (unsigned long) size of the subspace desired
+		* beta : (float) beta value desired for MonteCarlo sampling
+		* reticle : (unsigned long) reticle of breadth-first search sampling
+        *
+		* Returns
+		* -------
+        * None
+		*****************************************************************/
+		//Initial states
+		allocate_more_nodes(sampling_size);
+        //StatesArr* currentState = this->clone();
+        decltype(this) current_state = new StatesR_T(50);
+        //*currentState = StatesArr(arrR.size());
+
+		for (unsigned int i = 0; i < this->arr.size(); i++) {
+			current_state->add(this->arr.at(i).key);
+		}
+
+		bool tree_like_sampling = false;
+		if(verbose == 13){tree_like_sampling = true;}
+
+		unsigned long MH_size = this->arr.size();
+
+		StateType size_current_step_eval = this->arr.size();
+		StateType size_next_step_eval = reticle * size_current_step_eval;
+		//StatesArr* nextStepEval = this->clone();
+		decltype(this) next_step_eval = new StatesR_T(50);
+
+		unsigned int g = 0;
+		auto step1 = std::chrono::high_resolution_clock::now();
+		auto step2 = std::chrono::high_resolution_clock::now();
+		while (MH_size < sampling_size) {
+
+			size_current_step_eval = current_state->get_length();
+
+
+			step2 = std::chrono::high_resolution_clock::now();
+			if (verbose > 5) {
+                std::cout << "\nCURRENT SAMPLE SIZE:" << MH_size << " ("
+                      << (float)MH_size / sampling_size << "\nCurrentStateLen:"
+                      << current_state->get_length()
+                      << "\nTime to gather current sample:"
+                      << time_formating(step1, step2) << std::endl;
+            }
+			step1 = std::chrono::high_resolution_clock::now();
+
+
+            bool big_sample = reticle * size_current_step_eval > sampling_size;
+			size_next_step_eval = big_sample ? sampling_size :
+                reticle * size_current_step_eval;
+
+			next_step_eval->remove_all();
+			next_step_eval->allocate_more_nodes(size_next_step_eval);
+			g++;
+
+			float current_energy;
+			std::vector<StateType> possible_new_state;
+
+			for (StateType i = 0; i < size_current_step_eval; i++) {
+				//Evolution of Hamiltonian of the current state
+                //and energy of the current state
+				current_energy = Hu(current_state->get_at(i),
+                        this->sys_hubP.n_sites);
+                ///THIS SINGLE LINE CORRECTS THE WRONG BOLTZMANN DISTRIBUTION!
+                //std::cout<<"no bug"<<std::endl;
+                //current_energy *= this->sys_hubP.u;
+
+				possible_new_state.clear();
+				Ht(current_state->get_at(i), &possible_new_state,
+                        &this->sys_hubP);
+
+				if (possible_new_state.size() != 0) {
+					StateType new_state;
+					std::vector<StateType> all_accepted_states;
+					//Test the breadth algorithm for all possible states found
+                    int new_nu;
+					for (StateType j = 0; j < possible_new_state.size(); j++)
+					{
+						new_state = possible_new_state.at(j);
+						if (tree_like_sampling) {
+							if(this->countains_element(new_state)){
+								continue;
+							}
+						}
+
+						//#Calculates new Energy and accept factor
+						new_nu = Hu(new_state,this->sys_hubP.n_sites);
+                        float new_energy = new_nu * this->sys_hubP.u;
+
+						float diff_energy = new_energy - current_energy;
+						float a = (float)rand() / (float)RAND_MAX;
+						bool accepted = exp(-beta * diff_energy) > a;
+
+						//Energy MONTE CARLO Condition
+						if (accepted){
+                            all_accepted_states.push_back(new_state);
+						}
+					}
+
+					//If no states are accepted
+					if (all_accepted_states.size() == 0) {
+						continue;
+					}
+					//If the number of accepted states is bigger than reticle
+					else if (all_accepted_states.size() > reticle) {
+						int* rdm_arr = new int[all_accepted_states.size()];
+						for (
+                        StateType p = 0; p < all_accepted_states.size(); p++)
+						{
+							rdm_arr[p] = p;
+						}
+						std::shuffle(
+                            rdm_arr, rdm_arr + all_accepted_states.size(),
+                            std::default_random_engine(std::time(NULL)));
+
+						for (StateType q = 0; q < reticle; q++) {
+							StateType item = all_accepted_states.at(rdm_arr[q]);
+
+							next_step_eval->add(item);
+							if(!this->countains_element(item)){
+								add(item);
+								MH_size++;
+								g=0;
+							}
+							if (MH_size >= sampling_size) {
+								delete[] rdm_arr;
+                                //This is a nested break to get out of the for
+                                //loop of the evolution and the for loop of the
+                                //currentState to evaluate.
+								goto nestedBreakForEnoughSampling;
+							}
+						}
+						delete[] rdm_arr;
+					}
+					//If the number of accepted states is less than reticle
+					else {
+						for (
+                        StateType l = 0; l < all_accepted_states.size(); l++){
+							StateType item = all_accepted_states.at(l);
+
+
+							next_step_eval->add(item);
+							if (!this->countains_element(item)) {
+								add(item);
+								MH_size++;
+								g=0;
+							}
+							if (MH_size >= sampling_size) {
+                                //This is a nested break to get out of the for
+                                //loop of the evolution and the for loop of the
+                                //currentState to evaluate.
+								goto nestedBreakForEnoughSampling;
+							}
+						}
+					}
+				}
+				else {//Prevents solo block breaking
+					std::cout << "No Evolution\n";
+					std::cout << "Current: " << current_state->get_at(i)
+                              << "   E : " << current_energy;
+					break;
+				}
+                //std::cout<<"new total"<<this->get_length()<<std::endl;
+
+			}//END OF FOR
+
+            //std::cout<<"g:"<<g<<std::endl;
+		nestedBreakForEnoughSampling:
+			if (g > PERMISSION) {
+				std::cout << "The sample size entered couldn't be met. "
+                          << "This can be a result of:\n\t-An unattainable "
+                          << "sample size\n\t-A beta value too large\n";
+				break;
+			}
+			//std::swap(currentState,nextStepEval);
+			if (next_step_eval->get_length()>0){
+				decltype(current_state) temp = current_state;
+				current_state = next_step_eval;
+				next_step_eval = temp;
+			}
+			next_step_eval->remove_all();
+		}
+
+		delete current_state;
+		delete next_step_eval;
+	}
 	void MHSamplingOfStates(unsigned long sampling_size, float beta,
                             unsigned long reticle) {
 		/****************************************************************
@@ -198,7 +391,8 @@ private:
             nb_state_per_nu.push_back(n_states);
         }
 
-        int filled_nu_layer = -1;
+        int filled_nu_layer = 0;
+        std::cout<<"A"<<a_sample<<"B"<<b_sample<<std::endl;
 
         //StatesArr* currentState = this->clone();
         decltype(this) current_state = new StatesR_T(50);
@@ -284,8 +478,9 @@ private:
 			for (StateType i = 0; i < size_current_step_eval; i++) {
 				//Evolution of Hamiltonian of the current state
                 //and energy of the current state
-				current_energy = Hu(current_state->get_at(i),
-                        this->sys_hubP.n_sites)*this->sys_hubP.u;
+				int current_nu = Hu(current_state->get_at(i),
+                        this->sys_hubP.n_sites);
+                current_energy = current_nu*this->sys_hubP.u;
 				possible_new_state.clear();
 				Ht(current_state->get_at(i), &possible_new_state,
                         &this->sys_hubP);
@@ -319,7 +514,13 @@ private:
 
 						float diff_energy = new_energy - current_energy;
 						float a = (float)rand() / (float)RAND_MAX;
-						bool accepted = exp(-beta * diff_energy) > a;
+						bool accepted;
+						//accepted = exp(-beta*(this->sys_hubP.u*(new_nu) - current_nu)) > a;
+
+                        //Nouvelle methode echantillojn acceptation
+                        //bool accepted = exp(-beta*this->sys_hubP.u*(new_nu-filled_nu_layer+1)) > a;
+                        accepted = exp(-beta*this->sys_hubP.u*(new_nu-a_sample*current_nu-b_sample*filled_nu_layer)) > a;
+
 
 						//Energy MONTE CARLO Condition
 						if (accepted){
@@ -381,9 +582,16 @@ private:
                                 new_nu = Hu(item,this->sys_hubP.n_sites);
                                 nu_state_counter[new_nu] += 1;
                                 // Prevents already filled sampling
-                                if (nu_state_counter[new_nu] \
-                                    == nb_state_per_nu[new_nu]) {
-                                    filled_nu_layer++;
+                                bool filled_layer = nu_state_counter[new_nu] \
+                                    == nb_state_per_nu[new_nu];
+                                bool prev_filled = true;
+                                if (new_nu>0){
+                                    prev_filled = nu_state_counter[new_nu-1] \ 
+                                    == nb_state_per_nu[new_nu-1];
+                                }
+                                if (filled_layer && prev_filled && 
+                                        filled_nu_layer+1 == new_nu ) {
+                                    filled_nu_layer = new_nu;
                                     if (verbose > 4) std::cout<<"FILLED : " <<filled_nu_layer<<std::endl;
                                 }
                                 //print_vector(nu_state_counter.data(),nu_state_counter.size());
@@ -480,7 +688,9 @@ private:
             sType rdm_index = index_active.at(rdm_element_1);
 
 			float current_energy = Hu(this->get_at(rdm_index),
-                            this->sys_hubP.n_sites) * this->sys_hubP.u;
+                            this->sys_hubP.n_sites);
+            ///THIS SINGLE LINE SWITCHES BETWEEN THE BUG AND NO BUG
+            //current_energy *= this->sys_hubP.u;
 
             //Generate a random accessible jumping state from the selected one.
 			std::vector<StateType> possible_new_state;
@@ -597,8 +807,10 @@ public:
 
 	//Samplings
 	void sampling(){
-		MC_sampling(this->sys_sP.sampling_size,this->sys_sP.beta_MH);
-		//MHSamplingOfStates(this->sys_sP.sampling_size,
+		//MC_sampling(this->sys_sP.sampling_size,this->sys_sP.beta_MH);
+		MHSamplingOfStates(this->sys_sP.sampling_size,
+                            this->sys_sP.beta_MH, this->sys_sP.reticle);
+        //MHSamplingOfStates_OLD_VERSION(this->sys_sP.sampling_size,
         //                    this->sys_sP.beta_MH, this->sys_sP.reticle);
 	}
 	void sampling_least_energy(){

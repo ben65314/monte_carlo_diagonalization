@@ -5,7 +5,7 @@
 
 //Declaration of constants
 const std::vector<double> EPSILON_NULL;
-const long PERMISSION = 500000;
+const long PERMISSION = 500000000;
 const int LANCZOS_SIZE = 5;
 const uInt BAND_LANCZOS_MAX_ITERATIONS = 1500;
 //const uInt NUM_THREADS_USED = 1;

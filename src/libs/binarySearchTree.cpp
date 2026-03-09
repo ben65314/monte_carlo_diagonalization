@@ -4,6 +4,8 @@
 #include <vector>
 //Global variables
 int verbose = 0;
+float a_sample = 0;
+float b_sample = 0;
 int dept = 0;
 
 Node* insert(Node* node, Node* key, bool* alreadyThere) {

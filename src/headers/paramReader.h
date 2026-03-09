@@ -86,6 +86,12 @@ struct justManyVariables readParameters(const std::string file) {
 			//Empty line
 			if (lines.size()==0) {
 			}
+			else if (lines.starts_with("a_sample")) {
+                a_sample = value_float;
+			}
+			else if (lines.starts_with("b_sample")) {
+                b_sample = value_float;
+			}
 			//Comments
 			else if (lines.starts_with("#")) {
 			}

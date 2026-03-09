@@ -80,5 +80,7 @@ typedef uint64_t uLong;
 
 //Declaration of external variables
 extern int verbose;
+extern float a_sample;
+extern float b_sample;
 
 #endif
