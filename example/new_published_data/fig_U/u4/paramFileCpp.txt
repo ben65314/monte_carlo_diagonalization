@@ -1,0 +1,83 @@
+####################################################################################
+# Parameters of the Hubbard Hamiltonian in the sites formalism
+#
+#This template requires you to change the value between {}.
+#We suggest to copy a template below if you want to add a site or an 
+#allowed jump for the electrons.
+#
+#The reader is very picky when reading this file it is suggested to make a copy and
+#keep this one as an example. You can change the file read in "paramReader.h"
+#
+#If a vital parameter is missing or incomplete its value will be zero 
+####################################################################################
+
+############################### UNIVERSAL PARAMETERS ###############################
+#(INFORMATION NEEDED FOR ALL PROGRAMS)
+Number_of_sites: {16}
+U: {4}
+mu: {2}
+
+
+################################ LATTICE PARAMETERS ################################
+#(INFORMATION NEEDED FOR ALL PROGRAMS)
+Sites_location: {(0,0,0)}
+Sites_location: {(1,0,0)}
+Sites_location: {(2,0,0)}
+Sites_location: {(3,0,0)}
+Sites_location: {(4,0,0)}
+Sites_location: {(5,0,0)}
+Sites_location: {(6,0,0)}
+Sites_location: {(7,0,0)}
+Sites_location: {(8,0,0)}
+Sites_location: {(9,0,0)}
+Sites_location: {(10,0,0)}
+Sites_location: {(11,0,0)}
+Sites_location: {(12,0,0)}
+Sites_location: {(13,0,0)}
+Sites_location: {(14,0,0)}
+Sites_location: {(15,0,0)}
+
+Allowed_Jump: {(1,0,0)} {-1}
+Allowed_Jump: {(15,0,0)} {-1}
+
+
+################################# SAMPLING PARAMETERS ##############################
+#(THOSE PARAMETERS ARE REQUIRED FOR SAMPLING PROGRAMS)
+N: {16}
+Sz: {0}
+
+Beta_MH: {0.2}
+Beta_FD: {0.2}
+Beta_Happly: {0}
+
+Reticle: {0}
+Repeat_Iterations: {1}
+Sampling_Space_Size_S: {0.05}
+Sampling_Space_Size_K: {1}
+
+nHapply: {0}
+
+
+
+########################## INITIAL SAMPLING STATES #################################
+#(Here you can specify the initial State or States of your sampling it will overwrite the N and Sz parameters entered above, if you want to use the N and Sz value, you can remove those lines, comment them or leave the curly brackets empty.)
+Initial_S : {}
+Initial_K : {}
+
+########################## GREEN FUNCTION PARAMETERS ###############################
+#(Here you can specify the parameters of the Green function creator)
+ComputeGreen: {YES}
+AddAll: {YES} #If YES will compute each Green curve for each AddedSite Possible according to the AddedSpin mentionned if NO will compute only the site specified
+Average: {YES} #IF YES will do an average between all curves
+AddedSite: {1}
+AddedSpin: {0} #Must be 0 (down) or 1 (up)
+EtaValue: {0.05}
+
+
+
+
+
+
+#TEMPLATES
+#Sites_location_template---->    Sites_location: {(1,0,0)}
+#Allowed_Jump_template------>    Allowed_Jump: {(1,0,0)} {-1}
