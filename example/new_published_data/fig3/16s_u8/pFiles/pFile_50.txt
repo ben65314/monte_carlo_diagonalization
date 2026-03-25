@@ -15,13 +15,6 @@ b_sample{0}
 
 ############################### UNIVERSAL PARAMETERS ###############################
 #(INFORMATION NEEDED FOR ALL PROGRAMS)
-number_of_sites: {12}
-U: {8}
-mu: {4}
-
-
-############################### UNIVERSAL PARAMETERS ###############################
-#(INFORMATION NEEDED FOR ALL PROGRAMS)
 number_of_sites: {16}
 U: {8}
 mu: {4}
@@ -54,7 +47,7 @@ allow_jump: {(15,0,0)} {-1}
 N: {16}
 Sz: {0}
 
-beta: {0.225}
+beta: {0.2}
 
 #	Reticle of the breadth sampling. 0 will be set the reticle to its maximum value
 reticle: {0}

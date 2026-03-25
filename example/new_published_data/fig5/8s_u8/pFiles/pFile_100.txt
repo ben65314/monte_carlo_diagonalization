@@ -1,3 +1,5 @@
+a_sample{0}
+b_sample{0}
 ####################################################################################
 # Parameters of the Hubbard Hamiltonian in the sites formalism
 #
@@ -41,7 +43,7 @@ allow_jump: {(0,1,0)} {-2}
 N: {8}
 Sz: {0}
 
-beta: {1.2}
+beta: {0}
 
 #	Reticle of the breadth sampling. 0 will be set the reticle to its maximum value
 reticle: {0}

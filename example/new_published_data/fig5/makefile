@@ -1,5 +1,5 @@
 
-REPS= 4s_u8 8s_u8 12s_u8 16s_u8
+REPS= 12s_u8 16s_u8 #4s_u8 8s_u8
 
 .SILENT: all run tidy clean
 
