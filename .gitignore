@@ -7,3 +7,4 @@ build/
 .clangd
 *.json
 unit_test
+logs/
