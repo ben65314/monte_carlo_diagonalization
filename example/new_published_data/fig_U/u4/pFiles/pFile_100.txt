@@ -53,7 +53,7 @@ beta: {0.2}
 reticle: {0}
 
 #	Size of the truncated space
-sampling_space_size: {165636900}
+sampling_space_size: {10}#165636900}
 
 #	After fundamental truncating. After the fundamental is found will keep the most dominant
 #	states until the Truncated_Cutoff value is met. A value of 1, will not change to space.
