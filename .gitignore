@@ -8,3 +8,5 @@ build/
 *.json
 unit_test
 logs/
+greens/
+qMatrices/

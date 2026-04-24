@@ -1,5 +1,5 @@
 a_sample{0}
-b_sample{0}
+b_sample{1}
 ####################################################################################
 # Parameters of the Hubbard Hamiltonian in the sites formalism
 #
