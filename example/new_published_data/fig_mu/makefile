@@ -1,5 +1,5 @@
 
-REPS= u4 u8 u2 u16 
+REPS= mu1_6 mu2 #mu0 mu0_4 mu0_8 mu1_2
 
 .SILENT: all run tidy clean
 

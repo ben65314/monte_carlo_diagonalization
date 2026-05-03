@@ -16,8 +16,8 @@ b_sample{0}
 ############################### UNIVERSAL PARAMETERS ###############################
 #(INFORMATION NEEDED FOR ALL PROGRAMS)
 number_of_sites: {16}
-U: {16}
-mu: {8}
+U: {8}
+mu: {0}
 
 
 ################################ LATTICE PARAMETERS ################################
@@ -44,16 +44,16 @@ allow_jump: {(15,0,0)} {-1}
 
 ################################# SAMPLING PARAMETERS ##############################
 #(THOSE PARAMETERS ARE REQUIRED FOR SAMPLING PROGRAMS)
-N: {16}
+N: {10}
 Sz: {0}
 
-beta: {0.1}
+beta: {0.2}
 
 #	Reticle of the breadth sampling. 0 will be set the reticle to its maximum value
 reticle: {0}
 
 #	Size of the truncated space
-sampling_space_size: {8281845}
+sampling_space_size: {953971}
 
 #	After fundamental truncating. After the fundamental is found will keep the most dominant
 #	states until the Truncated_Cutoff value is met. A value of 1, will not change to space.
