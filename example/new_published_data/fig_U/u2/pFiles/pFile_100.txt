@@ -16,8 +16,8 @@ b_sample{0}
 ############################### UNIVERSAL PARAMETERS ###############################
 #(INFORMATION NEEDED FOR ALL PROGRAMS)
 number_of_sites: {16}
-U: {16}
-mu: {8}
+U: {2}
+mu: {1}
 
 
 ################################ LATTICE PARAMETERS ################################

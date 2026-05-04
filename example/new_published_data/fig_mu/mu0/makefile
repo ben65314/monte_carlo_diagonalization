@@ -17,7 +17,7 @@ all:
 	for s in $(SUFF); do \
 		echo "Doing $(FILES)pFile_$$s"; \
 		$(MCD_SOLVER) "$(FILES)pFile_$$s" 1 > "logs/log_$$s"; \
-		$(QMATRIX_PY) qMatrices.txt -10 10; \
+		$(QMATRIX_PY) qMatrices.txt -8 12; \
 		mv greenFunctionValueQM.txt "green_$$s"; \
 		$(AV_COMBINE_PY) "green_$$s"; \
 		mv "green_$$s" greens/; \
