@@ -9,6 +9,7 @@ ifeq ($(wildcard dos_green100.txt),)
 else
 	SUFF ?= Ncst.txt 
 endif
+SUFF = 100.txt
 
 FILES ?= pFiles/
 
