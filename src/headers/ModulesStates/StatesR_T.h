@@ -191,7 +191,7 @@ private:
 		}
 
 		bool tree_like_sampling = false;
-		if(verbose == 13){tree_like_sampling = true;}
+		if(verbose == -1){tree_like_sampling = true;}
 
 		unsigned long MH_size = this->arr.size();
 
@@ -374,7 +374,7 @@ private:
 		* -------
         * None
 		*****************************************************************/
-        std::cout<<"MH_SAMPLING"<<std::endl;
+        //std::cout<<"MH_SAMPLING"<<std::endl;
 		//Initial states
 		allocate_more_nodes(sampling_size);
 
@@ -392,7 +392,6 @@ private:
         }
 
         int filled_nu_layer = 0;
-        std::cout<<"A"<<a_sample<<"B"<<b_sample<<std::endl;
 
         //StatesArr* currentState = this->clone();
         decltype(this) current_state = new StatesR_T(50);
@@ -406,7 +405,7 @@ private:
 		}
 
 		bool tree_like_sampling = false;
-		if(verbose == 13){tree_like_sampling = true;}
+		if(verbose == -1){tree_like_sampling = true;}
 
 		unsigned long MH_size = this->arr.size();
 

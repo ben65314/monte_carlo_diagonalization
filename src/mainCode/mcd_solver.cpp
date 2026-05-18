@@ -5,11 +5,12 @@ typedef StatesR_T<sType,vType> arrType;
 int main(int argc, char *argv[]){
 	//Args
 	if (argc<2 || argc>3) {
-        std::cout << "Number of parameters invalid!\nYou should execute \n"
-                  << "TD_solver with this format:\n TD_solver {paramFile} "
-                  << "*{verbose}\nWhere * are optionnal arguments\n\nVerbose "
-                  << "values:\n* =0 :(default) Minimal prints\n* >0 : Time "
-                  << "steps\n* >4 : Lanczos steps\n* >99 : All prints\n";
+        std::cout << "Number of parameters invalid!\nYou should execute "
+                  << "mcd_solver with this format:\n\nmcd_solver {paramFile} "
+                  << "*{verbose}\n\nWhere * are optionnal arguments\n\nVerbose "
+                  << "values:\n* =0 :(default) Minimal prints\n* >0 : Time steps"
+                  << "\n* =2 : Show parameters"
+                  << "\n* >4 : Lanczos steps\n* >99 : All prints\n";
         exit(0);
     }
 	else if (argc == 3) verbose = std::stoi(argv[2]);
@@ -30,6 +31,16 @@ int main(int argc, char *argv[]){
 
 	//Read file of parameters
 	justManyVariables jMV = readParameters("/" + (std::string)argv[1]);
+
+    if (verbose == 2) {
+        jMV.hubP.print();
+        jMV.sP.print();
+    }
+
+    //Check full space
+    Electrons el = transform_NSz(jMV.hubP.N_e,jMV.hubP.S_z);
+    bool full = false;
+    if(jMV.sP.sampling_size >= 0.999*comb(jMV.hubP.n_sites, el.up)*comb(jMV.hubP.n_sites, el.down)) full = true;
 
 	if (verbose > 0) {
         std::cout << "Bytes for a state:" << sizeof(sType) << "\tMax threads:"
@@ -66,9 +77,18 @@ int main(int argc, char *argv[]){
 	auto step2_1 = std::chrono::high_resolution_clock::now();
 	if (verbose > 0) std::cout << "Step 1:Choosing States..."<<std::endl;
 
+    //Full subspace construct
+    int t_verbose = verbose;
+    if (full) {
+        verbose = -1;
+        MH_Block.sys_sP.beta_MH = 0;
+    }
+
 	//Sampling methods
 	MH_Block.sampling();
     MH_Block.rebalance();
+
+    verbose = t_verbose;
 
 	auto step2_2 = std::chrono::high_resolution_clock::now();
 	if (verbose > 0) {
