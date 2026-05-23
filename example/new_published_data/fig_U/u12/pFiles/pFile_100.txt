@@ -1,4 +1,4 @@
-a_sample{1}
+a_sample{0}
 b_sample{0}
 ####################################################################################
 # Parameters of the Hubbard Hamiltonian in the sites formalism
@@ -16,8 +16,8 @@ b_sample{0}
 ############################### UNIVERSAL PARAMETERS ###############################
 #(INFORMATION NEEDED FOR ALL PROGRAMS)
 number_of_sites: {16}
-U: {8}
-mu: {4}
+U: {12}
+mu: {6}
 
 
 ################################ LATTICE PARAMETERS ################################
@@ -47,13 +47,13 @@ allow_jump: {(15,0,0)} {-1}
 N: {16}
 Sz: {0}
 
-beta: {0.2}
+beta: {0}
 
 #	Reticle of the breadth sampling. 0 will be set the reticle to its maximum value
 reticle: {0}
 
 #	Size of the truncated space
-sampling_space_size: {8281845}
+sampling_space_size: {165636900}
 
 #	After fundamental truncating. After the fundamental is found will keep the most dominant
 #	states until the Truncated_Cutoff value is met. A value of 1, will not change to space.

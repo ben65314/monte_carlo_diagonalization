@@ -519,7 +519,10 @@ private:
 
                         //Nouvelle methode echantillojn acceptation
                         //bool accepted = exp(-beta*this->sys_hubP.u*(new_nu-filled_nu_layer+1)) > a;
+                        //MCD
                         accepted = exp(-beta*this->sys_hubP.u*(new_nu-a_sample*current_nu-b_sample*filled_nu_layer)) > a;
+                        //BOLTZMAN
+                        //accepted = exp(-beta*this->sys_hubP.u*(new_nu-a_sample*current_nu-b_sample*filled_nu_layer)) > a;
 
 
 						//Energy MONTE CARLO Condition

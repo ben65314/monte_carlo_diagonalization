@@ -4,7 +4,7 @@ MCD_SOLVER      ?= ../../../../build/mcd_solver
 QMATRIX_PY      ?= ../../../../build/qMatrixGreenCompute.py
 AV_COMBINE_PY   ?= ../../../../build/av_combine.py
 
-SUFF ?= 0.txt 0.05.txt 0.1.txt 0.2.txt 0.3.txt
+SUFF ?= 0.1.txt 0.2.txt #0.3.txt #0.txt 0.05.txt
 
 FILES ?= pFiles/
 

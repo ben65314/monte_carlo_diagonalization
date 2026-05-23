@@ -1,5 +1,5 @@
 
-REPS= u2 u4 u8 u16
+REPS= BFS-Boltzmann DFS MCD
 
 .SILENT: all run tidy clean
 
