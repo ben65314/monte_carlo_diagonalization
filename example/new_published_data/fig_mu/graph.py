@@ -28,7 +28,7 @@ def reader(file_name):
 ##Curves information
 #limits
 xlims_min = -6
-xlims_max = 12
+xlims_max = 10
 #position of # of states abs position
 pos_x_name = 0.005
 pos_y_name = 0.975
@@ -37,14 +37,16 @@ pos_y_name = 0.975
 #JUST NEED TO CHANGE THOSE VALUES, works up to 4 graphs
 data_perc = ['100','Ncst']
 data_site = 16
-data_mu = ['2','1_6','1_2','0_8','0_4']
-data_mu_label = ['2','1.6','1.2','0.8','0.4']
-ylims = [0.35,0.35,0.6,0.6,0.6,0.6]
+data_mu = ['2','1_6','1_2','0_8','0_4','0']
+data_mu_label = ['2.0','1.6','1.2','0.8','0.4', '0.0']
+ylims = [0.35,0.35,0.45,0.8,0.8,0.8]
 
 
-ref_number = ['165,636,900', '165,636,900', '130,873,600', '64,128,064', '19,079,424']
+ref_sector = [r'$N_e=16$'+'\t'+'$S_z=0$', r'$N_e=16$'+'\t'+'$S_z=0$', r'$N_e=14$'+'\t'+'$S_z=0$', r'$N_e=12$'+'\t'+'$S_z=0$', r'$N_e=10$'+'\t'+'$S_z=0$', r'$N_e=10$'+'\t'+'$S_z=0$']
+
+ref_number = ['165,636,900', '165,636,900', '130,873,600', '64,128,064', '19,079,424', '19,079,424']
 per_5 = ['8,281,845', '8,281,845', '6,543,680', '3,206,403', '953,972']
-per_Ncst = ['(f=0.05)','(f=0.05)','(f=0.06)','(f=0.13)','(f=0.43)']
+per_Ncst = [r'$f=0.05$',r'$f=0.05$',r'$f=0.06$',r'$f=0.13$',r'$f=0.43$',r'$f=0.43$']
 Ncst = "8,281,845"
 
 
@@ -57,12 +59,12 @@ line_width = [1.5]*5
 #line_width = [2,2,2,2,1]
 #Colors #states
 cmap = plt.get_cmap('gnuplot')
-colorsa = np.linspace(0,0.90,num=len(data_perc));
+colorsa = np.linspace(0,0.85,num=len(data_perc));
 colors = [cmap(i) for i in colorsa]
 
 
 #legend labels
-labels = ['$N_{1.00}$','$N_{0.05}$','Ncst']
+labels = ['$ED$',r'$N_{\mathrm{cst}}$','Ncst']
 letters = ['a) ','b) ','c) ','d) ','e) ','f) ']
 handles = []
 
@@ -83,7 +85,7 @@ for j in data_mu:
     for i in data_perc:
         if (i == '05') :
             continue
-        q_matrix_files[-1].append('./mu'+j+'/average/av_green_'+i+'.txt')
+        q_matrix_files[-1].append('./mu'+j+'/dos_green'+i+'.txt')
 
 # Create subplots with shared x-axis
 fig, axes = plt.subplots(len(data_mu), 1, sharex=True, figsize=(6, 2+len(data_mu)),constrained_layout=True)
@@ -93,8 +95,8 @@ fig, axes = plt.subplots(len(data_mu), 1, sharex=True, figsize=(6, 2+len(data_mu
 
 #BOX PARAMS
 ss_x = 0.9975#xlims_max*0.50
-ss_y = 0.99#*np.array(ylims)
-ss_spacing = 0.14 #Was .15
+ss_y = 0.98#*np.array(ylims)
+ss_spacing = 0.17 #Was .15
 ss_size_text = 12 #Was 16
 ha_pos_title = 'center'
 ha_pos = 'right'
@@ -146,15 +148,16 @@ for i,ax in enumerate(axes):
         #Remove y tick labels
         ax.set_yticklabels([])
         if i == 0:  # Add legend only to the first plot
-            
+            #pass
             handles.append(handle)
             #ax.legend(loc='upper right')
     # Optionally add individual titles or labels
     #ax.set_ylabel(graph_name[i],fontsize=14)
     ax.text(pos_x_name,pos_y_name,letters[i] + r'$\mu=$ ' + data_mu_label[i],fontsize=size_text,ha='left',va='top', transform=ax.transAxes)
-    ax.text(ss_x,ss_y, ref_number[i], fontsize=size_text,ha='right',va='top', transform=ax.transAxes,c=colors[0])
+    ax.text(ss_x,ss_y - 0*ss_spacing, ref_sector[i], fontsize=size_text,ha='right',va='top', transform=ax.transAxes,c=colors[0])
+    ax.text(ss_x,ss_y - 1*ss_spacing, ref_number[i], fontsize=size_text,ha='right',va='top', transform=ax.transAxes,c=colors[0])
     #ax.text(ss_x,ss_y - ss_spacing, per_5[i], fontsize=size_text,ha='right',va='top', transform=ax.transAxes,c=colors[1])
-    ax.text(ss_x,ss_y - 1*ss_spacing, Ncst + per_Ncst[i], fontsize=size_text,ha='right',va='top', transform=ax.transAxes,c=colors[1])
+    ax.text(ss_x,ss_y - 2*ss_spacing, per_Ncst[i], fontsize=size_text,ha='right',va='top', transform=ax.transAxes,c=colors[1])
     #ax.text(pos_x_name+0.05,pos_y_name-0.025,labels[i],fontsize=size_text-1,ha='left',va='top', transform=ax.transAxes, color=colors[i])
 
 
@@ -162,13 +165,14 @@ handles.append(handle1)
 handles.append(handle2)
 
 # Set x-axis label on the bottom subplot only
-fig.legend(handles=handles,loc='center',bbox_to_anchor=(0.45,0.96),fontsize=size_text-2,ncol=2,columnspacing=0.5,labelspacing=0.1,handletextpad=0.1,handlelength=1,borderpad=0.1, frameon=True,markerfirst=False)
+legend = fig.legend(handles=handles,loc='center',bbox_to_anchor=(0.5,0.985),fontsize=size_text-2,ncol=4,columnspacing=0.5,labelspacing=0.1,handletextpad=0.1,handlelength=1,borderpad=0.1, frameon=True,markerfirst=False)
+fig.get_layout_engine().set(rect=[0, 0, 1, 0.975])  # top 5% reserved for legend
 axes[-1].set_xlabel('$\omega$',fontsize = size_text)
 
 # Shared legend placed outside the plots (bottom center)
 #plt.tight_layout()
 ##plt.savefig('1D_4s_to_16s.svg')
-plt.savefig('mu_variation.pdf')
+plt.savefig('mu_variation.pdf', bbox_inches='tight', bbox_extra_artists=[legend])
 
-#plt.show()
+plt.show()
 

@@ -9,12 +9,12 @@ int main(int argc, char *argv[]){
 	//Args
 	if(argc<2||argc>3){
 		std::cout<<"Number of parameters invalid!\n"<<
-		"You should execute s_breadthSampling with this format:\n"<<
-		"s_breadthSampling {paramFile} *{verbose}\n"<<
+		"You should execute subspace_finder with this format:\n"<<
+		"subspace_finder {paramFile} *{verbose}\n"<<
 		"Where * are optionnal arguments\n\nVerbose values:\n"<<
 		"* =0 :(default) Minimal prints\n* >0 : Time steps\n"<<
-		"* =2 : Prints Array of State\n"<<
-		"* =3 Print Means and deviation\n"<<
+		"* =2 : Energy of all blocks\n"<<
+		"* =3 : Show matrices\n"<<
 		"* >5 : All prints\n"; exit(0);}
 	else if (argc == 3) verbose = std::stoi(argv[2]);
 
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]){
 	//Test for a number of electrons up
 	for (int i = 0; i <= jMV.hubP.n_sites; i++) {
 		//Test for a number of elctrons down
-		for (int j = i; j <= jMV.hubP.n_sites; j++) {
+		for (int j = 0; j <= jMV.hubP.n_sites; j++) {
 			//Skips no electron case
             if (i == j && i == 0) continue;
 
@@ -74,6 +74,7 @@ int main(int argc, char *argv[]){
 			//Sampling methods
 			states_block.sampling();
 
+
             //Find ground state
 			std::vector<vType> fund_state = std::vector<vType>(sP.sampling_size,0);
             initial_vector(sP.sampling_size, fund_state.data());
@@ -87,8 +88,18 @@ int main(int argc, char *argv[]){
             LS.lanczos_energy(&fund_state_lanczos_basis, fund_state.data(),
                             &states_block, &alpha, &beta, &fundE, &iter, &deg);
 
-            if (verbose > 2) std::cout << "The bloc (" << i << "," << j
-                <<") energy is "<< fundE << std::endl;
+            if (verbose == 2 || verbose ==3) {
+                printf("Ne=%d\tSz=%d\tenergy = %+5.4f",(i+j),(i-j),fundE);
+                if (verbose == 3) {
+                    printf("\nStates : ");
+                    states_block.show_all_states();
+                    printf("Matrix\n");
+                    std::vector<double> mat(states_block.get_length()*states_block.get_length(),0);
+                    states_block.matrix_creation(mat.data());
+                    print_matrix(mat.data(),states_block.get_length(),states_block.get_length());
+                }
+                printf("\n");
+            }
             //Look for minimum energy
 			if (fundE < minEnergy) {
 				minEnergy = fundE;

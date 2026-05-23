@@ -301,9 +301,6 @@ struct justManyVariables readParameters(const std::string file) {
 	send_info.hubP.S_z = Sz;
 
 	if(send_info.sP.sampling_size <=0) send_info.sP.sampling_size = 1;
-    Electrons el = transform_NSz(N,Sz);
-    if(send_info.sP.sampling_size >= 0.999*comb(send_info.hubP.n_sites,el.up)*comb(send_info.hubP.n_sites,el.down)) verbose = 13;
-    std::cout<<"VERB : "<<verbose<<"--"<<0.999*comb(send_info.hubP.n_sites,el.up)*comb(send_info.hubP.n_sites,el.down)<<"/"<<send_info.sP.sampling_size<<std::endl;
 
 	return send_info;
 

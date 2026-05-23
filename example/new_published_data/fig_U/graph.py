@@ -41,15 +41,17 @@ def gapWidth(x_data,y_data):
     return max_x_left, max_x_right
 ##Curves information
 #limits
-xlims_min = -7.5
-xlims_max = 7.5
+xlims_min = -12.5
+xlims_max = 12.5
 #position of # of states abs position
 pos_x_name = 0.005
 pos_y_name = 0.975
 
 #data
 #JUST NEED TO CHANGE THOSE VALUES, works up to 4 graphs 
-data_perc = ['100','05']#['100','50','25','15','05']
+data_perc = ['100','05','05']#['100','50','25','15','05']
+data_perc_label = ['100','05','05_bU']#['100','50','25','15','05']
+perc_label = ['ED',r'$\beta=0.2$',r'$U\beta=0.2$']#['100','50','25','15','05']
 data_site = 16
 data_u = ['2','4','8','16']
 ylims = [0.85,0.6,0.4,0.4]
@@ -90,8 +92,8 @@ size_text = 14
 q_matrix_files =[]
 for j in data_u:
     q_matrix_files.append([])
-    for i in data_perc:
-        q_matrix_files[-1].append('./u'+j+'/average/av_green_'+i+'.txt')
+    for i in data_perc_label:
+        q_matrix_files[-1].append('./u'+j+'/dos_green'+i+'.txt')
 
 # Create subplots with shared x-axis
 fig, axes = plt.subplots(len(data_u), 1, sharex=True, figsize=(6, 2+len(data_u)),constrained_layout=True)
@@ -125,7 +127,7 @@ for i,ax in enumerate(axes):
     for j in range(len(q_matrix_files[i])):
 
         x,y = reader(q_files[j])
-        handle, = ax.plot(x, np.array(y),linestyle=line_style[j],lw=line_width[j],color=colors[j],label=labels[j])
+        handle, = ax.plot(x, np.array(y),linestyle=line_style[j],lw=line_width[j],color=colors[j],label=perc_label[j])
         ax.set_ylim(0, float(ylims[i]))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.set_xlim(xlims_min,xlims_max)
@@ -157,21 +159,22 @@ for i,ax in enumerate(axes):
             #ax.legend(loc='upper right')
     # Optionally add individual titles or labels
     #ax.set_ylabel(graph_name[i],fontsize=14)    
-    ax.text(pos_x_name,pos_y_name,letters[i] + r'$U=$ ' + data_u[i],fontsize=size_text,ha='left',va='top', transform=ax.transAxes)
+    ax.text(pos_x_name,pos_y_name,letters[i] + r'$U/t=$ ' + data_u[i],fontsize=size_text,ha='left',va='top', transform=ax.transAxes)
     #ax.text(pos_x_name,pos_y_name,letters[i] + data_site[i] + ' sites',fontsize=size_text,ha='left',va='top', transform=ax.transAxes)
     #ax.text(pos_x_name+0.05,pos_y_name-0.025,labels[i],fontsize=size_text-1,ha='left',va='top', transform=ax.transAxes, color=colors[i])
 
 
 
 # Set x-axis label on the bottom subplot only
-fig.legend(handles=handles,loc='center',bbox_to_anchor=(0.90,0.96),fontsize=size_text,ncol=5,
+legend = fig.legend(handles=handles,loc='center',bbox_to_anchor=(0.5,0.98),fontsize=size_text,ncol=5,
         columnspacing=0.5,labelspacing=0.1,handletextpad=0.1,handlelength=1,borderpad=0.1, frameon=True,markerfirst=False)
+fig.get_layout_engine().set(rect=[0, 0, 1, 0.965])  # top 5% reserved for legend
 axes[-1].set_xlabel('$\omega$',fontsize = size_text)
 
 # Shared legend placed outside the plots (bottom center)
 #plt.tight_layout()
 ##plt.savefig('1D_4s_to_16s.svg')
-plt.savefig('1D_4s_to_16s.pdf')
+plt.savefig('var_U.pdf', bbox_inches='tight', bbox_extra_artists=[legend])
 
-#plt.show()
+plt.show()
 

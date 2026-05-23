@@ -18,7 +18,7 @@ all:
 		$(AV_COMBINE_PY) "green_05_$$s"; \
 		mv "green_05_$$s" greens/; \
 		mv qMatrices.txt "qMatrices/qM_05_$$s"; \
-		mv "av_green_05_$$s" "dos_green$$s"; \
+		mv "av_green_05_$$s" "dos_green05_$$s"; \
 	done; \
 
 tidy:
