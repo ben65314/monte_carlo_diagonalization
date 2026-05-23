@@ -138,7 +138,7 @@ public:
 	virtual void sampling() = 0;
 	virtual void sampling_least_energy() = 0;
 
-	virtual void subspace_condition_expanding() = 0;
+	//virtual void subspace_condition_expanding() = 0;
 
     //Rebalance the binary tree
     void rebalance(){

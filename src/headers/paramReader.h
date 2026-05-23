@@ -154,6 +154,7 @@ struct justManyVariables readParameters(const std::string file) {
 				int endB = lines.find('}', startB);
 				double tempo = std::stof(lines.substr(startB + 1,
                                          endB - (startB + 1)));
+                std::cout<<"temp"<<tempo<<std::endl;
                 jump_energy.push_back(tempo);
 			}
 			//Get initial s states
