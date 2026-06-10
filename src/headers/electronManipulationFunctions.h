@@ -18,6 +18,84 @@ Electrons transform_NSz(int nElec, int spin);
 void t_jump_energy(sType right_state, std::vector<sType>* states,
                    std::vector<double>* energies, hubbardParam* hubP);
 
+double compute_mu(float mu, Electrons elec);
+
+// k-basis
+template <class T>void HuN(T state, std::vector<T>* proj_states, int sites) {
+	/************************************************************
+	* Generates the possible transition of the interaction hubbard hamiltonian in k base
+	*
+	* Parameters
+	* ----------
+	* state			: (T) initial state in the Fock formalisme
+	* proj_states	: (std::vector<T>*) Array of the possible accessible states after the Hamiltonian
+	* sites			: (int) Number of sites of the system
+	*
+	* Templates
+	* ---------
+	* T			: int, short, long, unsigned 
+	*
+	* Returns
+	* -------
+	* NONE
+	**************************************************************/
+	//States after applied Hamiltonian
+	T iter_up = 1UL << sites;
+	//Checks for all k
+	for (char k = sites - 1; k >= 0; k--) {
+		//Check for all destruction sites
+		T iter_down = 1UL;
+		for (char l = sites - 1; l >= 0; l--) {
+			T evolving_state = state;
+			//T change = 0;
+		
+			if (((evolving_state & iter_up) != 0) && ((evolving_state & iter_down) != 0)) {
+
+				evolving_state ^= (iter_up | iter_down);
+				//change -= (iterUp + iterDown); 
+			}
+			else {iter_down <<= 1;	continue;}
+			for (unsigned char q = 0; q < sites; q++) {
+				T final_state;
+				int qk = q+k;
+				T where_up;
+				if (qk >= sites) {
+					where_up = iter_up << (sites - q);
+				}
+				else where_up = iter_up >> (q);
+				
+				int ql = l - q;
+				T where_down;
+				if (ql < 0) {
+					where_down = iter_down >> (sites - q);
+
+				}
+				else where_down = iter_down << q;
+				
+
+				if (((evolving_state | where_up) != evolving_state) && ((evolving_state | where_down) != evolving_state)) {
+					final_state = evolving_state | (where_up | where_down);
+					//change += (whereUp + whereDown); 
+				} 
+				else continue;
+				proj_states->push_back(final_state);
+			}
+
+			iter_down <<= 1;
+		}//END OF FOR L
+		iter_up <<= 1;
+	} //END OF FOR K
+	//Remove duplicates
+	std::sort(proj_states->begin(), proj_states->end());
+	auto it = std::unique(proj_states->begin(), proj_states->end());
+	proj_states->erase(it, proj_states->end());
+}
+void u_jump_energy(sType right_state, Electrons elec, std::vector<sType>* states, std::vector<double>* energies, hubbardParam* hubP);
+void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vector<std::complex<double>>* energies, hubbardParam* hubP);
+double state_energy(sType x, hubbardParam* hubP);
+void calculate_epsilon_1d(hubbardParam* hubP);
+
+
 template <class A> void Ht_subspace_condition_expanding(
         A* sArr, uint64_t start, uint64_t end){
 	/*******************************************************
@@ -50,7 +128,6 @@ template <class A> void Ht_subspace_condition_expanding(
 	}
 }
 
-double compute_mu(float mu, Electrons elec);
 
 template<class T, class U> void write_state_with_double(
     std::vector<T>* fund, U* states, unsigned int sites, double keep=1) {
@@ -101,7 +178,7 @@ template<class T, class U> void write_state_with_double(
 	std::string fund_txt = "";
 	double cummul = 0;
 	for (uLong i = 0 ; i < sorted_fund.size(); i++) {
-		cummul += sorted_fund.at(i)*sorted_fund.at(i);
+		cummul += (double)(conjugate(sorted_fund.at(i))*sorted_fund.at(i)).real();
 		fund_txt += to_string_pq(sorted_fund.at(i), 4, 14) + "\t"
             + to_string_pq((double)sorted_states.at(i), 10, 0) + "\t"
 			+ to_string_pq((double)Hu(sorted_states.at(i), sites), 10, 0)+ "\t"

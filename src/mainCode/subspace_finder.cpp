@@ -2,8 +2,8 @@
 #include "paramReader.h"
 
 //Type to use in code
-typedef double vType;
-typedef StatesR_H<sType,vType> arrType;
+//typedef double vType;
+typedef StatesK_T<sType,vType> arrType;
 
 int main(int argc, char *argv[]){
 	//Args
@@ -26,6 +26,10 @@ int main(int argc, char *argv[]){
 
 	//Read file of parameters
 	justManyVariables jMV = readParameters("/" + (std::string)argv[1]);
+
+    if (verbose == 2) {
+        jMV.hubP.print();
+    }
 
     //Present to the user the number of bytes allowed for states and threads
 	if (verbose > 0) std::cout << "Bytes for a state:" << sizeof(sType) <<
@@ -65,20 +69,27 @@ int main(int argc, char *argv[]){
 			elec.up = i; elec.down = j;
 
             //Setting block
-			std::vector<sType> state_init = {
-				create_anti_ferro(jMV.hubP.n_sites, i, j)};
-			arrType states_block = arrType(&state_init, jMV.hubP);
+            int max_nU = (elec.up<elec.down) ? elec.up : elec.down;
+            std::vector<sType> all_states;
+            for (int k = 0; k <= max_nU; k++){
+                std::vector<sType> states;
+                combination_all(i, j, jMV.hubP.n_sites, k, &states);
+                all_states.insert(all_states.end(), states.begin(), states.end());
+            }
+			//std::vector<sType> state_init = {
+			//	create_anti_ferro(jMV.hubP.n_sites, i, j)};
+			arrType states_block = arrType(&all_states, jMV.hubP);
 			states_block.set_sampling_parameters(sP);
 			states_block.electrons = elec;
 
 			//Sampling methods
-			states_block.sampling();
+			//states_block ;
 
 
             //Find ground state
 			std::vector<vType> fund_state = std::vector<vType>(sP.sampling_size,0);
             initial_vector(sP.sampling_size, fund_state.data());
-			std::vector<vType> fund_state_lanczos_basis;
+			std::vector<double> fund_state_lanczos_basis;
 			LanczosSolver<vType,arrType> LS;
 			int deg = 1;
 			double fundE;
@@ -94,7 +105,7 @@ int main(int argc, char *argv[]){
                     printf("\nStates : ");
                     states_block.show_all_states();
                     printf("Matrix\n");
-                    std::vector<double> mat(states_block.get_length()*states_block.get_length(),0);
+                    std::vector<vType> mat(states_block.get_length()*states_block.get_length(),0);
                     states_block.matrix_creation(mat.data());
                     print_matrix(mat.data(),states_block.get_length(),states_block.get_length());
                 }

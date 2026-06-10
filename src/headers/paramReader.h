@@ -154,7 +154,7 @@ struct justManyVariables readParameters(const std::string file) {
 				int endB = lines.find('}', startB);
 				double tempo = std::stof(lines.substr(startB + 1,
                                          endB - (startB + 1)));
-                std::cout<<"temp"<<tempo<<std::endl;
+                //std::cout<<"temp"<<tempo<<std::endl;
                 jump_energy.push_back(tempo);
 			}
 			//Get initial s states
@@ -302,6 +302,12 @@ struct justManyVariables readParameters(const std::string file) {
 	send_info.hubP.S_z = Sz;
 
 	if(send_info.sP.sampling_size <=0) send_info.sP.sampling_size = 1;
+
+    // k-basis
+    //Create epsilon vector
+	int n = send_info.hubP.n_sites*send_info.hubP.n_sites;
+	send_info.hubP.matEpsilon = std::vector<std::complex<double>>(n,0);
+	calculate_epsilon_1d(&send_info.hubP);
 
 	return send_info;
 

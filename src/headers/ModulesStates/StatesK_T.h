@@ -156,12 +156,10 @@ private:
 			for (StateType i = 0; i < size_current_step_eval; i++) {
 				//Evolution of Hamiltonian of the current state
                 //and energy of the current state
-				int current_nu = Hu(current_state->get_at(i),
-                        this->sys_hubP.n_sites);
-                current_energy = current_nu*this->sys_hubP.u;
+                current_energy = state_energy(current_state->get_at(i),&this->sys_hubP);
 				possible_new_state.clear();
-				Ht(current_state->get_at(i), &possible_new_state,
-                        &this->sys_hubP);
+				HuN(current_state->get_at(i), &possible_new_state,
+                        this->sys_hubP.n_sites);
 
                 if (verbose > 4) {
                     //Compute proposed states for print
@@ -176,7 +174,7 @@ private:
 					StateType new_state;
 					std::vector<StateType> all_accepted_states;
 					//Test the breadth algorithm for all possible states found
-                    int new_nu;
+                    double new_energy;
 					for (StateType j = 0; j < possible_new_state.size(); j++)
 					{
 						new_state = possible_new_state.at(j);
@@ -187,8 +185,7 @@ private:
 						}
 
 						//#Calculates new Energy and accept factor
-						new_nu = Hu(new_state,this->sys_hubP.n_sites);
-                        float new_energy = new_nu * this->sys_hubP.u;
+                        new_energy = state_energy(new_state, &this->sys_hubP);
 
 						float diff_energy = new_energy - current_energy;
 						float a = (float)rand() / (float)RAND_MAX;
@@ -197,14 +194,14 @@ private:
 
                         //Nouvelle methode echantillojn acceptation
                         //bool accepted = exp(-beta*this->sys_hubP.u*(new_nu-filled_nu_layer+1)) > a;
-                        accepted = exp(-beta*this->sys_hubP.u*(new_nu-a_sample*current_nu-b_sample*filled_nu_layer)) > a;
+                        accepted = exp(-beta*(new_energy-a_sample*current_energy-b_sample*filled_nu_layer)) > a;
 
 
 						//Energy MONTE CARLO Condition
 						if (accepted){
-                            if (new_nu >= filled_nu_layer) {
-                                all_accepted_states.push_back(new_state);
-                            }
+                            //if (new_nu >= filled_nu_layer) {
+                            all_accepted_states.push_back(new_state);
+                            //}
 						}
 					}
 
@@ -257,17 +254,17 @@ private:
 								g=0;
 
                                 //Add to counter for each type of nu
-                                new_nu = Hu(item,this->sys_hubP.n_sites);
+                                int new_nu = Hu(item,this->sys_hubP.n_sites);
                                 nu_state_counter[new_nu] += 1;
                                 // Prevents already filled sampling
                                 bool filled_layer = nu_state_counter[new_nu] \
                                     == nb_state_per_nu[new_nu];
                                 bool prev_filled = true;
                                 if (new_nu>0){
-                                    prev_filled = nu_state_counter[new_nu-1] \ 
+                                    prev_filled = nu_state_counter[new_nu-1] \
                                     == nb_state_per_nu[new_nu-1];
                                 }
-                                if (filled_layer && prev_filled && 
+                                if (filled_layer && prev_filled &&
                                         filled_nu_layer+1 == new_nu ) {
                                     filled_nu_layer = new_nu;
                                     if (verbose > 4) std::cout<<"FILLED : " <<filled_nu_layer<<std::endl;
@@ -370,7 +367,7 @@ public:
 	}
 
 	//Function overload
-	void matrix_creation(double* result_matrix) {
+	void matrix_creation(std::complex<double>* result_matrix) {
 		/*******************************************************************
 		Create the matrix of the block of state given
 
@@ -382,30 +379,40 @@ public:
 		-------
 		NONE
 		*****************************************************************/
+	//Mu (all the same)
 		double mu_value = compute_mu(this->sys_hubP.mu, this->electrons);
 		uint64_t cols = this->get_length();
+		for (long unsigned i = 0; i < cols; i++) {
+			result_matrix[i * cols + i]+= mu_value;
 
-		for (StateType i = 0; i < cols; i++) {
-			//Adds diagonal values
-			//Hu and Hmu
-			result_matrix[i * cols + i]
-                += (double)Hu(this->get_at(i), this->sys_hubP.n_sites)
-                * (this->sys_hubP.u);
-			result_matrix[i * cols + i] += mu_value;
+			//He
+			std::vector<sType> proj;
+			std::vector<std::complex<double>> epsilon_energies;
+			epsilon_jump_energy(this->get_at(i), &proj, &epsilon_energies, &this->sys_hubP);
+			for (unsigned int j = 0; j < proj.size(); j++) {
+				sType index;
 
-			std::vector<StateType> projHt;
-			std::vector<double> jump_energy;
-			t_jump_energy(this->get_at(i), &projHt, &jump_energy,
-                 &this->sys_hubP);
-			for (unsigned int j = 0; j < projHt.size(); j++) {
-				StateType index;
-				if (!this->where_is_element(projHt.at(j), &index)) continue;
-				if (index < i) continue;
-				result_matrix[i * cols + index] += jump_energy.at(j);
-				result_matrix[index * cols + i] += jump_energy.at(j);
+				if (!this->where_is_element(proj.at(j), &index)) continue;
+				if ((unsigned long)(index) < i) continue;
+
+				result_matrix[i * cols + index] += epsilon_energies.at(j).real();
+				if (i != (unsigned long)index) result_matrix[index * cols + i] += epsilon_energies.at(j).real();
 			}
-		}
-	}
+
+
+			//HuN
+			proj.clear();
+			std::vector<double> u_energies;
+			u_jump_energy(this->get_at(i), this->electrons, &proj, &u_energies, &this->sys_hubP);
+			for (unsigned int j = 0; j < proj.size(); j++) {
+				sType index;
+				if (!this->where_is_element(proj.at(j), &index)) continue;
+				if ((unsigned long)index < i) continue;
+				result_matrix[i * cols + index] += u_energies.at(j);
+				if (i != (unsigned long)index) result_matrix[index * cols + i] += u_energies.at(j);
+
+			}
+		}}
 
 	void H (VectorType* h_phi_n, VectorType* phi_n) {
 		/***************************************************************
@@ -430,24 +437,39 @@ public:
 		#pragma omp parallel for default(none) shared(elements, mu_value,\
             h_phi_n, phi_n, stdout)
 		for(int i = 0; i < elements; i++){
-			//Hu and hmu
-			h_phi_n[i] += (double)(Hu(this->get_at(i),
-                            this->sys_hubP.n_sites)*this->sys_hubP.u + mu_value)
-                            * phi_n[i];
 
-			//Ht
+            //Hmu
+			h_phi_n[i] += (double)(mu_value) * phi_n[i];
+
+		    //He
 			std::vector<StateType> proj;
-			std::vector<double> energies;
-			t_jump_energy(this->get_at(i), &proj, &energies, &this->sys_hubP);
-
+			std::vector<std::complex<double>> energies;
+			epsilon_jump_energy(this->get_at(i), &proj, &energies, &this->sys_hubP);
+			//printf("tJump size:%ld\n",proj.size());
+			//fflush(stdout);
 			for (unsigned int j = 0; j < proj.size(); j++) {
 				StateType index;
-
+				//printf("\tProj:%ld\n",proj.at(j));
+				//fflush(stdout);
 				if (this->where_is_element(proj.at(j), &index)) {
-					h_phi_n[i] += energies.at(j) * phi_n[index];
+					h_phi_n[i] += energies.at(j).real() * phi_n[index];
 				}
 			}
-		}
+			//HuN
+			proj.clear();
+			std::vector<double> energiesD;
+			u_jump_energy(this->get_at(i), this->electrons, &proj, &energiesD, &this->sys_hubP);
+			//printf("tJump size:%ld\n",proj.size());
+			//fflush(stdout);
+			for (unsigned int j = 0; j < proj.size(); j++) {
+				StateType index;
+				//printf("\tProj:%ld\n",proj.at(j));
+				//fflush(stdout);
+				if (this->where_is_element(proj.at(j), &index)) {
+					h_phi_n[i] += energiesD.at(j) * phi_n[index];
+				}
+			}
+        }
 	}
 
 

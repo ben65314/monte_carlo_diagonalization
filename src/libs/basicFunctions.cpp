@@ -296,6 +296,30 @@ std::string to_string_p(const double a_value, const int n) {
 	out << std::fixed << a_value;
 	return std::move(out).str();
 }
+std::string to_string_p(const std::complex<double> a_value, const int n) {
+	/*****************************************
+	* Transforms a double value in a string with a given precicion
+	*
+	* Parameters
+	* ----------
+	* a_value	: (const double) value to stringify
+	* n			: (const int) precision requested
+	*
+	* Returns
+	* -------
+	* string	: (double) converted to string with precision n
+	***************************************/
+	std::ostringstream out;
+	out.precision(n);
+    if (a_value.imag()<0) {
+        out << std::fixed << a_value.real() << a_value.imag();
+    }
+    else {
+        out << std::fixed << a_value.real() << "+" << a_value.imag();
+    }
+
+	return std::move(out).str();
+}
 
 template <> std::string to_string_pq(const double a_value, const uInt integers,
                                      const uInt decimals) {
@@ -323,6 +347,31 @@ template <> std::string to_string_pq(const double a_value, const uInt integers,
 	std::string str(s);
 	return str;
 }
+template <> std::string to_string_pq(const std::complex<double> a_value, const uInt integers, const uInt decimals) {
+	/*****************************************
+	* Transforms a double value in a string with a given precicion
+	*
+	* Parameters
+	* ----------
+	* a_value	: (const std::complex<double>) value to stringify
+	* integers	: (const unsigned int) precision of integer part
+	* decimals	: (const unsigned int) precision of decimal part
+	*
+	* Returns
+	* -------
+	* string: double converted to string with precision n
+	***************************************/
+	char s[120];
+	double real = (abs(a_value.real())>10e-8) ? a_value.real() : 0;
+	double imag = (abs(a_value.imag())>10e-8) ? a_value.imag() : 0;
+	if (imag > 0)
+		sprintf(s,"%*.*f+%*.*fj",integers+decimals,decimals,real,integers,decimals,imag);
+	else
+		sprintf(s,"%*.*f-%*.*fj",integers+decimals,decimals,real,integers,decimals,abs(imag));
+
+	std::string str(s);
+	return str;
+}
 
 template <> double remove_zeros(double a){
 	/*****************************************
@@ -337,6 +386,22 @@ template <> double remove_zeros(double a){
 	* a: (double) number with near zero ->  zero
 	****************************************/
 	if (abs(a) < 10e-13){a = 0;}
+	return a;
+}
+template <> std::complex<double> remove_zeros(std::complex<double> a){
+	/*****************************************
+	* if a value of a real number is near zero, will make it zero
+    *
+	* Parameters
+	* ----------
+	* a: (double) number to verify
+    *
+	* Returns
+	* -------
+	* a: (double) number with near zero ->  zero
+	****************************************/
+	if (abs(a.real()) < 10e-13){a = std::complex<double>(0,a.imag());}
+	if (abs(a.imag()) < 10e-13){a = std::complex<double>(a.real(),0);}
 	return a;
 }
 
@@ -683,6 +748,37 @@ bool accept_function(sType state, float acceptQuota){
 	bool accepted = (rng_number < acceptQuota);
 
 	return accepted;
+}
+// k-basis
+template <> std::complex<double> conjugate(std::complex<double> c) {
+	/***************************************
+	* Computes the complex conjugate
+	*
+	* Parameters
+	* ----------
+	* c		: (std::complex<double>) complex number
+	*
+	* Returns
+	* -------
+	* newC	: (std::complex<double>) conjugated c number
+	****************************************/
+	double real = c.real(), imag = c.imag();
+	std::complex<double> newC(real, -imag);
+	return newC;
+}
+template <> double conjugate(double c) {
+	/*****************************************
+	* Computes the 'complex' conjugate (dummy function to satisfy templates)
+	*
+	* Parameters
+	* ----------
+	* c		: (double) "complex" number
+	*
+	* Returns
+	* -------
+	* newC	: (double) "conjugated" c number
+	****************************************/
+	return c;
 }
 
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"

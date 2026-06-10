@@ -1,4 +1,6 @@
 #include "electronManipulationFunctions.h"
+#include "Structures.h"
+#include "basicFunctions.h"
 
 
 bool c_operator(sType* num, int index){
@@ -304,4 +306,260 @@ double compute_mu(float mu, Electrons elec){
 	//Computs chemical potential
 	result = -n_electron * mu;
 	return result;
+}
+
+// k-basis functions
+//
+
+void u_jump_energy(sType right_state, Electrons elec, std::vector<sType>* states, std::vector<double>* energies, hubbardParam* hubP) {
+	/*******************************************************************
+	* Calculates the energy of a U_N jump between two given states
+	*
+	* Parameters
+	* ----------
+	* right_state		: (long) state to jump from
+	* elec				: (Electrons) number of electrons of the right_state
+	* states_accessible : (std::vector<sType>) states to project to
+	* energies			: (std::vector<double>) energies for states to project to
+	* hubP			: (hubbardParam*) System parameters
+	*
+	* Returns
+	* -------
+	* NONE
+	*****************************************************************/
+	double jump_energy = hubP->u / hubP->n_sites;
+	double stay_energy = jump_energy * elec.up * elec.down;
+
+	//No mouvement
+	states->push_back(right_state);
+	energies->push_back(stay_energy);
+
+	sType iter_up = 1UL << hubP->n_sites;
+	//Checks for all k
+	for (int k = hubP->n_sites - 1; k >= 0; k--) {
+		//Check for all destruction sites
+		sType iter_down = 1L;
+		for (int l = hubP->n_sites - 1; l >= 0; l--) {
+			sType evolving_state = right_state;
+			//long change = 0;
+
+			if (((evolving_state & iter_up) != 0) && ((evolving_state & iter_down) != 0)) {
+
+				evolving_state ^= (iter_up | iter_down);
+				//change -= (iterUp + iterDown);
+			}
+			else {iter_down <<= 1;	continue;}
+			for (int q = 1; q < hubP->n_sites; q++) {
+				long final_state;
+				int qk = q+k;
+				long where_up;
+				if (qk >= hubP->n_sites) {
+					where_up = iter_up << (hubP->n_sites - q);
+					qk -= hubP->n_sites;
+				}
+				else where_up = iter_up >> (q);
+
+				int ql = l - q;
+				long where_down;
+				if (ql < 0) {
+					where_down = iter_down >> (hubP->n_sites - q);
+					ql += hubP->n_sites;
+				}
+				else where_down = iter_down << q;
+
+
+				if (((evolving_state | where_up) != evolving_state) && ((evolving_state | where_down) != evolving_state)) {
+					final_state = evolving_state | (where_up | where_down);
+					//change += (whereUp + whereDown);
+				}
+				else continue;
+
+				states->push_back(final_state);
+				char phase = 1;
+				int start_down, start_up;
+				if (qk < k) start_up = k;
+				else {
+					start_up = qk;
+					qk = k;
+				}
+
+				if (ql < l) start_down = l;
+				else {
+					start_down = ql;
+					ql = l;
+				}
+				sType down_state = final_state >> (hubP->n_sites - start_down);
+
+				for (int m = start_down - 1; m > ql; m--) {
+					if ((down_state & 1) == 1) phase *= -1;
+					down_state >>= 1;
+				}
+
+				sType up_state = final_state >> (2 * hubP->n_sites - start_up);
+				for (int m = start_up - 1; m > qk; m--) {
+					if ((up_state & 1) == 1) phase *= -1;
+					up_state >>= 1;
+				}
+				energies->push_back(jump_energy * phase);
+			}//END OF FOR q
+
+			iter_down <<= 1;
+		}//END OF FOR L
+		iter_up <<= 1;
+	} //END OF FOR K
+}
+
+
+void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vector<std::complex<double>>* energies, hubbardParam* hubP) {
+	/******************************************************
+	* Calculates the energy of a He jump between two given states
+	*
+	* Parameters
+	* ----------
+	* right_state	: (sType) state to jump from
+	* states		: (std::vector<sType>*) receptacles of the states accessible from right_state
+	* energies		: (std::vector<std::complec<double>>*) receptacles of the energies for each states
+	* hubP		: (hubbardParam*) System parameters
+	*
+	* Returns
+	* -------
+	* NONE
+	*******************************************************/
+	//States after applied Hamiltonian
+	int sites = hubP->n_sites;
+	const sType state_num = right_state;
+	states->push_back(right_state);
+	energies->push_back(0);
+
+	sType from_down = 1UL << (sites - 1), from_up = 1UL << (2 * sites - 1);
+
+	for(int i = 0; i < sites; i++){//From
+		sType to_down = 1UL << (sites - 1), to_up = 1UL << (2 * sites - 1);
+
+		for(int j = 0; j < sites; j++){//To
+			if (hubP->matEpsilon[i * sites + j]==std::complex<double>(0,0)){
+				to_down >>= 1;
+				to_up >>= 1;
+				continue;
+			}
+			//Is there an electron there and can we jump there
+			bool has_down, has_up, can_up, can_down, standby_up, standby_down;
+			has_down = ((from_down & state_num) != 0);
+			can_down = ((to_down & state_num ) == 0);
+
+			has_up = ((from_up & state_num) != 0);
+			can_up = ((to_up & state_num ) == 0);
+
+			standby_up = (from_up == to_up);
+			standby_down = (from_down == to_down);
+
+			//Spin down
+			if ((has_down && can_down) || (has_down && standby_down)) {
+				sType new_state = (state_num+to_down-from_down);
+
+				if (new_state == right_state) {
+					(*energies)[0] += hubP->matEpsilon[i * sites + j];
+				}
+				else {
+					states->push_back(new_state);
+
+					char phase = 1;
+					char start = (i > j) ? i : j;
+					char end = (i > j) ? j : i;
+					new_state >>= (hubP->n_sites - start);
+					for (int l = start - 1; l > end; l--) {
+						if ((new_state & 1) == 1) phase *= -1;
+						new_state >>= 1;
+					}
+					energies->push_back(hubP->matEpsilon[i * sites + j] * (double)phase);
+				}
+
+			}
+			//Spin up
+			if ((has_up && can_up) || (has_up && standby_up)) {
+				sType new_state = (state_num+to_up-from_up);
+
+				if (new_state == right_state) {
+					(*energies)[0] += hubP->matEpsilon[i * sites + j];
+				}
+				else {
+					states->push_back(new_state);
+
+					char phase = 1;
+					char start = (i > j) ? i : j;
+					char end = (i > j) ? j : i;
+					new_state >>= (hubP->n_sites - start);
+					for (int l = start - 1; l > end; l--) {
+						if ((new_state & 1) == 1) phase *= -1;
+						new_state >>= 1;
+					}
+					energies->push_back(hubP->matEpsilon[i * sites + j] * (double)phase);
+				}
+			}
+			to_down >>= 1;
+			to_up >>= 1;
+		}
+		from_down >>= 1;
+		from_up >>= 1;
+	}
+}
+
+double state_energy(sType x, hubbardParam* hubP){
+	/*****************************************
+	* Calculates the energy <x|H|x> of a given state
+	*
+	* Parameters
+	* ----------
+    * x     : (sType) state
+	* hubP	: (hubbardParam) System parameters
+	*
+	* Returns
+	* -------
+	* energy: (double) energy of the state
+	****************************************/
+
+    double energy = 0;
+    //Epsilon terms
+    sType scan = 1 << 2*hubP->n_sites;
+    for (int i=0; i < 2*hubP->n_sites; i++){
+        scan >>= 1;
+        if ((x & scan) != 0){
+            energy += hubP->matEpsilon[(i%hubP->n_sites)*(1+hubP->n_sites)].real();
+        }
+    }
+
+    //U terms
+    Electrons elec = find_number_of_electron(x, hubP->n_sites);
+	energy += hubP->u / hubP->n_sites * elec.up * elec.down;
+
+    return energy;
+}
+
+void calculate_epsilon_1d(hubbardParam* hubP){
+	/*****************************************
+	* Calculates the epsilon values matrix in a 1D lattice
+	*
+	* Parameters
+	* ----------
+	* hubP	: (hubbardParam) System parameters
+	*
+	* Returns
+	* -------
+	* NONE
+	****************************************/
+	std::complex<double> value = 0;
+	for (int i = 0; i < hubP->n_sites; i++) {
+		for (int j = 0; j < hubP->n_sites; j++) {
+			value = 0;
+			for (int k = 0; k < hubP->n_sites; k++){
+				for (int l = 0; l < hubP->n_sites; l++){
+					double delta = 2 * M_PI * (double)(-(double)(i * k) + j * l);
+					delta /= hubP->n_sites;
+					value += hubP->t_matrix[k * hubP->n_sites + l] * exp(std::complex<double>(0,1) * delta) / (double) hubP->n_sites;
+				}//END OF FOR L
+			}//END OF FOR K
+			hubP->matEpsilon[i * hubP->n_sites + j] = remove_zeros(value);
+
+		}//END OF FOR J
+	}//END OF FOR I
 }

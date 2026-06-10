@@ -182,6 +182,7 @@ int main(int argc, char *argv[]){
 	writes += "\nFund energy : " + to_string_p(fundE);
 	writes += "\n----------------------------------------------\n";
 
+    std::cout<<writes<<std::endl;
 	//Out and writings in files
     //std::ofstream out_file;
 	//out_file.open(out_file_dir, std::ios::app);

@@ -1,4 +1,4 @@
-#include "utilities.h"
+#include "blas_lapack_wrappers.h"
 #ifndef __binarySearchTree_h__
 #define __binarySearchTree_h__
 struct Node {

@@ -127,7 +127,8 @@ public:
 	virtual std::string show_all_states_string() const = 0;
 
 	//Matrices operations
-	virtual void matrix_creation(double* result_matrix) = 0;
+	void matrix_creation(double* result_matrix);
+	void matrix_creation(std::complex<double>* result_matrix);
 	virtual void H(VectorType* h_phi_n, VectorType* phi_n) = 0;
 
 	virtual void s_matrix_creation(VectorType* s_matrix) {

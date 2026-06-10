@@ -22,6 +22,8 @@ struct hubbardParam{ //Hubbard parameters
 	float u, mu;
 	std::vector<double> t_matrix;
 
+    std::vector<std::complex<double>> matEpsilon;
+
 	//Used only for diagExact
 	int N_e, S_z;
 
@@ -30,8 +32,10 @@ struct hubbardParam{ //Hubbard parameters
 		std::cout << "\nSites = " << n_sites << "\n";
 		std::cout << "Hubbard block used : N" << N_e << "Sz" << S_z << "\n";
 		std::cout << "U = " << u << "\tmu = " << mu << "\n";
-		std::cout << "tMatrix = " << "\n";
+		std::cout << "t matrix = " << "\n";
 		print_matrix(t_matrix.data(), n_sites, n_sites);
+		std::cout << "epsilon matrix = " << "\n";
+		print_matrix(matEpsilon.data(), n_sites, n_sites);
 		std::cout << std::endl;
 	}
 };

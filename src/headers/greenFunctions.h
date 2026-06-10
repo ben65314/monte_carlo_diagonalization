@@ -606,4 +606,207 @@ template <class StatesArrType> void compute_green_long(
 	//////
 
 }
+template <class StatesArrType> void compute_green_long(
+        int spin, std::vector<std::complex<double>>* fund_state, double fundE,
+        StatesArrType* const states_array, greenParam gP, int deg){
+	/***************************************************************
+	* Calculates the Q matrix and writes them in a qMatrices.txt
+	*
+	* Parameters
+	* ----------
+	* spin			: (int) spin to create/destroy (1=up, 0=down)
+	* fund_state	: (std::vector<T>*) fundamental vector |Omega>
+	* fundE			: (double) fundamental energy
+	* states_array	: (StatesArrType*) array of the states in the subspace
+	* gP			: (greenParam) green params
+	* deg			: (int) degeneracy of the fundamental
+	*
+	* Templates:
+	* ----------
+	* StatesArrType : StatesR_T, StatesR_H
+	*
+	* Returns
+	* -------
+	* NONE
+	*****************************************************************/
+	if(verbose < -4) std::cout<<"computeGreen_long(...)"<<std::endl;
+
+	int sites = states_array->sys_hubP.n_sites;
+	//Projected excited states
+	StatesArrType* states_excited_e = states_array->clone();
+	states_excited_e->electrons.up += spin ;
+	states_excited_e->electrons.down += (1-spin);
+	StatesArrType* states_excited_h = states_array->clone();
+	states_excited_h->electrons.up -= spin ;
+	states_excited_h->electrons.down -= (1-spin);
+
+	//Projected Space
+	green_space_projection(states_array, spin, true, states_excited_e);
+	green_space_projection(states_array, spin, false, states_excited_h);
+    states_excited_e->rebalance();
+    states_excited_h->rebalance();
+
+    //states_excited_e->subspace_condition_expanding();
+	//states_excited_h->subspace_condition_expanding();
+
+	if (verbose > 99) {
+		std::cout<<"PROJ STATES E"<<std::endl;
+		states_excited_e->show_all_states();
+		std::cout<<"PROJ STATES H"<<std::endl;
+		states_excited_h->show_all_states();
+	}
+
+	//Wrtiting the Q-Matrix and the eigen values in a txt file
+	Electrons elec = states_array->electrons;
+	float perc_used = (float)states_array->get_length() /
+                            (comb(sites, elec.up) * comb(sites, elec.down));
+	std::string written_q_matrix = write_q_system(fundE, (double)gP.g_eta, elec,
+                                            &states_array->sys_hubP, perc_used);
+
+	//Vectors
+	//ELECTONS
+	int new_space_len_e = states_excited_e->get_length();
+
+	written_q_matrix += "\n# Eigen values E -- Q-Matrixes E\n";
+
+	for (int m = 0; m < deg; m++) {
+		std::vector<std::complex<double>> q_matrix_e = std::vector<std::complex<double>>(
+                                                    sites*new_space_len_e, 0);
+		std::vector<double> eigen_e;
+		if (new_space_len_e > 0) {
+            std::complex<double>* arr_BL_e = new std::complex<double>[new_space_len_e * sites]();
+			//Creation of the vectors c_mu^(dag)|Omega>
+			for (int i = 0; i < sites; i++){
+				excited_vector_projection(
+                    true, i, spin,
+                    fund_state->data() + states_array->get_length() * m,
+                    states_array, states_excited_e,
+                    arr_BL_e + i * new_space_len_e);
+			}
+
+			//Hamiltonian matrices
+            std::complex<double>* hE = new std::complex<double>[new_space_len_e*new_space_len_e]();
+			states_excited_e->matrix_creation(hE);
+
+			char jobs = 'V', uplo='U';
+			double* eigen_value_e = new double[new_space_len_e]();
+			int lwork = new_space_len_e*(new_space_len_e+1);
+            std::complex<double>* work = new std::complex<double>[lwork];
+			double* rwork = new double[lwork];
+			int info;
+
+			//Eigen values of hE|E> = E|E>
+			zheev_(&jobs, &uplo, &new_space_len_e, hE, &new_space_len_e,
+                   eigen_value_e, work, &lwork, rwork, &info);
+
+			delete[] work; delete[] rwork;
+
+			eigen_e = std::vector<double>(eigen_value_e,
+                                            eigen_value_e + new_space_len_e);
+            //Convert arr_BL_e to col-major.
+            std::complex<double>* temp_array = row2col_major(arr_BL_e, sites, new_space_len_e);
+            delete[] arr_BL_e;
+            arr_BL_e = temp_array;
+
+			//<OMEGA|c Ue
+            char trans_a = 'N', trans_b = 'N';
+			zgemm_(&trans_a, &trans_b, &sites, &new_space_len_e, &new_space_len_e, &ALPHA_C,
+                  arr_BL_e, &sites, hE, &new_space_len_e, &BETA_C,
+                  q_matrix_e.data(), &sites);
+
+			delete[] hE; delete[] arr_BL_e;	delete[] eigen_value_e;
+
+            std::complex<double>* temp_q = col2row_major(q_matrix_e.data(), sites,
+                                      new_space_len_e);
+            q_matrix_e.clear();
+            q_matrix_e = std::vector<std::complex<double>>(temp_q,
+                                             temp_q + sites*new_space_len_e);
+            delete[] temp_q;
+		}
+		written_q_matrix += write_q_matrix_string(
+                                            &q_matrix_e, &eigen_e, sites)+"\n";
+	}
+	delete states_excited_e;
+
+
+	//HOLES
+	int new_space_len_h = states_excited_h->get_length();
+
+
+	//Wrtiting the Q-Matrix and the eigen values in a txt file
+	written_q_matrix += "\n# Eigen values H -- Q-Matrixes H\n";
+
+	for (int m = 0; m < deg; m++) {
+		std::vector<std::complex<double>> q_matrix_h = std::vector<std::complex<double>>(
+                                                    sites*new_space_len_h, 0);
+		std::vector<double> eigen_h;
+		if (new_space_len_h > 0) {
+            std::complex<double>* arr_BL_h = new std::complex<double>[new_space_len_h * sites]();
+			//Creation of the vectors c_mu^(dag)|Omega>
+			for (int i = 0; i < sites; i++){
+				excited_vector_projection(
+                    false, i, spin,
+                    fund_state->data() + states_array->get_length() * m,
+                    states_array, states_excited_h,
+                    arr_BL_h + i * new_space_len_h);
+			}
+
+			//Hamiltonian matrices
+            std::complex<double>* hH = new std::complex<double>[new_space_len_h*new_space_len_h]();
+			states_excited_h->matrix_creation(hH);
+
+			char jobs = 'V', uplo='U';
+			double* eigen_value_h = new double[new_space_len_h]();
+			int lwork = new_space_len_h*(new_space_len_h+1);
+            std::complex<double>* work = new std::complex<double>[lwork];
+            double* rwork = new double[lwork];
+			int info;
+
+			//Eigen values of hH|E> = E |E>
+			zheev_(&jobs, &uplo, &new_space_len_h, hH, &new_space_len_h,
+                   eigen_value_h, work, &lwork, rwork, &info);
+
+			delete[] work; delete[] rwork;
+
+			eigen_h = std::vector<double>(eigen_value_h,
+                                            eigen_value_h + new_space_len_h);
+            //
+            //Convert arr_BL_e to col-major.
+            std::complex<double>* temp_array = row2col_major(arr_BL_h, sites, new_space_len_h);
+            delete[] arr_BL_h;
+            arr_BL_h = temp_array;
+
+			//<OMEGA|c Uh
+            char trans_a = 'N', trans_b = 'N';
+			zgemm_(&trans_a, &trans_b, &sites, &new_space_len_h, &new_space_len_h, &ALPHA_C,
+                  arr_BL_h, &sites, hH, &new_space_len_h, &BETA_C,
+                  q_matrix_h.data(), &sites);
+
+			delete[] hH; delete[] arr_BL_h; delete[] eigen_value_h;
+
+            std::complex<double>* temp_q = col2row_major(q_matrix_h.data(), sites,
+                                      new_space_len_h);
+            q_matrix_h.clear();
+            q_matrix_h = std::vector<std::complex<double>>(temp_q,
+                                             temp_q + sites*new_space_len_h);
+            delete[] temp_q;
+		}
+		written_q_matrix += write_q_matrix_string(&q_matrix_h,
+                                                    &eigen_h, sites)+"\n";
+	}
+	delete states_excited_h;
+
+	char cwd[PATH_MAX];
+	if(!getcwd(cwd, sizeof(cwd))) std::cout << "Problem occured getting CWD"
+                                            << std::endl;
+	std::string txt_name = "/qMatrices.txt";
+	const std::string out_file_name = cwd + txt_name;
+	std::ofstream out_file;
+	//Write Q-matrix and ev
+	out_file.open(out_file_name);
+	out_file << written_q_matrix;
+	out_file.close();
+	//////
+
+}
 #endif
