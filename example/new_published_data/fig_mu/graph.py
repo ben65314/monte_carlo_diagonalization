@@ -119,8 +119,13 @@ for i,ax in enumerate(axes):
         x,y,y_both = reader(q_files[j])
         handle, = ax.plot(x, np.array(y)+0.01,linestyle=line_style[j],lw=lwidth,color=colors[j],label=labels[j],alpha=alpha)
         if j != 0:
+            ##if i != 2 : 
             handle1, = ax.plot(x, np.array(y_both)[:,0],linestyle='--',lw=1.,label=r"$G^-(\omega)$",color='red', alpha=.75)
             handle2, = ax.plot(x, np.array(y_both)[:,1],linestyle='--',lw=1.,label=r"$G^+(\omega)$",color='blue', alpha=.75)
+        #else:
+        #    handle1, = ax.plot(x, np.array(y_both)[:,0],linestyle='--',lw=1.,label=r"$G^-(\omega)$",color='g', alpha=.75)
+        #    handle2, = ax.plot(x, np.array(y_both)[:,1],linestyle='--',lw=1.,label=r"$G^+(\omega)$",color='k', alpha=.75)
+
         ax.set_ylim(0, float(ylims[i]))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.set_xlim(xlims_min,xlims_max)

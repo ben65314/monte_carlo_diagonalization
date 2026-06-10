@@ -41,20 +41,20 @@ def gapWidth(x_data,y_data):
     return max_x_left, max_x_right
 ##Curves information
 #limits
-xlims_min = -12.5
-xlims_max = 12.5
+xlims_min = -9
+xlims_max = 9
 #position of # of states abs position
 pos_x_name = 0.005
 pos_y_name = 0.975
 
 #data
 #JUST NEED TO CHANGE THOSE VALUES, works up to 4 graphs 
-data_perc = ['100','05','05']#['100','50','25','15','05']
-data_perc_label = ['100','05','05_bU']#['100','50','25','15','05']
-perc_label = ['ED',r'$\beta=0.2$',r'$U\beta=0.2$']#['100','50','25','15','05']
+data_perc = ['100','05']#['100','50','25','15','05']
+data_perc_label = ['100','05']#['100','50','25','15','05']
+perc_label = ['ED',r'$f=0.05$',r'$U\beta=0.2$']#['100','50','25','15','05']
 data_site = 16
-data_u = ['2','4','8','16']
-ylims = [0.85,0.6,0.4,0.4]
+data_u = ['4','8','12']
+ylims = [0.6,0.4,0.4,0.4,0.4]
 
 
 
@@ -72,7 +72,7 @@ colors = [cmap(i) for i in colorsa]
 
 #legend labels
 labels = []
-letters = ['a) ','b) ','c) ','d) ']
+letters = ['a) ','b) ','c) ','d) ','e) ']
 for j in data_perc:
     labels.append('{:.2f}'.format(float(j)/100))
 labels[0] = '$f$: {:.2f}'.format(float(data_perc[0])/100)
@@ -166,9 +166,9 @@ for i,ax in enumerate(axes):
 
 
 # Set x-axis label on the bottom subplot only
-legend = fig.legend(handles=handles,loc='center',bbox_to_anchor=(0.5,0.98),fontsize=size_text,ncol=5,
-        columnspacing=0.5,labelspacing=0.1,handletextpad=0.1,handlelength=1,borderpad=0.1, frameon=True,markerfirst=False)
-fig.get_layout_engine().set(rect=[0, 0, 1, 0.965])  # top 5% reserved for legend
+legend = fig.legend(handles=handles,loc='center',bbox_to_anchor=(0.5,0.975),fontsize=size_text,ncol=5,
+        columnspacing=2.,labelspacing=0.1,handletextpad=0.1,handlelength=1,borderpad=0.1, frameon=True,markerfirst=False)
+fig.get_layout_engine().set(rect=[0, 0, 1, 0.955])  # top 5% reserved for legend
 axes[-1].set_xlabel('$\omega$',fontsize = size_text)
 
 # Shared legend placed outside the plots (bottom center)

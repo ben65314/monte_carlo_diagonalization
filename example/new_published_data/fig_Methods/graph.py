@@ -27,7 +27,7 @@ def reader(file_name):
 
 ##Curves information
 #limits
-xlims_min = -7.5
+xlims_min = 0#-7.5
 xlims_max = 7.5
 #position of # of states abs position
 pos_x_name = 0.005
@@ -37,11 +37,12 @@ pos_y_name = 0.975
 #JUST NEED TO CHANGE THOSE VALUES, works up to 4 graphs
 data_perc = '05'
 data_site = 16
-data_methods = ['MCD', 'DFS', 'Monte-Carlo', 'BFS-Boltzmann']
+data_methods = ['MCD', 'BFS-Boltzmann', 'DFS', 'Monte-Carlo']
+data_methods_label = ['MCD', 'Variante 1', 'Variante 2', 'Variante 3']
 data_beta = [[0.1, 0.2, 0.3], # MCD
-             [0.1], # DFS
-             [0.1, 0.2, 0.3], # Monte-Carlo
-             [0.1, 0.2, 0.3]] # BFS-Boltzmann
+             [0.1, 0.2, 0.3], # BFS-Boltzmann
+             [0.1, 0.2, 0.3], # DFS
+             [0.1, 0.2, 0.3]] # Monte-Carlo
 data_mu_label = ['2','1.6','1.2','0.8','0.4']
 ylims = [0.45,0.45,0.45,0.45,0.6,0.6]
 
@@ -54,11 +55,11 @@ line_width = [1.5]*5
 lwidth = 1.5 #if j!=0 else 5
 #line_width = [2,2,2,2,1]
 #Colors #states
-cmap = plt.get_cmap('turbo')
-colorsa = np.linspace(0,0.90,num=7);
+cmap = plt.get_cmap('gnuplot')
+colorsa = np.linspace(0,.90,num=4);
 colors = [cmap(i) for i in colorsa]
 
-betas = ['ED', 0.1, 0.2, 0.3, 0.4, 0.5]
+betas = ['ED', 0.1, 0.2, 0.3]
 color_dict = {}
 for i,b in enumerate(betas):
     color_dict[b] = colors[i]
@@ -139,15 +140,16 @@ for i,ax in enumerate(axes):
     # Optionally add individual titles or labels
     #ax.set_ylabel(graph_name[i],fontsize=14)
     ax.text(pos_x_name,pos_y_name,letters[i],fontsize=size_text,ha='left',va='top', transform=ax.transAxes)
-    ax.text(ss_x,ss_y - 0*ss_spacing, data_methods[i], fontsize=size_text,ha='right',va='top', transform=ax.transAxes,c='k')
+    ax.text(ss_x,ss_y - 0*ss_spacing, data_methods_label[i], fontsize=size_text,ha='right',va='top', transform=ax.transAxes,c='k')
 
 
 # legend
 handles_color = []
 for b in betas:
-    hdl, = axes[0].plot(20,20, color = color_dict[b], label=str(b))
+    hdl, = axes[0].plot(20,20, color = color_dict[b], label=str(b),alpha=0.65)
     handles_color.append(hdl)
-# Set x-axis label on the bottom subplot only
+data_methods = ['MCD', 'BFS-Boltzmann', 'DFS', 'Monte-Carlo']
+# Set x-axis label on the bottom subplot
 legend = fig.legend(handles=handles_color,loc='center',bbox_to_anchor=(0.5,0.98),fontsize=size_text-2,ncol=10,columnspacing=0.5,labelspacing=0.1,handletextpad=0.1,handlelength=1,borderpad=0.1, frameon=True,markerfirst=False)
 fig.get_layout_engine().set(rect=[0, 0, 1, 0.965])  # top 5% reserved for legend
 axes[-1].set_xlabel('$\omega$',fontsize = size_text)
