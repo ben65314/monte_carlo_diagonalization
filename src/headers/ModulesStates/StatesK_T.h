@@ -347,6 +347,13 @@ public:
                             this->sys_sP.beta_MH, this->sys_sP.reticle);
 	}
 
+    void subspace_condition_expanding() {
+		if (verbose > 5) std::cout<<"nHapply "<<this->sys_sP.nHapply<<std::endl;
+		for(uInt i = 0; i < this->sys_sP.nHapply; i++) {
+			HuN_subspace_condition_expanding(this,0,this->get_length());
+		}
+	}
+
 	StateType get_at(StateType index) const{//::
 		/***************************************
 		Gets a specific state in the StatesArr

@@ -33,28 +33,29 @@ allow_jump: {(3,0,0)} {-1}
 N: {4}
 Sz: {0}
 
-beta: {0.4}
+beta: {0.}
 
 #	Reticle of the breadth sampling. 0 will be set the reticle to its maximum value
 reticle: {0}
 
 #	Size of the truncated space
-sampling_space_size: {36}
+sampling_space_size: {10}
 
 #	After fundamental truncating. After the fundamental is found will keep the most dominant
 #	states until the Truncated_Cutoff value is met. A value of 1, will not change to space.
 #	0 < Truncated_Cutoff < 1
 truncated_cutoff: {1}
 
+nHapply : {1}
 
 
 ########################## INITIAL SAMPLING STATES #################################
 #(Here you can specify the initial State or States of your sampling it will overwrite the N and Sz parameters entered above, if you want to use the N and Sz value, you can remove those lines, comment them or leave the curly brackets empty.)
-initial_states : {}
+initial_states : {90}
 
 ########################## GREEN FUNCTION PARAMETERS ###############################
 #(Here you can specify the parameters of the Green function creator)
-compute_green: {no}
+compute_green: {YES}
 added_spin: {0} #Must be 0 (down) or 1 (up)
 eta: {0.05}
 

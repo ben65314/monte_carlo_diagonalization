@@ -95,6 +95,34 @@ void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vec
 double state_energy(sType x, hubbardParam* hubP);
 void calculate_epsilon_1d(hubbardParam* hubP);
 
+template <class A> void HuN_subspace_condition_expanding(A* sArr, uint64_t start, uint64_t end){
+	/*******************************************************
+	* Expends a subspace by applying the Hu hopping opoerator
+	*
+	* Parameters
+	* ----------
+	* sArr	: (A*) ptr to the StatesArr object to expand
+	* start	: (uint64_t) first index to apply Ht on
+	* end		: (uint64_t) index to stop apply Ht on
+	*
+	* Templates
+	* ---------
+	* A		: Any StatesArr child object
+	*
+	* Returns
+	* -------
+	* NONE
+	********************************************************/
+	for (uint64_t i = start; i < end; i++) {
+		//HuN
+		std::vector<sType> proj;
+		HuN(sArr->get_at(i), &proj, sArr->sys_hubP.n_sites);
+		for (uint64_t j = 0; j < proj.size(); j++) {
+			sArr->add(proj.at(j));
+		}
+	}
+}
+
 
 template <class A> void Ht_subspace_condition_expanding(
         A* sArr, uint64_t start, uint64_t end){
