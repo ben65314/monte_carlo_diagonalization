@@ -15,7 +15,7 @@ struct justManyVariables readParameters(const std::string file) {
 	int Sz = 0;
 	Electrons elec;
 	sType init;
-	std::vector<int> sites_pos;
+	std::vector<sType> sites_pos;
 	unsigned char current_site = 0;
 	std::vector<int> allowed_jump;
 	std::vector<double> jump_energy;
@@ -304,10 +304,29 @@ struct justManyVariables readParameters(const std::string file) {
 	if(send_info.sP.sampling_size <=0) send_info.sP.sampling_size = 1;
 
     // k-basis
+    //Find dimensions of lattice
+    for (int i = 0; i < send_info.hubP.n_sites; i++){
+        for (int d = 0; d < send_info.hubP.DIM; d++){
+
+            send_info.hubP.R.push_back(sites_pos.at(i*send_info.hubP.DIM + d));
+
+            //Find x,y,z dimensions
+            if (send_info.hubP.R[i*send_info.hubP.DIM + d] + 1 > send_info.hubP.dimension.at(d))
+                send_info.hubP.dimension[d] = send_info.hubP.R[i*send_info.hubP.DIM + d] + 1;
+        }
+    }
+
+    //Build k-vectors
+    for (int i = 0; i < send_info.hubP.n_sites; i++){
+        for (int d = 0; d < send_info.hubP.DIM; d++){
+            send_info.hubP.K.push_back(2*M_PI*send_info.hubP.R[i*send_info.hubP.DIM + d]/send_info.hubP.dimension[d]);
+        }
+    }
     //Create epsilon vector
 	int n = send_info.hubP.n_sites*send_info.hubP.n_sites;
 	send_info.hubP.matEpsilon = std::vector<std::complex<double>>(n,0);
-	calculate_epsilon_1d(&send_info.hubP);
+	calculate_epsilon_3d(&send_info.hubP);
+
 
 	return send_info;
 

@@ -1,5 +1,6 @@
 #include "electronManipulationFunctions.h"
 #include "Structures.h"
+#include "blas_lapack_wrappers.h"
 #include "basicFunctions.h"
 
 
@@ -562,4 +563,41 @@ void calculate_epsilon_1d(hubbardParam* hubP){
 
 		}//END OF FOR J
 	}//END OF FOR I
+}
+
+
+int INC = 1;
+void calculate_epsilon_3d(hubbardParam* hubP){
+	/*****************************************
+	* Calculates the epsilon values matrix in a 1D lattice
+	*
+	* Parameters
+	* ----------
+	* hubP	: (hubbardParam) System parameters
+	*
+	* Returns
+	* -------
+	* NONE
+	****************************************/
+    sType* dim = &(hubP->DIM);
+	std::complex<double> value = 0;
+	for (int k = 0; k < hubP->n_sites; k++) {
+		for (int q = 0; q < hubP->n_sites; q++) {
+			value = 0;
+			for (int i = 0; i < hubP->n_sites; i++){
+				for (int j = 0; j < hubP->n_sites; j++){
+                    double delta =ddot_(dim,hubP->K.data()+k*(*dim),
+                                        &INC,hubP->R.data()+i*(*dim),&INC) - 
+                                  ddot_(dim,hubP->K.data()+q*(*dim),
+                                        &INC,hubP->R.data()+j*(*dim),&INC);
+
+					value += hubP->t_matrix[i * hubP->n_sites + j] * exp(std::complex<double>(0,1) * delta) / (double) hubP->n_sites;
+				}//END OF FOR J
+			}//END OF FOR I
+			hubP->matEpsilon[k * hubP->n_sites + q] = remove_zeros(value);
+
+		}//END OF FOR Q
+	}//END OF FOR K
+    delete[] K;
+    delete[] R;
 }

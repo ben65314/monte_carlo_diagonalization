@@ -94,6 +94,7 @@ void u_jump_energy(sType right_state, Electrons elec, std::vector<sType>* states
 void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vector<std::complex<double>>* energies, hubbardParam* hubP);
 double state_energy(sType x, hubbardParam* hubP);
 void calculate_epsilon_1d(hubbardParam* hubP);
+void calculate_epsilon_3d(hubbardParam* hubP);
 
 template <class A> void HuN_subspace_condition_expanding(A* sArr, uint64_t start, uint64_t end){
 	/*******************************************************

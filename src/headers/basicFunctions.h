@@ -167,6 +167,37 @@ template <class T> std::string to_string_pq(
 template <class T> T remove_zeros(T a);
 
 //Print vec and matrix
+template <class R> std::string write_matrix(
+        const sType* mat, R rows, R cols){
+	/*****************************************
+	* Writes a double matrix has a string
+	*
+	* Parameters
+	* ----------
+	* mat	    : (double*) pointer of the double matrix to stringify
+	* rows	    : (R) number of rows of the matrix
+	* cols	    : (R) number of cols of the matrix
+    * integers  : (int) number of int spaces
+    * precision : (int) number of float spaces
+	*
+	* Templates
+	* ---------
+	* R		: int, long, unsigned
+	*
+	* Returns
+	* -------
+	* write	: (std::string) double matrix in string form
+	****************************************/
+	std::string write = "";
+	for (R i = 0; i < rows; i++) {
+		write += "[";
+		for (R j = 0; j < cols; j++) {
+			write += std::to_string(mat[i * cols + j])+"\t";
+		}
+		write += "]\n";
+	}
+	return write;
+}
 template <class T, class R> std::string write_vector(const T* vec, R size){
 	/*****************************************
 	* Writes a double vector has a string
@@ -277,6 +308,29 @@ template <class T, class R> void print_vector(const T* vec, R size){
 	* NONE
 	****************************************/
 	std::cout << write_vector(vec, size);
+}
+template <class R> void print_matrix_i(sType* mat, R rows, R cols){
+	/*****************************************
+	* Prints the given matrix
+	*
+	* Parameters
+	* ----------
+	* mat	: (double*) pointer of the complex matrix to stringify
+	* rows	: (R) number of rows of the matrix
+	* cols	: (R) number od cols of the matrix
+    * integers  : (int) number of int spaces
+    * precision : (int) number of float spaces
+    *
+	* Templates
+	* ---------
+	* T		: double, std::complex<double>
+	* R		: int, long, unsigned
+	*
+	* Returns
+	* -------
+	* NONE
+	****************************************/
+	std::cout << write_matrix(mat, rows, cols);
 }
 template <class T, class R> void print_matrix(const T* mat, R rows, R cols,
                                      int integers = 2, int precision = 0){

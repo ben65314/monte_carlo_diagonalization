@@ -7,6 +7,7 @@ extern "C" {
 void dscal_(sType* n, double* alpha, double* x, int* incx);
 double dnrm2_(sType*, double*, int*);
 void daxpy_(sType*, double*, double*, int*, double*, int*);
+sType sdot_(sType*, sType*, int*, sType*, int*);
 double ddot_(sType*, double*, int*, double*, int*);
 void dswap_(sType*, double*, int*, double*, int*);
 
