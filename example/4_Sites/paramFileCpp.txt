@@ -46,7 +46,8 @@ sampling_space_size: {10}
 #	0 < Truncated_Cutoff < 1
 truncated_cutoff: {1}
 
-nHapply : {1}
+nHapply : {3}
+wH : {1}
 
 
 ########################## INITIAL SAMPLING STATES #################################
@@ -56,6 +57,6 @@ initial_states : {90}
 ########################## GREEN FUNCTION PARAMETERS ###############################
 #(Here you can specify the parameters of the Green function creator)
 compute_green: {YES}
-added_spin: {0} #Must be 0 (down) or 1 (up)
+added_spin: {1} #Must be 0 (down) or 1 (up)
 eta: {0.05}
 

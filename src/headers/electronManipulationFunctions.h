@@ -1,5 +1,6 @@
 #pragma once
 #include "Structures.h"
+#include "basicFunctions.h"
 
 
 bool c_operator(sType* num, int index);
@@ -131,8 +132,7 @@ template <class A> void Ht_subspace_condition_expanding(
 	* Expends a subspace by applying the Ht hopping opoerator
 	*
 	* Parameters
-	* ----------
-	* sArr	: (A*) ptr to the StatesArr object to expand
+	* ---------StatesK_T*	* sArr	: (A*) ptr to the StatesArr object to expand
 	* start	: (uint64_t) first index to apply Ht on
 	* end	: (uint64_t) index to stop apply Ht on
 	*
@@ -238,5 +238,87 @@ template<class T, class U> void write_state_with_double(
 	outFile<<fund_txt;
 	outFile.close();
 
+
+}
+
+template<class T, class U> void count_contribution_wH(
+    T* fund, U* states, U* states_to_probe, unsigned int sites, double wH) {
+	/*******************************************************
+	* Sort the states according to their fund weight, creates a reduced
+    * subspace keeping only the most dominant elements and write everything in
+    * a .txt file
+	*
+	* Parameters
+	* ----------
+	* fund	: (std::vector<T>*) ptr to the fund vector
+	* states: (U*) ptr to the StatesArr object to expand
+	* sites	: (unsigned int) nbr of sites of the system
+	* keep	: (double) weight to keep
+	*
+	* Templates
+	* ---------
+	* T		: double, std::complex<double>
+	* U		: Any StatesArr child object
+	*
+	* Returns
+	* -------
+	* NONE
+	********************************************************/
+    sType size = states->get_length();
+    int one = 1;
+    wH *= pow(dznrm2_(&size, fund, &one),2);
+	// Create index vector: [0, 1, 2, 3]
+    std::vector<uLong> indices(states->get_length());
+    std::iota(indices.begin(), indices.end(), 0);
+
+    // Sort indices based on weight of fundamental state
+    std::sort(indices.begin(), indices.end(), [&](size_t i, size_t j) {
+        return abs(fund[i]) > abs(fund[j]);
+    });
+
+	// Apply the sorting to weights and states
+    //    sorted_fund[i] = fund[indices[i]];
+    //    sorted_states[i] = states->get_at(indices[i]);
+    //}
+
+	//Removing old arrays
+	//states->remove_all();
+    //std::fill(fund, fund + states->get_length(), 0);
+
+	//Creates a string to store the sorted fund
+	std::string fund_txt = "";
+	double cummul = 0;
+	for (uLong i = 0 ; i < indices.size(); i++) {
+		cummul += (double)(conjugate(fund[indices[i]])*fund[indices[i]]).real();
+
+        //Add the states back in the States array but in order of their weight
+        states_to_probe->add(states->get_at(indices[i]));
+		//Count how many states are needed to get to wH
+		if (abs(cummul-wH) < 10e-8) {
+            break;
+			if(verbose > 99) {
+                std::cout << cummul << "\tADD:"<<
+                states->get_at(indices[i]) << "\t" << fund[indices[i]] << std::endl;
+            }
+		}
+
+	}
+    //std::cout<<"States to probe"<<std::endl;
+    //states_to_probe->show_all_states();
+
+	//Writes
+	/*
+    char cwd[PATH_MAX];
+fif (!getcwd(cwd, sizeof(cwd))) {
+        std::cout << "Problem occured getting CWD" << std::endl;
+    }
+	std::string txtName = "/fund.txt";
+	const std::string outFileName = cwd + txtName;
+	std::ofstream outFile;
+	//Write Q-matrix and ev
+	outFile.open(outFileName);
+	outFile<<fund_txt;
+	outFile.close();
+    */
 
 }

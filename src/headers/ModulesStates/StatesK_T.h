@@ -2,6 +2,7 @@
 #include "Structures.h"
 #include "basicFunctions.h"
 #include "electronManipulationFunctions.h"
+#include "utilities.h"
 
 #ifndef __StatesK_T_h__
 #define __StatesK_T_h__
@@ -352,6 +353,29 @@ public:
 		for(uInt i = 0; i < this->sys_sP.nHapply; i++) {
 			HuN_subspace_condition_expanding(this,0,this->get_length());
 		}
+	}
+
+    template<class T> void subspace_condition_expanding_weighted(T* fund_vector, std::vector<StateType>* states_added) {
+		if (verbose > 5) std::cout<<"nHapply weighted = "<<this->sys_sP.nHapply<<std::endl;
+        if (verbose > 99) {
+            this->show_all_states();
+            print_vector(fund_vector, this->get_length(),3);
+        }
+        StatesK_T* states_to_probe = new StatesK_T<StateType, VectorType>(50);
+        states_to_probe->set_hubbard_parameters(this->sys_hubP);
+        //Finds the states with the most weight and put them in
+        count_contribution_wH(fund_vector, this, states_to_probe, this->sys_hubP.n_sites, this->sys_sP.wH);
+
+        if (verbose > 99) {
+            this->show_all_states();
+            print_vector(fund_vector, this->get_length(),3);
+        }
+		for(uInt i = 0; i < this->sys_sP.nHapply; i++) {
+            HuN_subspace_condition_expanding(states_to_probe,0,states_to_probe->get_length());
+		}
+        states_to_probe->get_num_array(states_added);
+
+        delete states_to_probe;
 	}
 
 	StateType get_at(StateType index) const{//::

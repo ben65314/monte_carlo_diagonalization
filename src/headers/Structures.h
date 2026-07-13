@@ -90,11 +90,13 @@ struct samplingParam{ //Sampling parameters
 	float beta_MH;
 
 	//H application for green
-	uInt nHapply;
-	float beta_Happly;
+	uInt nHapply = 0;
+	float beta_Happly = 0;
 
 	//Fundamental truncation cutoff value
 	float fund_tc = 1;
+	//Excited states truncation cutoff value
+	float wH = 1;
 	
 	std::vector<sType> init_state;
 

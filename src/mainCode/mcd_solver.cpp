@@ -105,8 +105,15 @@ int main(int argc, char *argv[]){
 	LanczosSolver<vType,decltype(MH_Block)> LS;
 	double fundE = LS.fund_energy(&fund_state, &MH_Block, &deg);
 
-	if (verbose > 99) std::cout << "ENDING FUND VECTOR" << std::endl;
-	if (verbose > 99) print_vector(fund_state.data(), got_subspace_len);
+	if (verbose > 99) std::cout << "FUND VECTOR" << std::endl;
+	if (verbose > 9) {
+        std::cout<<"States("<<MH_Block.get_length()<<"):"<<std::endl;
+        MH_Block.show_all_states();
+        for (int i = 0; i < deg; i++) {
+            std::cout<<"Fund state #"<<i<<std::endl;
+            print_vector(fund_state.data() + got_subspace_len*i, got_subspace_len,5);
+        }
+    }
 	//MH_Block.show_all_states();
 	if (MH_Block.sys_sP.fund_tc < 1) {
 		if (verbose > 9) {
@@ -130,7 +137,7 @@ int main(int argc, char *argv[]){
 		auto step2_5 = std::chrono::high_resolution_clock::now();
 		if (verbose > 0) std::cout << "\nStep 3:Green functions..."<<std::endl;
 
-		if (MH_Block.sys_hubP.n_sites < 5 ) {
+		if (MH_Block.sys_hubP.n_sites < 4 ) {
 			compute_green_long(gP.g_added_spin, &fund_state, fundE,
                                 &MH_Block, gP, deg);
 		}

@@ -43,13 +43,15 @@ beta: {0}
 reticle: {0}
 
 #	Size of the truncated space
-sampling_space_size: {400}
+sampling_space_size: {618}
 
 #	After fundamental truncating. After the fundamental is found will keep the most dominant
 #	states until the Truncated_Cutoff value is met. A value of 1, will not change to space.
 #	0 < Truncated_Cutoff < 1
 truncated_cutoff: {1}
 
+nHapply : {5}
+wH : {1}
 
 
 ########################## INITIAL SAMPLING STATES #################################

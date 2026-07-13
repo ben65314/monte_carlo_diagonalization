@@ -128,6 +128,9 @@ struct justManyVariables readParameters(const std::string file) {
 			else if (lines.find("truncated_cutoff") != std::string::npos) {
 				send_info.sP.fund_tc = value_float;
 			}
+			else if (lines.find("wH") != std::string::npos) {
+				send_info.sP.wH = value_float;
+			}
 			//Location of sites//////////////////////////////////////
 			else if (lines.find("site_location") != std::string::npos) {
 				sites_pos.insert(sites_pos.end(), value_vector.begin(),

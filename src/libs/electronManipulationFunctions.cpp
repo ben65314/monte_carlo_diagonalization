@@ -598,6 +598,4 @@ void calculate_epsilon_3d(hubbardParam* hubP){
 
 		}//END OF FOR Q
 	}//END OF FOR K
-    delete[] K;
-    delete[] R;
 }

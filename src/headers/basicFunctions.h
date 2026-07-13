@@ -198,7 +198,7 @@ template <class R> std::string write_matrix(
 	}
 	return write;
 }
-template <class T, class R> std::string write_vector(const T* vec, R size){
+template <class T, class R> std::string write_vector(const T* vec, R size, int decimals=0){
 	/*****************************************
 	* Writes a double vector has a string
 	*
@@ -218,7 +218,7 @@ template <class T, class R> std::string write_vector(const T* vec, R size){
 	****************************************/
 	std::string write = "[";
 	for (R i = 0; i < size; i++) {
-		write += to_string_p(vec[i], 0) + "\t";
+		write += to_string_p(vec[i], decimals) + "\t";
 		if ((i+1) % 10 == 0) write += "";
 	}
 	write += "]\n";
@@ -289,7 +289,7 @@ template <class R> std::string write_matrix(
 	return write;
 }
 
-template <class T, class R> void print_vector(const T* vec, R size){
+template <class T, class R> void print_vector(const T* vec, R size, int decimals=0){
 	/*****************************************
 	* Prints a given vector
 	*
@@ -307,7 +307,7 @@ template <class T, class R> void print_vector(const T* vec, R size){
 	* -------
 	* NONE
 	****************************************/
-	std::cout << write_vector(vec, size);
+	std::cout << write_vector(vec, size, decimals);
 }
 template <class R> void print_matrix_i(sType* mat, R rows, R cols){
 	/*****************************************
