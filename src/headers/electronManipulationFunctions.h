@@ -292,7 +292,10 @@ template<class T, class U> void count_contribution_wH(
 		cummul += (double)(conjugate(fund[indices[i]])*fund[indices[i]]).real();
 
         //Add the states back in the States array but in order of their weight
-        states_to_probe->add(states->get_at(indices[i]));
+        if (verbose > 9) std::cout<<cummul<<"/"<<wH<<std::endl;
+        if (cummul < wH) {
+            states_to_probe->add(states->get_at(indices[i]));
+        }
 		//Count how many states are needed to get to wH
 		if (abs(cummul-wH) < 10e-8) {
             break;

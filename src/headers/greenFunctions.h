@@ -291,7 +291,7 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 
 	//Number of times H is applied to generate new states
     new_space_len = states_excited->get_length();
-	if (verbose > 9) {
+	if (verbose > 4) {
         std::cout << "Before H excitation : "<< new_space_len << std::endl;
         states_excited->show_all_states();
     }
@@ -323,7 +323,7 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
                                   states_excited, arr_BL + i*new_space_len);
 	}
 
-	if (verbose > 9) {
+	if (verbose > 4) {
         std::cout << "After H excitation : " << states_excited->get_length() << std::endl;
         states_excited->show_all_states();
     }
