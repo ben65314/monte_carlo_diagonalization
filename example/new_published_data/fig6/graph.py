@@ -1,24 +1,19 @@
 
 #!/usr/bin/python3
 import csv
-from os import wait
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
-from matplotlib.patches import FancyBboxPatch
-from matplotlib.ticker import AutoMinorLocator
 import matplotlib.gridspec as gridspec
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 import numpy as np
-import matplotlib.ticker as mticker
 
 import scipy.stats as stats
 
-from matplotlib.legend_handler import HandlerBase
-from matplotlib.colors import LinearSegmentedColormap
+import sys
+import os
+# add the parent directory (where stack_axes.py lives) to the path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from stack_axes import make_stacked_axes
 
-from PIL import Image
-import svgutils.compose as sc
 
 plt.style.use('tableau-colorblind10')
 
@@ -32,7 +27,7 @@ def reader(file_name):
     print(file_name)
     x = []
     y = []
-    #y = []
+    y_both= []
     with open(file_name) as file:
         reader = csv.reader(file,delimiter='\t')
         for lines in reader:
@@ -41,7 +36,8 @@ def reader(file_name):
             x.append(float(lines[0]))
             #y.append(float(lines[1])+float(lines[2]))
             y.append(float(lines[1])+float(lines[2]))
-    return x,y
+            y_both.append([float(lines[1]),float(lines[2])])
+    return x,y,y_both
 
 ##Curves information
 #limits
@@ -60,25 +56,22 @@ data_r_float = ['0.00000', '0.0001', '0.001', '0.01', '0.1']
 #exp_label_10 = [r'$10^{-\infty}$',r'$10^{-3}$',r'$10^{-2}$',r'$10^{-1}$']
 data_site = ['16','16']
 
-ylims = [0.35,0.35,0.45,0.45,0.45,0.45]
+ylims = [0.44,0.44]
 
 
 
 #lines esthetics
 line_style = ['solid']*6
-#line_style = ['solid','dashed','dashdot',(0,(1,1)),'solid']
-#line_width = [2.6,2.2,1.8,1.4,1]
 line_width = [1.5]*6
 markers = ['.','x']
 m_size = [70,40]
-#line_width = [2,2,2,2,1]
+
 #Colors #states
 cmap = plt.get_cmap('viridis')
 colorsa = np.linspace(0,1,num=len(data_r)-1);
 colors = [cmap(i) for i in colorsa]
 colors.insert(0,'k')
 colors[-1]='goldenrod'
-
 
 #legend labels
 labels = []
@@ -90,12 +83,10 @@ handles = []
 
 #Set font family
 hfont = {'fontname':'Times'}
-plt.rc('font', family='serif',size=24)
+plt.rc('font', family='serif',size=14)
 plt.rc('text', usetex=True)
-plt.rc('legend', fontsize=24)
-#mpl.rcParams['text.latex.preamble'] = r'\boldmath'
-#plt.rcParams["font.family"] = "Computer Modern"
-size_text = 14
+plt.rc('legend', fontsize=14)
+size_text = 16
 
 # Sample data
 q_matrix_files =[]
@@ -106,17 +97,8 @@ for i in data_perc:
 
 #print(q_matrix_files)
 # Create subplots with shared x-axis
-fig = plt.figure(figsize=(6,3.5),constrained_layout=True)
-L, R, T, B = 0.002, 0.002, 0.08, 0.0
-fig.get_layout_engine().set(w_pad=0.05,h_pad=0.03,wspace=0.,rect=(L, B, 1 - L - R, 1 - B - T))
-#mpl.layout_engine.ConstrainedLayoutEngine.set(,w_pad=0.0)
-#mpl.layout_engine.ConstrainedLayoutEngine(w_pad=0.0)
-#mpl.layout_engine.ConstrainedLayoutEngine.execute(fig)
-
-#fig, axes = plt.subplots(2# Create main axes for a) and b)
+fig,axes = make_stacked_axes(n_panels=2,panel_height_cm=3.2,left=0.01,right=0.99,top_margin_cm=0.1)
 gs = gridspec.GridSpec(2, 1, figure=fig, height_ratios=[1, 1])
-axes = [fig.add_subplot(gs[0, 0])]  # a)
-axes.append(fig.add_subplot(gs[1, 0]))  # b)
 
 # Create inset axis (for c)) positioned relative to the lower plot
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
@@ -149,17 +131,17 @@ for i,ax in enumerate(axes):
     if i < 2 :
         q_files = q_matrix_files[i]
         #print(q_files)
-        x_ref,y_ref = reader(q_files[0])
+        x_ref,y_ref,_ = reader(q_files[0])
 
         for j in range(len(q_matrix_files[i])):
-            x,y = reader(q_files[j])
+            x,y,_ = reader(q_files[j])
             #SPECTRAL FUNCTIONS
             handle, = ax.plot(x, np.array(y),linestyle=line_style[j],lw=line_width[j],color=colors[j],label=data_r_float_w[j])
 
             ax.set_ylim(0, float(ylims[i]))
             ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
             ax.set_xlim(xlims_min,xlims_max)
-            ax.tick_params(axis='x',labelsize=size_text)
+            ax.tick_params(axis='x',labelsize=size_text+1)
             ax.set_yticks([0, ylims[i]])  # Tick only at 0 and 1 and 2
 
             #Vert line at 0
@@ -197,7 +179,7 @@ handles = reverse_handle
 
 # Set x-axis label on the bottom subplot only
 leg = fig.legend(handles=handles,loc='upper center',
-        bbox_to_anchor=(0.5,1.01),
+        bbox_to_anchor=(0.525,1.01),
         #bbox_to_anchor=(0.725,0.16),
         #bbox_to_anchor=(0.66,0.5828),
         fontsize=size_text,ncol=6,
@@ -221,10 +203,9 @@ axes[2].tick_params(
     labelleft=False     # remove y labels
 )
 axes[2].set_xlim(2e-1,5e-5)
-axes[2].set_ylim(-0.005,0.13)
+axes[2].set_ylim(-0.005,0.15)
 axes[2].axhline(0,c='k',lw=0.7,linestyle='--')
 
-# Shared legend placed outside the plots (bottom center)
-#plt.tight_layout()
 plt.savefig('further_truncation.pdf')
 
+plt.show()

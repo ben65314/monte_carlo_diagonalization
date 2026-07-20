@@ -24,8 +24,8 @@ mu: {4}
 #(INFORMATION NEEDED FOR ALL PROGRAMS)
 site_location: {(0,0,0)}
 site_location: {(1,0,0)}
-site_location: {(0,1,0)}
 site_location: {(1,1,0)}
+site_location: {(0,1,0)}
 
 allow_jump: {(1,0,0)} {-2}
 allow_jump: {(0,1,0)} {-2}
@@ -35,7 +35,7 @@ allow_jump: {(0,1,0)} {-2}
 N: {4}
 Sz: {0}
 
-beta: {0.2}
+beta: {0.}
 
 #	Reticle of the breadth sampling. 0 will be set the reticle to its maximum value
 reticle: {0}

@@ -69,7 +69,7 @@ size_text = 14
 cmap_red   = plt.get_cmap("Reds")
 cmap_yellow= plt.get_cmap("Blues")
 cmap_green = plt.get_cmap("Greens")
-cmap_blue  = plt.get_cmap("YlOrBr")
+cmap_blue  = plt.get_cmap("RdPu")
 cmaps = [cmap_red,cmap_yellow,cmap_green,cmap_blue]
 
 # Markers
@@ -129,8 +129,8 @@ for i in range(len(q_ghost_files)):
 for i in range(len(q_matrix_files)):
     #Color map used
     max_color, min_color = 0.95, 0.006
-    if i == 1 :
-        max_color, min_color = 0.5, 0.012
+    if i == 3 :
+        max_color, min_color = 0.35, 0.012
     colorsa = (np.linspace(min_color,max_color,num=(int(sites[i]/2)+1)))**(0.2);
     colors = [cmaps[i](j) for j in colorsa]
 

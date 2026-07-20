@@ -161,7 +161,7 @@ template <class T, class R> std::string write_vector(const T* vec, R size){
 	****************************************/
 	std::string write = "[";
 	for (R i = 0; i < size; i++) {
-		write += to_string_p(vec[i], 0) + "\t";
+		write += to_string_p(vec[i], 3) + "\t";
 		if ((i+1) % 10 == 0) write += "";
 	}
 	write += "]\n";

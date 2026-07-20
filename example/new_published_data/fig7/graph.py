@@ -158,7 +158,7 @@ for i,ax in enumerate(axes):
         ax.set_ylim(0, float(ylims[i]))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.set_xlim(xlims_min,xlims_max)
-        ax.tick_params(axis='x',labelsize=size_text)
+        ax.tick_params(axis='x',labelsize=size_text+1)
         ax.set_yticks([0, float(ylims[i])])  # Tick only at 0 and 1 and 2
         
         #Vert line at 0
@@ -235,5 +235,5 @@ axes[-1].set_xlabel('$\omega$',fontsize = size_text)
 #plt.tight_layout()
 plt.savefig('large_clusters.pdf')
 
-#plt.show()
+plt.show()
 

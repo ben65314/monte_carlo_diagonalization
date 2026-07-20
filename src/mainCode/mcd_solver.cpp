@@ -104,9 +104,17 @@ int main(int argc, char *argv[]){
 	int deg = 1;
 	LanczosSolver<vType,decltype(MH_Block)> LS;
 	double fundE = LS.fund_energy(&fund_state, &MH_Block, &deg);
+    std::cout<<"Deg="<<deg<<std::endl;
 
-	if (verbose > 99) std::cout << "ENDING FUND VECTOR" << std::endl;
-	if (verbose > 99) print_vector(fund_state.data(), got_subspace_len);
+	if (verbose > 99) std::cout << "FUND VECTOR" << std::endl;
+	if (verbose > 9) {
+        std::cout<<"States("<<MH_Block.get_length()<<"):"<<std::endl;
+        MH_Block.show_all_states();
+        for (int i = 0; i < deg; i++) {
+            std::cout<<"Fund state #"<<i<<std::endl;
+            print_vector(fund_state.data() + got_subspace_len*i, got_subspace_len);
+        }
+    }
 	//MH_Block.show_all_states();
 	if (MH_Block.sys_sP.fund_tc < 1) {
 		if (verbose > 9) {

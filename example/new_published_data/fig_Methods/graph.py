@@ -6,6 +6,18 @@ import numpy as np
 import matplotlib as mpl
 import csv
 
+import sys
+import os
+# add the parent directory (where stack_axes.py lives) to the path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from stack_axes import make_stacked_axes
+
+def ax_to_fig(ax, x, y):
+    fig = ax.figure
+    display_coords = ax.transAxes.transform((x, y))
+    f = fig.transFigure.inverted().transform(display_coords)
+    return f[0], f[1]
+
 def reader(file_name):
     """
     READER
@@ -38,7 +50,7 @@ pos_y_name = 0.975
 data_perc = '05'
 data_site = 16
 data_methods = ['MCD', 'BFS-Boltzmann', 'DFS', 'Monte-Carlo']
-data_methods_label = ['MCD', 'Variante 1', 'Variante 2', 'Variante 3']
+data_methods_label = ['MCD', 'Variant 1', 'Variant 2', 'Variant 3']
 data_beta = [[0.1, 0.2, 0.3], # MCD
              [0.1, 0.2, 0.3], # BFS-Boltzmann
              [0.1, 0.2, 0.3], # DFS
@@ -49,17 +61,16 @@ ylims = [0.45,0.45,0.45,0.45,0.6,0.6]
 
 #lines esthetics
 line_style = ['solid']*5
-#line_style = ['solid','dashed','dashdot',(0,(1,1)),'solid']
-#line_width = [2.6,2.2,1.8,1.4,1]
 line_width = [1.5]*5
 lwidth = 1.5 #if j!=0 else 5
-#line_width = [2,2,2,2,1]
+
 #Colors #states
 cmap = plt.get_cmap('gnuplot')
 colorsa = np.linspace(0,.90,num=4);
 colors = [cmap(i) for i in colorsa]
 
 betas = ['ED', 0.1, 0.2, 0.3]
+betas_label = ['ED   ', r'$\beta:0.1$', 0.2, 0.3]
 color_dict = {}
 for i,b in enumerate(betas):
     color_dict[b] = colors[i]
@@ -72,12 +83,10 @@ handles = []
 
 #Set font family
 hfont = {'fontname':'Times'}
-plt.rc('font', family='serif',size=24)
+plt.rc('font', family='serif',size=14)
 plt.rc('text', usetex=True)
-plt.rc('legend', fontsize=24)
-#mpl.rcParams['text.latex.preamble'] = r'\boldmath'
-#plt.rcParams["font.family"] = "Computer Modern"
-size_text = 14
+plt.rc('legend', fontsize=14)
+size_text = 16
 
 
 # Sample data
@@ -88,16 +97,13 @@ for i,method in enumerate(data_methods):
         q_matrix_files[-1].append('./'+method+'/dos_green05_'+str(j)+'.txt')
 
 # Create subplots with shared x-axis
-fig, axes = plt.subplots(len(data_methods), 1, sharex=True, figsize=(6, 2+len(data_methods)),constrained_layout=True)
-#plt.subplots_adjust(left=.02,right=.98,bottom=.16,top=.90)  #Change top space
-#plt.subplots_adjust(hspace=.1)  # Reduce vertical space between plots
-#plt.subplots_adjust(left=0, bottom=0, right=1, top=0, wspace=0, hspace=0)
+fig,axes = make_stacked_axes(n_panels=4,panel_height_cm=3.2,left=0.01,right=0.99,top_margin_cm=0.1)
 
 #BOX PARAMS
 ss_x = 0.9975#xlims_max*0.50
 ss_y = 0.98#*np.array(ylims)
 ss_spacing = 0.14 #Was .15
-ss_size_text = 12 #Was 16
+ss_size_text = 14 #Was 16
 ha_pos_title = 'center'
 ha_pos = 'right'
 va_pos = 'top'
@@ -125,7 +131,7 @@ for i,ax in enumerate(axes):
         ax.set_ylim(0, float(ylims[i]))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.set_xlim(xlims_min,xlims_max)
-        ax.tick_params(axis='x',labelsize=size_text)
+        ax.tick_params(axis='x',labelsize=size_text+1)
         ax.set_yticks([0, ylims[i]])  # Tick only at 0 and 1 and 2
 
         #Vert line at 0
@@ -138,25 +144,21 @@ for i,ax in enumerate(axes):
             #ax.legend(loc='upper right')
 
     # Optionally add individual titles or labels
-    #ax.set_ylabel(graph_name[i],fontsize=14)
     ax.text(pos_x_name,pos_y_name,letters[i],fontsize=size_text,ha='left',va='top', transform=ax.transAxes)
     ax.text(ss_x,ss_y - 0*ss_spacing, data_methods_label[i], fontsize=size_text,ha='right',va='top', transform=ax.transAxes,c='k')
 
-
 # legend
 handles_color = []
-for b in betas:
-    hdl, = axes[0].plot(20,20, color = color_dict[b], label=str(b),alpha=0.65)
+for i,b in enumerate(betas):
+    hdl, = axes[0].plot(20,20, color = color_dict[b], label=betas_label[i],alpha=0.65)
     handles_color.append(hdl)
 data_methods = ['MCD', 'BFS-Boltzmann', 'DFS', 'Monte-Carlo']
+
 # Set x-axis label on the bottom subplot
-legend = fig.legend(handles=handles_color,loc='center',bbox_to_anchor=(0.5,0.98),fontsize=size_text-2,ncol=10,columnspacing=0.5,labelspacing=0.1,handletextpad=0.1,handlelength=1,borderpad=0.1, frameon=True,markerfirst=False)
-fig.get_layout_engine().set(rect=[0, 0, 1, 0.965])  # top 5% reserved for legend
+legend = fig.legend(handles=handles_color,loc='center',bbox_to_anchor=(0.5,0.96),fontsize=size_text,ncol=10,columnspacing=0.7,labelspacing=0.1,handletextpad=0.1,handlelength=1,borderpad=0.1, frameon=True,markerfirst=False)
 axes[-1].set_xlabel('$\omega$',fontsize = size_text)
 
 # Shared legend placed outside the plots (bottom center)
-#plt.tight_layout()
-##plt.savefig('1D_4s_to_16s.svg')
 plt.savefig('method_variation.pdf',bbox_inches='tight', bbox_extra_artists=[legend])
 
 plt.show()
