@@ -1,11 +1,11 @@
 
 
-MCD_SOLVER      ?= ../../../../build/mcd_solver
-QMATRIX_PY      ?= ../../../../build/qMatrixGreenCompute.py
-AV_COMBINE_PY   ?= ../../../../build/av_combine.py
+MCD_SOLVER      ?= ../../../../../build/mcd_solver
+QMATRIX_PY      ?= ../../../../../build/qMatrixGreenCompute.py
+AV_COMBINE_PY   ?= ../../../../../build/av_combine.py
 
 ifeq ($(wildcard dos_green100.txt),)
-	SUFF ?= Ncst.txt 100.txt
+	SUFF ?= 100.txt#Ncst.txt 100.txt
 else
 	SUFF ?= 100.txt 
 endif
