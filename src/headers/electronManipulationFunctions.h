@@ -91,6 +91,7 @@ template <class T>void HuN(T state, std::vector<T>* proj_states, int sites) {
 	auto it = std::unique(proj_states->begin(), proj_states->end());
 	proj_states->erase(it, proj_states->end());
 }
+void Hepsilon(sType state, std::vector<sType>* proj_states, hubbardParam* hubP);
 void u_jump_energy(sType right_state, Electrons elec, std::vector<sType>* states, std::vector<double>* energies, hubbardParam* hubP);
 void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vector<std::complex<double>>* energies, hubbardParam* hubP);
 double state_energy(sType x, hubbardParam* hubP);

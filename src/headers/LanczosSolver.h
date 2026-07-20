@@ -653,7 +653,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 			energy = arr_a[0];
 			double RITZ = std::abs(vecs[n-1]*beta->back());
             //std::cout<<"RITZ VALUE : "<< RITZ<<std::endl;
-			if (abs(prevIterEnergy - energy) < epsilon && currentIteration > 3) {
+			if ((abs(prevIterEnergy - energy) < epsilon && currentIteration > 3) || (currentIteration == size)) {
 				converged = true;
 				*deg = deg_fundamental_check(arr_a,n);
 				fundState_lanczosBasis->clear();
@@ -665,9 +665,6 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 			if(currentIteration%10==0 && verbose > 5){
 				std::cout << "Lanczos current iteration :" << currentIteration << ":"<<abs(prevIterEnergy - energy)<< std::endl;
 
-			}
-			if(currentIteration == size) {
-				break;
 			}
 			currentIteration++;
 
@@ -702,7 +699,6 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 				r[i] = q[i]/beta->at(j-1);
 				q[i] = -beta->at(j-1)*tmp;
 			}
-
 			for (int d = 0; d < *deg; d++) {
 				std::complex<double> temp_fundState_lanczosBasis = fundState_lanczosBasis->at(j+size_proj*d);
 				zaxpy_(&size, &temp_fundState_lanczosBasis, r.data(), &ONE, gs+d*size, &ONE);	//r = r - q*alpha

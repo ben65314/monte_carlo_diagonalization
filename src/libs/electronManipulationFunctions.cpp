@@ -599,3 +599,58 @@ void calculate_epsilon_3d(hubbardParam* hubP){
 		}//END OF FOR Q
 	}//END OF FOR K
 }
+void Hepsilon(sType state, std::vector<sType>* proj_states, hubbardParam* hubP) {
+	/****************************************************************
+	* Applies the hopping operator of the Hubbard Hamiltonian
+	*
+	* Parameters
+	* ----------
+	* state			: (sType) initial state in the Fock formalism
+	* proj_states	: (std::vector<sType>*) Array of the possible accessible
+    *                                       states after the Hamiltonian
+	* hubP			: (hubbardParam*) System parameters
+	*
+	* Returns
+	* -------
+	* NONE
+	******************************************************************/
+	//States after applied Hamiltonian
+	unsigned char sites = hubP->n_sites;
+	sType one = 1;
+
+	const sType state_num = state;
+    //Where the electron is
+	sType from_down = one << (sites - 1);
+    sType from_up = one << (2 * sites - 1);
+
+	for(unsigned char i = 0; i < sites; i++){
+        //Where the electron is going
+		sType to_down = one << (sites - 1);
+        sType to_up = one << (2 * sites - 1);
+
+		for(unsigned char j = 0; j < sites; j++){
+            //Skips the iteration if the jump has no amplitude in the t matrix
+			if (hubP->matEpsilon[i * sites + j] == (std::complex<double>)0){
+				to_down >>= 1;
+				to_up >>= 1;
+				continue;
+			}
+
+            //Down electron jump
+			if (((from_down & state_num) != 0)
+                && ((to_down & state_num ) == 0)) {
+				proj_states->push_back((state_num | to_down) ^ from_down);
+			}
+
+            //Up electron jump
+			if (((from_up & state_num) != 0) && ((to_up & state_num ) == 0)) {
+				proj_states->push_back((state_num | to_up) ^ from_up);
+			}
+
+			to_down >>= 1;
+			to_up >>= 1;
+		}
+		from_down >>= 1;
+		from_up >>= 1;
+	}
+}

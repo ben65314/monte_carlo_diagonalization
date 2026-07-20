@@ -159,8 +159,10 @@ private:
                 //and energy of the current state
                 current_energy = state_energy(current_state->get_at(i),&this->sys_hubP);
 				possible_new_state.clear();
-				HuN(current_state->get_at(i), &possible_new_state,
+                Hepsilon(current_state->get_at(i), &possible_new_state, &this->sys_hubP);
+                HuN(current_state->get_at(i), &possible_new_state,
                         this->sys_hubP.n_sites);
+                
 
                 if (verbose > 4) {
                     //Compute proposed states for print
@@ -338,7 +340,7 @@ public:
 		return cloned_sArr;
 	}
 
-	//Samplings
+	//;amplings
 	void sampling(){
 		MHSamplingOfStates(this->sys_sP.sampling_size,
                             this->sys_sP.beta_MH, this->sys_sP.reticle);
