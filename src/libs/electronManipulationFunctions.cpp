@@ -426,83 +426,75 @@ void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vec
 	* -------
 	* NONE
 	*******************************************************/
-	//States after applied Hamiltonian
+	//Calculates the electron jump sites
 	int sites = hubP->n_sites;
-	const sType state_num = right_state;
-	states->push_back(right_state);
-	energies->push_back(0);
+	for (int i = 0; i < sites; i++) {//To
+		for (int j = i+1; j < sites; j++) {//From
+			//Jump energy
+            std::complex<double> jumpFactor = hubP->matEpsilon.at(i * sites + j);
+			if (jumpFactor == std::complex<double>(0,0)) continue;
 
-	sType from_down = 1UL << (sites - 1), from_up = 1UL << (2 * sites - 1);
+			for (int k = 0; k < 2; k++) {//Iteration over spins
+				sType temp_stateJI = right_state;
+				sType temp_stateIJ = right_state;
 
-	for(int i = 0; i < sites; i++){//From
-		sType to_down = 1UL << (sites - 1), to_up = 1UL << (2 * sites - 1);
+				int indexJ = (sites-j-1 + k*sites);
+				int indexI = (sites-i-1 + k*sites);
+				//From J -> I
+				if (c_dag_operator(&temp_stateIJ, indexJ)
+                    && c_operator(&temp_stateIJ, indexI)) {
+					//Add to the receptacle
+					states->push_back(temp_stateIJ);
 
-		for(int j = 0; j < sites; j++){//To
-			if (hubP->matEpsilon[i * sites + j]==std::complex<double>(0,0)){
-				to_down >>= 1;
-				to_up >>= 1;
-				continue;
-			}
-			//Is there an electron there and can we jump there
-			bool has_down, has_up, can_up, can_down, standby_up, standby_down;
-			has_down = ((from_down & state_num) != 0);
-			can_down = ((to_down & state_num ) == 0);
-
-			has_up = ((from_up & state_num) != 0);
-			can_up = ((to_up & state_num ) == 0);
-
-			standby_up = (from_up == to_up);
-			standby_down = (from_down == to_down);
-
-			//Spin down
-			if ((has_down && can_down) || (has_down && standby_down)) {
-				sType new_state = (state_num+to_down-from_down);
-
-				if (new_state == right_state) {
-					(*energies)[0] += hubP->matEpsilon[i * sites + j];
-				}
-				else {
-					states->push_back(new_state);
-
-					char phase = 1;
-					char start = (i > j) ? i : j;
-					char end = (i > j) ? j : i;
-					new_state >>= (hubP->n_sites - start);
-					for (int l = start - 1; l > end; l--) {
-						if ((new_state & 1) == 1) phase *= -1;
-						new_state >>= 1;
+					//Phase
+					temp_stateIJ >>= indexJ + 1;
+					int phase = 1;
+					for (int l = indexJ + 1; l < indexI; l++) {
+						if ((temp_stateIJ & 1) == 1) phase *= -1;
+						temp_stateIJ >>= 1;
 					}
-					energies->push_back(hubP->matEpsilon[i * sites + j] * (double)phase);
+					//Add the energy to the receptacle
+					energies->push_back(jumpFactor * (std::complex<double>)phase);
 				}
+				//From I -> J
+				if (c_dag_operator(&temp_stateJI, indexI)
+                    && c_operator(&temp_stateJI, indexJ)) {
+					//Add to the receptacle
+					states->push_back(temp_stateJI);
 
-			}
-			//Spin up
-			if ((has_up && can_up) || (has_up && standby_up)) {
-				sType new_state = (state_num+to_up-from_up);
-
-				if (new_state == right_state) {
-					(*energies)[0] += hubP->matEpsilon[i * sites + j];
-				}
-				else {
-					states->push_back(new_state);
-
-					char phase = 1;
-					char start = (i > j) ? i : j;
-					char end = (i > j) ? j : i;
-					new_state >>= (hubP->n_sites - start);
-					for (int l = start - 1; l > end; l--) {
-						if ((new_state & 1) == 1) phase *= -1;
-						new_state >>= 1;
+					//Phase
+					temp_stateJI >>= indexJ + 1;
+					int phase = 1;
+					for (int l = indexJ + 1; l < indexI; l++) {
+						if ((temp_stateJI & 1) == 1) phase *= -1;
+						temp_stateJI >>= 1;
 					}
-					energies->push_back(hubP->matEpsilon[i * sites + j] * (double)phase);
+					//Add the energy to the receptacle
+					energies->push_back(conjugate(jumpFactor) * (std::complex<double>)phase);
 				}
 			}
-			to_down >>= 1;
-			to_up >>= 1;
 		}
-		from_down >>= 1;
-		from_up >>= 1;
 	}
+
+    //No movement
+    double energy = 0;
+    //Epsilon terms
+    sType scan = 1 << 2*hubP->n_sites;
+    for (int i=0; i < 2*hubP->n_sites; i++){
+        scan >>= 1;
+        if ((right_state & scan) != 0){
+            energy += hubP->matEpsilon[(i%hubP->n_sites)*(1+hubP->n_sites)].real();
+        }
+    }
+    if (energy!=0){
+        states->push_back(right_state);
+        energies->push_back(energy);
+    }
+    
+
+    //std::cout<<"R STATE:"<<right_state<<std::endl;
+    //print_vector(states->data(),states->size());
+    //print_matrix(energies->data(),states->size(),(uLong)1,1,2);
 }
 
 double state_energy(sType x, hubbardParam* hubP){

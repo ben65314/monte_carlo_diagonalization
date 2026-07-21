@@ -412,7 +412,7 @@ public:
 		-------
 		NONE
 		*****************************************************************/
-	//Mu (all the same)
+        //Mu (all the same)
 		double mu_value = compute_mu(this->sys_hubP.mu, this->electrons);
 		uint64_t cols = this->get_length();
 		for (long unsigned i = 0; i < cols; i++) {
@@ -428,8 +428,9 @@ public:
 				if (!this->where_is_element(proj.at(j), &index)) continue;
 				if ((unsigned long)(index) < i) continue;
 
-				result_matrix[i * cols + index] += epsilon_energies.at(j).real();
-				if (i != (unsigned long)index) result_matrix[index * cols + i] += epsilon_energies.at(j).real();
+				result_matrix[index * cols + i] += epsilon_energies.at(j);
+				if (i != (unsigned long)index) 
+                    result_matrix[i * cols + index] += conjugate(epsilon_energies.at(j));
 			}
 
 
@@ -485,7 +486,7 @@ public:
 				//printf("\tProj:%ld\n",proj.at(j));
 				//fflush(stdout);
 				if (this->where_is_element(proj.at(j), &index)) {
-					h_phi_n[i] += energies.at(j).real() * phi_n[index];
+					h_phi_n[i] += energies.at(j) * phi_n[index];
 				}
 			}
 			//HuN

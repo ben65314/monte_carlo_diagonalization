@@ -981,7 +981,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 			//bool sameNat = states->allSameNature();
 			states->matrix_creation(H);
 
-            print_matrix(H,rows,rows,2,2);
+            //print_matrix(H,rows,rows,2,2);
 
 
 			char jobs = 'V', uplo='U';

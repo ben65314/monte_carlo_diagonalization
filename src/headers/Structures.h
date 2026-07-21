@@ -6,7 +6,7 @@
 //Declaration of constants
 const std::vector<double> EPSILON_NULL;
 const long PERMISSION = 500;
-const int LANCZOS_SIZE = 5;
+const int LANCZOS_SIZE = 100;
 const uInt BAND_LANCZOS_MAX_ITERATIONS = 1500;
 //const uInt NUM_THREADS_USED = 1;
 //
@@ -47,7 +47,7 @@ struct hubbardParam{ //Hubbard parameters
 		std::cout << "t matrix = " << "\n";
 		print_matrix(t_matrix.data(), n_sites, n_sites);
 		std::cout << "epsilon matrix = " << "\n";
-		print_matrix(matEpsilon.data(), n_sites, n_sites);
+		print_matrix(matEpsilon.data(), n_sites, n_sites,1,3);
 		std::cout << std::endl;
 	}
 };
