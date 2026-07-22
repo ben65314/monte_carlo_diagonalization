@@ -428,8 +428,8 @@ void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vec
 	*******************************************************/
 	//Calculates the electron jump sites
 	int sites = hubP->n_sites;
-	for (int i = 0; i < sites; i++) {//To
-		for (int j = i+1; j < sites; j++) {//From
+	for (int i = 0; i < sites; i++) {
+        for (int j = i+1; j < sites; j++) {
 			//Jump energy
             std::complex<double> jumpFactor = hubP->matEpsilon.at(i * sites + j);
 			if (jumpFactor == std::complex<double>(0,0)) continue;

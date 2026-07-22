@@ -418,10 +418,12 @@ public:
 		for (long unsigned i = 0; i < cols; i++) {
 			result_matrix[i * cols + i]+= mu_value;
 
+
 			//He
 			std::vector<sType> proj;
 			std::vector<std::complex<double>> epsilon_energies;
 			epsilon_jump_energy(this->get_at(i), &proj, &epsilon_energies, &this->sys_hubP);
+            print_vector(proj.data(), proj.size());
 			for (unsigned int j = 0; j < proj.size(); j++) {
 				sType index;
 

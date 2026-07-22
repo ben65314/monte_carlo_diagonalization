@@ -472,9 +472,9 @@ template <class StatesArrType, class T> void compute_green_long(
 	//states_excited_h->subspace_condition_expanding();
 
 	if (verbose > 99) {
-		std::cout<<"PROJ STATES E"<<std::endl;
+		std::cout<<"PROJ STATES E ("<<states_excited_e->get_length()<<")"<<std::endl;
 		states_excited_e->show_all_states();
-		std::cout<<"PROJ STATES H"<<std::endl;
+		std::cout<<"PROJ STATES H ("<<states_excited_h->get_length()<<")"<<std::endl;
 		states_excited_h->show_all_states();
 	}
 
@@ -721,16 +721,16 @@ template <class StatesArrType> void compute_green_long(
 	green_space_projection(states_array, spin, false, states_excited_h);
     //states_excited_e->subspace_condition_expanding();
     //states_excited_h->subspace_condition_expanding();
-    //states_excited_e->rebalance();
-    //states_excited_h->rebalance();
+    states_excited_e->rebalance();
+    states_excited_h->rebalance();
 
     //states_excited_e->subspace_condition_expanding();
 	//states_excited_h->subspace_condition_expanding();
 
 	if (verbose > 99) {
-		std::cout<<"PROJ STATES E BEFORE wH"<<std::endl;
+		std::cout<<"PROJ STATES E before wH ("<<states_excited_e->get_length()<<")"<<std::endl;
 		states_excited_e->show_all_states();
-		std::cout<<"PROJ STATES H BEFORE wH"<<std::endl;
+		std::cout<<"PROJ STATES H before wH ("<<states_excited_h->get_length()<<")"<<std::endl;
 		states_excited_h->show_all_states();
 	}
 
@@ -762,27 +762,29 @@ template <class StatesArrType> void compute_green_long(
 			}
 
             //Truncated wH
-            std::vector<sType> all_states_to_add;
-            for (int i = 0; i < sites; i++) {
-                std::vector<sType> temp;
-                states_excited_e->subspace_condition_expanding_weighted(arr_BL_e+i*new_space_len_e, &temp);
-                all_states_to_add.insert(all_states_to_add.end(),temp.begin(),temp.end());
-            }
-            for (int i = 0; i< all_states_to_add.size(); i++)
-                states_excited_e->add(all_states_to_add.at(i));
-            states_excited_e->rebalance();
-            new_space_len_e = states_excited_e->get_length();
-            delete[] arr_BL_e;
-            arr_BL_e = new std::complex<double>[new_space_len_e * sites]();
+            if (states_array->sys_sP.wH != 0 && states_array->sys_sP.nHapply != 0) {
+                std::vector<sType> all_states_to_add;
+                for (int i = 0; i < sites; i++) {
+                    std::vector<sType> temp;
+                    states_excited_e->subspace_condition_expanding_weighted(arr_BL_e+i*new_space_len_e, &temp);
+                    all_states_to_add.insert(all_states_to_add.end(),temp.begin(),temp.end());
+                }
+                for (int i = 0; i< all_states_to_add.size(); i++)
+                    states_excited_e->add(all_states_to_add.at(i));
+                states_excited_e->rebalance();
+                new_space_len_e = states_excited_e->get_length();
+                delete[] arr_BL_e;
+                arr_BL_e = new std::complex<double>[new_space_len_e * sites]();
 
-			//Creation of the vectors c_mu^(dag)|Omega> AFTER REBALANCE
-			for (int i = 0; i < sites; i++){
-				excited_vector_projection(
-                    true, i, spin,
-                    fund_state->data() + states_array->get_length() * m,
-                    states_array, states_excited_e,
-                    arr_BL_e + i * new_space_len_e);
-			}
+                //Creation of the vectors c_mu^(dag)|Omega> AFTER REBALANCE
+                for (int i = 0; i < sites; i++){
+                    excited_vector_projection(
+                        true, i, spin,
+                        fund_state->data() + states_array->get_length() * m,
+                        states_array, states_excited_e,
+                        arr_BL_e + i * new_space_len_e);
+                }
+            }
 
 			//Hamiltonian matrices
             std::complex<double>* hE = new std::complex<double>[new_space_len_e*new_space_len_e]();
@@ -852,26 +854,28 @@ template <class StatesArrType> void compute_green_long(
 			}
 
             //Truncated wH
-            std::vector<sType> all_states_to_add;
-            for (int i = 0; i < sites; i++) {
-                std::vector<sType> temp;
-                states_excited_h->subspace_condition_expanding_weighted(arr_BL_h+i*new_space_len_h, &temp);
-                all_states_to_add.insert(all_states_to_add.end(),temp.begin(),temp.end());
+            if (states_array->sys_sP.wH != 0 && states_array->sys_sP.nHapply != 0) {
+                std::vector<sType> all_states_to_add;
+                for (int i = 0; i < sites; i++) {
+                    std::vector<sType> temp;
+                    states_excited_h->subspace_condition_expanding_weighted(arr_BL_h+i*new_space_len_h, &temp);
+                    all_states_to_add.insert(all_states_to_add.end(),temp.begin(),temp.end());
+                }
+                for (int i = 0; i< all_states_to_add.size(); i++)
+                    states_excited_h->add(all_states_to_add.at(i));
+                states_excited_h->rebalance();
+                new_space_len_h = states_excited_h->get_length();
+                delete[] arr_BL_h;
+                arr_BL_h = new std::complex<double>[new_space_len_h * sites]();
+                //Creation of the vectors c_mu^(dag)|Omega> After REBALANCE
+                for (int i = 0; i < sites; i++){
+                    excited_vector_projection(
+                        false, i, spin,
+                        fund_state->data() + states_array->get_length() * m,
+                        states_array, states_excited_h,
+                        arr_BL_h + i * new_space_len_h);
+                }
             }
-            for (int i = 0; i< all_states_to_add.size(); i++)
-                states_excited_h->add(all_states_to_add.at(i));
-            states_excited_h->rebalance();
-            new_space_len_h = states_excited_h->get_length();
-            delete[] arr_BL_h;
-            arr_BL_h = new std::complex<double>[new_space_len_h * sites]();
-			//Creation of the vectors c_mu^(dag)|Omega> After REBALANCE
-			for (int i = 0; i < sites; i++){
-				excited_vector_projection(
-                    false, i, spin,
-                    fund_state->data() + states_array->get_length() * m,
-                    states_array, states_excited_h,
-                    arr_BL_h + i * new_space_len_h);
-			}
 
 			//Hamiltonian matrices
             std::complex<double>* hH = new std::complex<double>[new_space_len_h*new_space_len_h]();

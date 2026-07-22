@@ -46,7 +46,7 @@ sampling_space_size: {36}
 #	0 < Truncated_Cutoff < 1
 truncated_cutoff: {1}
 
-nHapply : {3}
+nHapply : {2}
 wH : {1}
 
 
