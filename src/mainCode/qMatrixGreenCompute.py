@@ -145,7 +145,6 @@ with open(file_name_qm) as file:
                 for i in range(sites):
                     qm_h[i].append(complex(lines[i+1]))
 
-print(qm_e)
 #Green points x-axis
 nbr_points = 2000;
 if not set_omega :
