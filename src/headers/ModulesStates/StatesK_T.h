@@ -423,7 +423,9 @@ public:
 			std::vector<sType> proj;
 			std::vector<std::complex<double>> epsilon_energies;
 			epsilon_jump_energy(this->get_at(i), &proj, &epsilon_energies, &this->sys_hubP);
-            print_vector(proj.data(), proj.size());
+            //std::cout<<"r_state : "<<this->get_at(i)<<std::endl;
+            //print_vector(proj.data(), proj.size());
+            //print_vector(epsilon_energies.data(), epsilon_energies.size(),3);
 			for (unsigned int j = 0; j < proj.size(); j++) {
 				sType index;
 

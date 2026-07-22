@@ -744,6 +744,7 @@ template <class StatesArrType> void compute_green_long(
 	//Vectors
 	//ELECTONS
 	int new_space_len_e = states_excited_e->get_length();
+    states_excited_e->show_all_states();
 
 	written_q_matrix += "\n# Eigen values E -- Q-Matrixes E\n";
 
@@ -760,6 +761,8 @@ template <class StatesArrType> void compute_green_long(
                     states_array, states_excited_e,
                     arr_BL_e + i * new_space_len_e);
 			}
+            print_matrix(arr_BL_e,sites,new_space_len_e,1,4);
+            std::cout<<std::endl;
 
             //Truncated wH
             if (states_array->sys_sP.wH != 0 && states_array->sys_sP.nHapply != 0) {
@@ -790,6 +793,8 @@ template <class StatesArrType> void compute_green_long(
             std::complex<double>* hE = new std::complex<double>[new_space_len_e*new_space_len_e]();
 			states_excited_e->matrix_creation(hE);
 
+            print_matrix(hE, new_space_len_e, new_space_len_e,2,4);
+
 			char jobs = 'V', uplo='U';
 			double* eigen_value_e = new double[new_space_len_e]();
 			int lwork = new_space_len_e*(new_space_len_e+1);
@@ -805,6 +810,12 @@ template <class StatesArrType> void compute_green_long(
 
 			eigen_e = std::vector<double>(eigen_value_e,
                                             eigen_value_e + new_space_len_e);
+            print_vector(eigen_e.data(), eigen_e.size(), 3);
+
+            std::cout<<"VECTORS EIGEN"<<std::endl;
+            print_matrix(hE,new_space_len_e,new_space_len_e,1,3);
+
+
             //Convert arr_BL_e to col-major.
             std::complex<double>* temp_array = row2col_major(arr_BL_e, sites, new_space_len_e);
             delete[] arr_BL_e;
@@ -881,6 +892,7 @@ template <class StatesArrType> void compute_green_long(
             std::complex<double>* hH = new std::complex<double>[new_space_len_h*new_space_len_h]();
 			states_excited_h->matrix_creation(hH);
 
+            
 			char jobs = 'V', uplo='U';
 			double* eigen_value_h = new double[new_space_len_h]();
 			int lwork = new_space_len_h*(new_space_len_h+1);

@@ -364,26 +364,26 @@ template <> std::string to_string_pq(const std::complex<double> a_value, const u
 	char s[120];
 	double real = (abs(a_value.real())>10e-8) ? a_value.real() : 0;
 	double imag = (abs(a_value.imag())>10e-8) ? a_value.imag() : 0;
-	if (imag >= 0) 
+	if (imag >= 0)
     {
-        if (real >= 0)  
+        if (real >= 0)
         {
-            sprintf(s," %*.*f+%*.*fj",integers+decimals,decimals,real,integers,decimals,imag);
+            sprintf(s,"%*.*f+%*.*fj",integers+decimals+2,decimals,real,integers,decimals,imag);
         }
         else
         {
-            sprintf(s,"%*.*f+%*.*fj",integers+decimals,decimals,real,integers,decimals,imag);
+            sprintf(s,"%*.*f+%*.*fj",integers+decimals+2,decimals,real,integers,decimals,imag);
         }
     }
     else
     {
-        if (real >= 0)  
+        if (real >= 0)
         {
-            sprintf(s," %*.*f-%*.*fj",integers+decimals,decimals,real,integers,decimals,abs(imag));
+            sprintf(s,"%*.*f-%*.*fj",integers+decimals+2,decimals,real,integers,decimals,abs(imag));
         }
         else
         {
-            sprintf(s,"%*.*f-%*.*fj",integers+decimals,decimals,real,integers,decimals,abs(imag));
+            sprintf(s,"%*.*f-%*.*fj",integers+decimals+2,decimals,real,integers,decimals,abs(imag));
         }
     }
 

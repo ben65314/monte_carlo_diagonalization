@@ -490,7 +490,7 @@ void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vec
         states->push_back(right_state);
         energies->push_back(energy);
     }
-    
+
 
     //std::cout<<"R STATE:"<<right_state<<std::endl;
     //print_vector(states->data(),states->size());
@@ -578,12 +578,13 @@ void calculate_epsilon_3d(hubbardParam* hubP){
 			value = 0;
 			for (int i = 0; i < hubP->n_sites; i++){
 				for (int j = 0; j < hubP->n_sites; j++){
-                    double delta =ddot_(dim,hubP->K.data()+k*(*dim),
-                                        &INC,hubP->R.data()+i*(*dim),&INC) - 
+                    double delta = - ddot_(dim,hubP->K.data()+k*(*dim),
+                                        &INC,hubP->R.data()+i*(*dim),&INC) +
                                   ddot_(dim,hubP->K.data()+q*(*dim),
                                         &INC,hubP->R.data()+j*(*dim),&INC);
 
-					value += hubP->t_matrix[i * hubP->n_sites + j] * exp(std::complex<double>(0,1) * delta) / (double) hubP->n_sites;
+                    std::complex<double> value_add = hubP->t_matrix[i * hubP->n_sites + j] * exp(std::complex<double>(0,1) * delta) / (double) hubP->n_sites;
+					value += value_add;
 				}//END OF FOR J
 			}//END OF FOR I
 			hubP->matEpsilon[k * hubP->n_sites + q] = remove_zeros(value);

@@ -43,7 +43,8 @@ def green_electrons(omega, fundE, q_matrix_e, eigen_e, nu_mu, eta):
     #Electron part
     for l in range(len(eigen_e)):
         denom_e = z + fundE - eigen_e[l]
-        g_omega += (q_matrix_e[nu_mu][l]**2) / denom_e
+        num_e = q_matrix_e[nu_mu][l] * np.conjugate(q_matrix_e[nu_mu][l])
+        g_omega += num_e / denom_e
 
     g_omega_float = g_omega.imag / -np.pi
     return g_omega_float;
@@ -71,7 +72,8 @@ def green_holes(omega, fundE, q_matrix_h, eigen_h, nu_mu, eta):
     #Hole part
     for l in range(len(eigen_h)):
         denom_h = z - fundE + eigen_h[l]
-        g_omega += (q_matrix_h[nu_mu][l]**2) / denom_h
+        num_h = q_matrix_h[nu_mu][l] * np.conjugate(q_matrix_h[nu_mu][l])
+        g_omega += num_h / denom_h
 
     g_omega_float = g_omega.imag / -np.pi
     return g_omega_float
@@ -143,6 +145,7 @@ with open(file_name_qm) as file:
                 for i in range(sites):
                     qm_h[i].append(complex(lines[i+1]))
 
+print(qm_e)
 #Green points x-axis
 nbr_points = 2000;
 if not set_omega :
