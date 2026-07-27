@@ -152,7 +152,10 @@ template <class T, class R> void initial_vector(
 	srand(seed);
 	for (R i = 0; i < SIZE; i++) {
 		double a = (double)rand() / RAND_MAX;
-		v[i] = a;
+		double b = (double)rand() / RAND_MAX;
+        std::complex<double> z(a,b);
+        std::cout<<z<<std::endl;
+		v[i] = z;
 	}
 
 	normalize(v,SIZE);

@@ -335,6 +335,17 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
         &vec_BL, sites, new_space_len, states_excited, &BL_space_size,
         &BL_space_evectors, &prod_c_omega);
 
+    std::cout<<"Energies Electrons"<<std::endl;
+    print_vector(BL_space_evalues.data(), BL_space_evalues.size(), 3);
+    std::cout<<"VECTORS E"<<std::endl;
+    double phase = std::arg(BL_space_evectors.at(0));
+    for (int i = 0; i < BL_space_evectors.size(); i++){
+        BL_space_evectors.at(i) = BL_space_evectors.at(i) * exp(-std::complex<double>(0,1)*phase);
+    }
+    print_matrix(BL_space_evectors.data(), new_space_len, BL_space_evectors.size() / new_space_len,1,3);
+
+    conjugate_vector(BL_space_evectors.data(), BL_space_size*BL_space_size);
+
 	//Clear mem
 	std::vector<T>().swap(vec_BL);
 	states_excited->remove_all();
@@ -805,13 +816,17 @@ template <class StatesArrType> void compute_green_long(
 			//Eigen values of hE|E> = E|E>
 			zheev_(&jobs, &uplo, &new_space_len_e, hE, &new_space_len_e,
                    eigen_value_e, work, &lwork, rwork, &info);
-
 			delete[] work; delete[] rwork;
 
 			eigen_e = std::vector<double>(eigen_value_e,
                                             eigen_value_e + new_space_len_e);
+            std::cout<<"Energies Electrons"<<std::endl;
             print_vector(eigen_e.data(), eigen_e.size(), 3);
 
+            double phase = std::arg(hE[0]);
+            for (int i = 0; i < new_space_len_e*new_space_len_e; i++){
+                hE[i] = hE[i] * exp(-std::complex<double>(0,1)*phase);
+            }
             std::cout<<"VECTORS EIGEN"<<std::endl;
             print_matrix(hE,new_space_len_e,new_space_len_e,1,3);
 
@@ -908,6 +923,11 @@ template <class StatesArrType> void compute_green_long(
 
 			eigen_h = std::vector<double>(eigen_value_h,
                                             eigen_value_h + new_space_len_h);
+
+            double phase = std::arg(hH[0]);
+            for (int i = 0; i < new_space_len_h*new_space_len_h; i++){
+                hH[i] = hH[i] * exp(-std::complex<double>(0,1)*phase);
+            }
             //
             //Convert arr_BL_e to col-major.
             std::complex<double>* temp_array = row2col_major(arr_BL_h, sites, new_space_len_h);

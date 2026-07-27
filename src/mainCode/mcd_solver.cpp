@@ -1,3 +1,4 @@
+#include "basicFunctions.h"
 #include "paramReader.h"
 
 typedef StatesK_T<sType,vType> arrType;
@@ -90,6 +91,34 @@ int main(int argc, char *argv[]){
 
     verbose = t_verbose;
 
+    std::complex<double>* mat_test = new std::complex<double>[MH_Block.get_length()*MH_Block.get_length()];
+    std::complex<double>* vec_test_result_1 = new std::complex<double>[MH_Block.get_length()];
+    std::complex<double>* vec_test_result_2 = new std::complex<double>[MH_Block.get_length()];
+    std::complex<double>* vec_test = new std::complex<double>[MH_Block.get_length()];
+    for (int i = 0; i < MH_Block.get_length(); i++)
+        vec_test[i]=1;
+    MH_Block.matrix_creation(mat_test);
+
+
+    char trans_a = 'N', trans_b = 'N';
+    int one = 1;
+    int size = MH_Block.get_length();
+    int sites = MH_Block.sys_hubP.n_sites;
+
+    zgemm_(&trans_a, &trans_b, &size, &one, &size, &ALPHA_C, mat_test, &size, vec_test, &size, &BETA_C, vec_test_result_1, &size);
+
+    MH_Block.H(vec_test_result_2,vec_test);
+
+    print_vector(vec_test_result_1, size, 3);
+    print_vector(vec_test_result_2, size, 3);
+
+
+    //delete[] mat_test;
+    delete[] vec_test;
+    delete[] vec_test_result_1;
+    delete[] vec_test_result_2;
+
+
 	auto step2_2 = std::chrono::high_resolution_clock::now();
 	if (verbose > 0) {
         std::cout << "\n(Completed)" << time_formating(step2_1, step2_2) << '\n';
@@ -104,6 +133,23 @@ int main(int argc, char *argv[]){
 	int deg = 1;
 	LanczosSolver<vType,decltype(MH_Block)> LS;
 	double fundE = LS.fund_energy(&fund_state, &MH_Block, &deg);
+
+
+    std::complex<double>* r = new std::complex<double>[size];
+    std::complex<double>* q = new std::complex<double>[size];
+    zgemm_(&trans_a, &trans_b, &size, &one, &size, &ALPHA_C, mat_test, &size, fund_state.data(), &size, &BETA_C, r, &size);
+
+    zgemm_(&trans_a, &trans_b, &size, &one, &size, &ALPHA_C, mat_test, &size, fund_state.data(), &size, &BETA_C, q, &size);
+    delete[] mat_test;
+    double fE_1 = 1/fundE;
+    sType om = size;
+    zdscal_(&om, &fE_1, r, &one);
+    zdscal_(&om, &fE_1, q, &one);
+    std::cout<<"H phi /E"<<std::endl;
+    print_vector(r, om,5);
+    std::cout<<"H**c phi /E"<<std::endl;
+    print_vector(q, om,5);
+    delete[] r; delete[] q;
 
 	if (verbose > 99) std::cout << "FUND VECTOR" << std::endl;
 	if (verbose > 9) {
@@ -137,7 +183,7 @@ int main(int argc, char *argv[]){
 		auto step2_5 = std::chrono::high_resolution_clock::now();
 		if (verbose > 0) std::cout << "\nStep 3:Green functions..."<<std::endl;
 
-		if (MH_Block.sys_hubP.n_sites < 4 ) {
+		if (MH_Block.sys_hubP.n_sites < 5 ) {
 			compute_green_long(gP.g_added_spin, &fund_state, fundE,
                                 &MH_Block, gP, deg);
 		}

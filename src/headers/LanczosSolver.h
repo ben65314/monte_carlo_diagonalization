@@ -4,6 +4,7 @@
 #include "ModulesStates/StatesK_T.h"
 #include "ModulesStates/StatesR_H.h"
 #include "basicFunctions.h"
+#include <atomic>
 
 int ONE = 1;
 double ALPHA_D = 1;
@@ -610,10 +611,11 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 		while (!converged) {
 			if(beta->size()) {
                 double beta_m1 = 1/beta->back();
-                double minus_beta = -beta->back();
+                double minus_beta = -(beta->back())*(beta->back());
 				zdscal_(&size, &beta_m1, r.data(), &ONE);
 				zdscal_(&size, &minus_beta, q.data(), &ONE);
 			}
+
 
 			std::vector<std::complex<double>> H_tmp(size);
 		//Applies the vector r on the matrix H and stores it in H_tmp
@@ -624,7 +626,12 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 			//swap q <-> r
 		    zswap_(&size, q.data(),&ONE,r.data(),&ONE);
 
-			std::complex<double> dotProd = zdotc_(&size, q.data(), &ONE, r.data(), &ONE);
+            print_vector(q.data(),q.size(),3);
+			std::complex<double> dotProd;
+
+            zdotcsub_(&size, q.data(), &ONE, r.data(), &ONE, &dotProd);
+            std::cout<<dotProd<<std::endl;
+            std::cout<<"ALPHA:"<<dotProd<<std::endl;
 			alpha->push_back(dotProd.real());
 
 			std::complex<double> alpha_back = -alpha->back();
@@ -679,6 +686,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 	void lanczos_vectors(std::vector<double>* fundState_lanczosBasis, std::complex<double>* gs, StatesArrType* sArr, std::vector<double>* alpha, std::vector<double>* beta, int* deg) {
 		sType size = sArr->get_length();
 		int size_proj = alpha->size();
+        print_vector(fundState_lanczosBasis->data(), fundState_lanczosBasis->size(),3);
 
 		std::vector<std::complex<double>> r(gs, gs + size);
 		std::vector<std::complex<double>> q(size);
@@ -706,6 +714,194 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 		}
 	}
 
+    double lanczos_all_benchmark(std::vector<std::complex<double>>* fundState,  StatesArrType* sArr, double epsilon = 10e-12){
+
+        //Number of states
+		sType size = sArr->get_length();
+
+		//Two main vectors
+		std::vector<std::complex<double>> r(fundState->data(), fundState->data() + size);
+        //Normalize phi_n
+        double norm = dznrm2_(&size, r.data(), &ONE);
+        zdscal_(&size, &norm, r.data(), &ONE);
+		std::vector<std::complex<double>> q(size);
+        //
+		//Energies to converge
+		double prevIterEnergy = 1000;
+	    double energy = 100;
+
+        bool converged = false;
+
+        std::vector<double>* alpha = new std::vector<double>;
+        std::vector<double>* beta = new std::vector<double>;
+		//Sets size of alpha and beta
+		alpha->clear();	alpha->reserve(500);
+		beta->clear();	beta->reserve(500);
+
+        std::vector<std::complex<double>> all_phi;
+        std::vector<double>* fundState_lanczosBasis =  new std::vector<double>;
+
+        int currentIteration = 0;
+
+        //std::complex<double>* mat = new std::complex<double>[size*size]();
+        //sArr->matrix_creation(mat);
+
+        double prev_norm = 1;
+        while (!converged)
+        {
+			if(beta->size()) {
+                double beta_m1 = 1/beta->back();
+                double minus_beta = -beta->back();
+				zdscal_(&size, &beta_m1, r.data(), &ONE);
+				zdscal_(&size, &minus_beta, q.data(), &ONE);
+			}
+
+            std::complex<double> norm_temp = 0;
+            for (int i = 0; i < r.size(); i++) {
+                norm_temp += conjugate(r.at(i))*r.at(i);
+            }
+            std::cout<<"NORM R "<<norm_temp<<std::endl;
+            all_phi.insert(all_phi.end(),r.begin(),r.end());
+
+
+			std::vector<std::complex<double>> H_tmp(size);
+            //Applies the vector r on the matrix H and stores it in H_tmp
+			sArr->H(H_tmp.data(),r.data());
+            //char trans_a = 'N', trans_b = 'N';
+            //int one_i = 1;
+            //int size_i = size;
+			//zgemm_(&trans_a, &trans_b, &size_i, &one_i, &size_i, &ALPHA_C,
+            //      mat, &size_i, r.data(), &size_i, &BETA_C,
+            //      H_tmp.data(), &size_i);
+
+			std::complex<double> one = 1;
+			zaxpy_(&size, &one, H_tmp.data(),&ONE,q.data(),&ONE);	//q = q + H*r
+			//swap q <-> r
+		    zswap_(&size, q.data(),&ONE,r.data(),&ONE);
+
+			std::complex<double> dotProd;
+            zdotcsub_(&size, q.data(), &ONE, r.data(), &ONE, &dotProd);
+			alpha->push_back(dotProd.real());
+
+			std::complex<double> alpha_back = -alpha->back();
+			zaxpy_(&size, &alpha_back, q.data(), &ONE, r.data(), &ONE);	//r = r - q*alpha
+
+			beta->push_back(dznrm2_(&size, r.data(), &ONE));
+            //Norm of vector phi_n
+            ////TESTST
+            //double norm = dznrm2_(&size, r.data(), &ONE);
+            ////
+
+            ////Apply H matrix on phi_n
+			//std::vector<std::complex<double>> H_tmp(size);
+			//sArr->H(H_tmp.data(),r.data());
+
+            ////Compute a_n
+            //std::complex<double> a;
+            //std::cout<<"SCALAR PRODUCT"<<std::endl;
+            //print_vector(H_tmp.data(), H_tmp.size(),3);
+            //print_vector(r.data(), r.size(),3);
+            //zdotcsub_(&size, H_tmp.data(), &ONE, r.data(), &ONE, &a);
+            //std::cout<<"a:"<<a<<std::endl;
+            //alpha->push_back(a.real()/norm);
+
+            ////Compute b_n
+            //std::complex<double> b = norm /prev_norm;
+            //beta->push_back(b.real());
+
+            //double norm = dznrm2_(&size, r.data(), &ONE);
+
+            ////Generate next vector
+            //std::complex<double> a_norm = -alpha->at(alpha->size()-1);
+            //zaxpy_(&size, &a_norm, r.data(), &ONE, H_tmp.data(), &ONE);
+            //if (currentIteration > 0)
+            //{
+            //    std::complex<double> b_norm = -beta->at(beta->size()-1);
+            //    zaxpy_(&size, &b_norm, q.data(), &ONE, H_tmp.data(), &ONE);
+            //}
+
+
+            ////Set phi_n-1
+            //std::copy(r.begin(),r.end(),q.begin());
+
+
+            ////Keep in memory
+            //all_phi.insert(all_phi.end(),r.begin(),r.end());
+
+            ////Set phi_n+1
+            //std::copy(H_tmp.begin(),H_tmp.end(),r.begin());
+
+			//Arrays for tridiag solve
+			double* arr_a = new double[alpha->size()];
+			double* arr_b = new double[beta->size()];
+			std::copy(alpha->begin(),alpha->end(),arr_a);
+			std::copy(beta->begin(),beta->end(),arr_b);
+
+			//Parameters for solver
+			char jobs = 'V';
+			int n = currentIteration+1;
+			int info;
+			double* vecs = new double[n*n];
+			double* work = new double[2*n];
+
+			//Solving Energy
+			dstev_(&jobs,&n,arr_a,arr_b,vecs,&n,work,&info);
+			//Fund energy
+
+			prevIterEnergy = energy;
+			energy = arr_a[0];
+			double RITZ = std::abs(vecs[n-1]*beta->back());
+            //std::cout<<"RITZ VALUE : "<< RITZ<<std::endl;
+			if ((abs(prevIterEnergy - energy) < epsilon && currentIteration > 3) || (n == size)) {
+				converged = true;
+				fundState_lanczosBasis->clear();
+				*fundState_lanczosBasis = std::vector<double>(vecs, vecs + n);
+			}
+
+			delete[] vecs; delete[] work; delete[]arr_a; delete[] arr_b;
+
+			if(currentIteration%10==0 && verbose > 5){
+				std::cout << "Lanczos current iteration :" << currentIteration << ":"<<abs(prevIterEnergy - energy)<< std::endl;
+
+			}
+            if (!converged)
+                currentIteration++;
+
+        }
+
+        //for (int i = 0; i <     currentIteration+1; i++) {
+        //    for (int j = 0; j < currentIteration+1; j++){
+        //        std::complex<double> norm;
+        //        int one = 1;
+        //        zdotcsub_(&size, all_phi.data()+i*size, &one, all_phi.data()+j*size, &one, &norm);
+        //        std::cout<<"<"<<i<<"|"<<j<<"> = "<<norm<<std::endl;
+        //    }
+        //}
+
+        //Constructing vector
+        fundState->clear();
+        *fundState = std::vector<std::complex<double>>(size,0);
+        for (int i = 0; i < fundState_lanczosBasis->size(); i++){
+            std::complex<double> temp_fundState_lanczosBasis = fundState_lanczosBasis->at(i);
+            zaxpy_(&size, &temp_fundState_lanczosBasis, all_phi.data() + i*size, &ONE, fundState->data(), &ONE);
+        }
+
+        print_vector(fundState->data(), fundState->size(), 5);
+
+        double phase = std::arg(fundState->at(0));
+        for (int i = 0; i < fundState->size(); i++){
+            fundState->at(i) = fundState->at(i) * exp(-std::complex<double>(0,1)*phase);
+        }
+
+
+
+        delete alpha;
+        delete beta;
+        delete fundState_lanczosBasis;
+
+        return energy;
+    }
+
 	double lanczos_algorithm(std::vector<std::complex<double>>* fundState, StatesArrType* sArr, int* deg, double epsilon = 10e-12) {
 		/*************************************************
 		Redefines a given matrix with the Lanczos Algorithm without needing the Hamiltonian matrix
@@ -730,6 +926,13 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 
 		// Random Initial Vector
 		initial_vector(sArr->get_length(),fundState->data());
+        //*fundState = std::vector<std::complex<double>>(sArr->get_length(),1);
+
+        bool test = true;
+        if (test){
+            fund_energy = lanczos_all_benchmark(fundState, sArr);
+        }
+        else{
 
 		lanczos_energy(&fundState_lanczosBasis,fundState->data(),sArr,&alpha,&beta,&fund_energy,&nIterations,deg,epsilon);
 		//Increase the size of the fundState according to the degeneracy
@@ -738,7 +941,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 		}
 
 		lanczos_vectors(&fundState_lanczosBasis,fundState->data(),sArr,&alpha,&beta,deg);
-
+        }
 		return fund_energy;
 	}
 
@@ -780,6 +983,8 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 		//if(!same){sArrNature = 'M';}
 		int j = 0;
 		for (j = 0; j < iterations; j++){
+            std::cout<<"!!"<<len_bk<<":"<<j+1<<"\t"<<j<<"/"<<iterations<<std::endl;
+
 			if(j%10==0) if(verbose > 5) std::cout<< "Band Lanczos current iteration :"<< j << std::endl;
 			if(verbose > 99){
 				for (int i = 0; i < M0; i++){
@@ -800,7 +1005,8 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 				}
 					std::copy(zero, zero + len_bk, vk->begin() + ((j+pc)%M0) * len_bk);
 				numOfV--;
-				if (pc == 0) break;
+                std::cout<<"pc:"<<pc<<std::endl;
+				if (pc == -1) break;
 				j--;
 				continue;//(d)
 			}
@@ -814,7 +1020,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 			//Qmatrix product requirements <phi|c_mu|Omega>
 			std::complex<double> dotProd;
 			for (uInt k = 0; k < n_bk; k++) {
-				dotProd = zdotc_(&len_bk, bk.data() + k * len_bk, &ONE, vk->data() + (j%M0) * len_bk, &ONE);
+				zdotcsub_(&len_bk, bk.data() + k * len_bk, &ONE, vk->data() + (j%M0) * len_bk, &ONE, &dotProd);
 				(*productCOmega)[k * *nIter + j] = dotProd;
 			}
 
@@ -822,7 +1028,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 			for (int k = j + 1; k < j + pc; k++) {
 				//Dot product between vj and vk
 				std::complex<double> vjvk;
-				vjvk = zdotc_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, vk->data() + (k%M0) * len_bk, &ONE);
+				zdotcsub_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, vk->data() + (k%M0) * len_bk, &ONE, &vjvk);
 
 				//Makes orthogonality
 				std::complex<double> a = - vjvk;
@@ -857,7 +1063,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 				if(index_array.at(k) != j) continue;
 
 				std::complex<double> dot_product;
-				dot_product = zdotc_(&len_bk, vk->data() + (index_array.at(k)%M0) * len_bk, &ONE, vk->data() + ((j + pc)%M0) * len_bk, &ONE);
+				zdotcsub_(&len_bk, vk->data() + (index_array.at(k)%M0) * len_bk, &ONE, vk->data() + ((j + pc)%M0) * len_bk, &ONE, &dot_product);
 				t_jpc[index_array.at(k) * iterations + j] = dot_product;
 
 				std::complex<double> a = -t_jpc[index_array.at(k) * iterations + j];
@@ -866,7 +1072,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 
 			////Diag element t(j,j)
 			std::complex<double> VkVjpc, tempMinus;
-			VkVjpc = zdotc_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, vk->data() + ((j + pc)%M0) * len_bk, &ONE);
+			zdotcsub_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, vk->data() + ((j + pc)%M0) * len_bk, &ONE, &VkVjpc);
 			t_jpc[j *iterations +j] = VkVjpc;
 
 			tempMinus = -VkVjpc;
@@ -896,6 +1102,9 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 				double* rwork = new double[lwork];
 				int info;
 
+                std::cout<<"TJPR TO SOLVE"<<std::endl;
+                print_matrix(T_jPr, jj, jj,2,4);
+ 
 				zheev_(&jobs, &uplo, &jj, T_jPr, &jj,eigenValues, work, &lwork, rwork, &info);
 				delete[] T_jPr;
 				//Delete zheev tools
@@ -931,10 +1140,15 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 		double* rwork = new double[lwork];
 		int info;
 
+        std::cout<<"T_JPR"<<std::endl;
+        print_matrix(T_jPr, jj, jj,2,4);
 		zheev_(&jobs, &uplo, &jj, T_jPr, &jj, eigenValues, work, &lwork, rwork, &info);
 		///Delete tools for zheev
 		delete[] work; delete[] rwork;
 
+        std::cout<<"Vectors"<<std::endl;
+        print_matrix(T_jPr, jj, jj,2,4);
+        conjugate_vector(T_jPr, jj*jj);
 		///Put the energies and the eigen vectors in vector
 		energies = std::vector<double>(eigenValues,eigenValues + jj);
 		*subSpace_vectors = std::vector<std::complex<double>>(T_jPr, T_jPr + jj * jj);
@@ -994,9 +1208,12 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 
 			fundEnergy = eigenValues[0];
 			delete[] work; delete[] rwork;
+            print_vector(eigenValues,rows,3);
 
 			*deg = deg_fundamental_check(eigenValues,rows);
+            print_vector(eigenValues,rows,3);
 			delete[] eigenValues;
+            print_matrix(H, rows, rows,1,4);
 
 			if (*deg > 1) fundState->resize(rows*(*deg));
 			//Stores the fundamental vector and if needed the degenerated ones too
@@ -1005,9 +1222,13 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 					fundState->at(i+j*rows) = H[i+rows*j];
 				}
 			}
-			conjugate_vector(fundState->data(),rows*(*deg));
 			delete[] H;
 		}
+        conjugate_vector(fundState->data(),rows*(*deg));
+        double phase = std::arg(fundState->at(0));
+        for (int i = 0; i < fundState->size(); i++){
+            fundState->at(i) = fundState->at(i) * exp(-std::complex<double>(0,1)*phase);
+        }
 
 		return fundEnergy;
 	}
