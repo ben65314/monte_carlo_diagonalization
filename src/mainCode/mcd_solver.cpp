@@ -138,7 +138,7 @@ int main(int argc, char *argv[]){
 		auto step2_5 = std::chrono::high_resolution_clock::now();
 		if (verbose > 0) std::cout << "\nStep 3:Green functions..."<<std::endl;
 
-		if (MH_Block.sys_hubP.n_sites < 4 ) {
+		if (MH_Block.sys_hubP.n_sites < 5 ) {
 			compute_green_long(gP.g_added_spin, &fund_state, fundE,
                                 &MH_Block, gP, deg);
 		}

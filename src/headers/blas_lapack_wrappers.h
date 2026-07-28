@@ -17,7 +17,7 @@ void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*,
 void zdscal_(sType* n, double* alpha, std::complex<double>* x, int* incx);
 double dznrm2_(sType*, std::complex<double>*, int*);
 void zaxpy_(sType*, std::complex<double>*, std::complex<double>*, int*, std::complex<double>*, int*);
-void zdotcsub_(sType*, std::complex<double>*, int*, std::complex<double>*, int*, std::complex<double>*);
+std::complex<double> zdotc_(sType*, std::complex<double>*, int*, std::complex<double>*, int*);
 void zswap_(sType*, std::complex<double>*, int*, std::complex<double>*, int*);
 void zgemm_(char*, char*, int*, int*, int*, std::complex<double>*, std::complex<double>*, int*, std::complex<double>*,
           int*, std::complex<double>*, std::complex<double>*, int*);

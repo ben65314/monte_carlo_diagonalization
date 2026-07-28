@@ -629,7 +629,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
             //print_vector(q.data(),q.size(),3);
 			std::complex<double> dotProd;
 
-            zdotcsub_(&size, q.data(), &ONE, r.data(), &ONE, &dotProd);
+            dotProd = zdotc_(&size, q.data(), &ONE, r.data(), &ONE);
             //std::cout<<dotProd<<std::endl;
             //std::cout<<"ALPHA:"<<dotProd<<std::endl;
 			alpha->push_back(dotProd.real());
@@ -827,7 +827,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
             conjugate_vector(vk->data(), vk->size());
 			std::complex<double> dotProd;
 			for (uInt k = 0; k < n_bk; k++) {
-				zdotcsub_(&len_bk, bk.data() + k * len_bk, &ONE, vk->data() + (j%M0) * len_bk, &ONE, &dotProd);
+				dotProd = zdotc_(&len_bk, bk.data() + k * len_bk, &ONE, vk->data() + (j%M0) * len_bk, &ONE);
 				(*productCOmega)[k * *nIter + j] = dotProd;
 			}
             conjugate_vector(vk->data(), vk->size());
@@ -836,7 +836,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 			for (int k = j + 1; k < j + pc; k++) {
 				//Dot product between vj and vk
 				std::complex<double> vjvk;
-				zdotcsub_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, vk->data() + (k%M0) * len_bk, &ONE, &vjvk);
+				vjvk = zdotc_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, vk->data() + (k%M0) * len_bk, &ONE);
 
 				//Makes orthogonality
 				std::complex<double> a = - vjvk;
@@ -871,7 +871,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 				if(index_array.at(k) != j) continue;
 
 				std::complex<double> dot_product;
-				zdotcsub_(&len_bk, vk->data() + (index_array.at(k)%M0) * len_bk, &ONE, vk->data() + ((j + pc)%M0) * len_bk, &ONE, &dot_product);
+				dot_product = zdotc_(&len_bk, vk->data() + (index_array.at(k)%M0) * len_bk, &ONE, vk->data() + ((j + pc)%M0) * len_bk, &ONE);
 				t_jpc[index_array.at(k) * iterations + j] = dot_product;
 
 				std::complex<double> a = -t_jpc[index_array.at(k) * iterations + j];
@@ -880,7 +880,7 @@ template<class StatesArrType> class LanczosSolver<std::complex<double>,StatesArr
 
 			////Diag element t(j,j)
 			std::complex<double> VkVjpc, tempMinus;
-			zdotcsub_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, vk->data() + ((j + pc)%M0) * len_bk, &ONE, &VkVjpc);
+			VkVjpc = zdotc_(&len_bk, vk->data() + (j%M0) * len_bk, &ONE, vk->data() + ((j + pc)%M0) * len_bk, &ONE);
 			t_jpc[j *iterations +j] = VkVjpc;
 
 			tempMinus = -VkVjpc;
