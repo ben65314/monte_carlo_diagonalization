@@ -215,6 +215,45 @@ Electrons transform_NSz(int n_elec, int spin) {
 	return elec;
 }
 
+int state_sym_locator(sType state, hubbardParam* hubP, std::vector<int>* k_index){
+    int scan = 1 << hubP->n_sites;
+
+    int k[3] = {0,0,0};
+
+    for (int i = 0; i < hubP->n_sites; i++){
+        scan >>= 1;
+        int up_found = state&(scan<<hubP->n_sites);
+        int down_found = state&scan;
+
+        if (up_found != 0) {
+            k[0] += k_index->at(i*3+0);
+            k[1] += k_index->at(i*3+1);
+            k[2] += k_index->at(i*3+2);
+        }
+        if (down_found != 0) {
+            k[0] += k_index->at(i*3+0);
+            k[1] += k_index->at(i*3+1);
+            k[2] += k_index->at(i*3+2);
+        }
+    }
+    
+    //Modulo
+    k[0]%= hubP->dimension.at(0);
+    k[1]%= hubP->dimension.at(1);
+    k[2]%= hubP->dimension.at(2);
+
+    //Which symetry
+    int j;
+    for (j = 0; j < hubP->n_sites; j++){
+        if (k_index->at(j*3+0)==k[0]\
+         && k_index->at(j*3+1)==k[1]\
+         && k_index->at(j*3+2)==k[2]){
+            break;
+        }
+    }
+    return j;
+}
+
 //Jump ENERGIES
 void t_jump_energy(sType right_state, std::vector<sType>* states,
                    std::vector<double>* energies, hubbardParam* hubP) {

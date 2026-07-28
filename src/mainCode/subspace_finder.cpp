@@ -1,4 +1,5 @@
 #include "basicFunctions.h"
+#include "electronManipulationFunctions.h"
 #include "paramReader.h"
 
 //Type to use in code
@@ -54,10 +55,28 @@ int main(int argc, char *argv[]){
     sP.nHapply = 0;
     sP.beta_Happly = 0;
 
-	//Test for a number of electrons up
-	for (int i = 0; i <= jMV.hubP.n_sites; i++) {
-		//Test for a number of elctrons down
-		for (int j = 0; j <= jMV.hubP.n_sites; j++) {
+
+    //Symetry indices
+    std::vector<int> K_index;
+    for (int k = 0; k < jMV.hubP.K.size(); k++){
+        K_index.push_back(jMV.hubP.K.at(k)/M_PI);
+    }
+
+	//Test for the total number of electron
+	for (int ii = 1; ii <= jMV.hubP.n_sites*2; ii++) {
+		//Test for the total spin
+        if (verbose == 2 || verbose ==3)
+            printf("Ne=%d\n",(ii));
+		for (int jj = -std::min(ii,jMV.hubP.n_sites); jj <= std::min(ii,jMV.hubP.n_sites); jj++) {
+            int i = (ii+jj)/2;
+            int j = (ii-jj)/2;
+
+            //Ne and Sz combination impossible
+            //std::cout<<"i:"<<i<<"\tii:"<<ii<<"\tjj:"<<jj<<std::endl;
+            if ((i!=(ii+jj)/2) || ii!=(i+j) || i > jMV.hubP.n_sites || j > jMV.hubP.n_sites) {
+                continue;
+            }
+
 			//Skips no electron case
             if (i == j && i == 0) continue;
 
@@ -85,37 +104,72 @@ int main(int argc, char *argv[]){
 			//Sampling methods
 			//states_block ;
 
+            //Bloc symetries
+            arrType* sym_block = new arrType[jMV.hubP.n_sites];
+            for(int k = 0; k < states_block.get_length(); k++) {
 
-            //Find ground state
-			std::vector<vType> fund_state = std::vector<vType>(sP.sampling_size,0);
-            initial_vector(sP.sampling_size, fund_state.data());
-			std::vector<double> fund_state_lanczos_basis;
-			LanczosSolver<vType,arrType> LS;
-			int deg = 1;
-			double fundE;
-            int iter = 0;
-            std::vector<double> alpha, beta;
+                //Check the k-sector of every state
+                int sector = state_sym_locator(states_block.get_at(k), &jMV.hubP, &K_index);
 
-            LS.lanczos_energy(&fund_state_lanczos_basis, fund_state.data(),
-                            &states_block, &alpha, &beta, &fundE, &iter, &deg);
-
-            if (verbose == 2 || verbose ==3) {
-                printf("Ne=%d\tSz=%d\tenergy = %+5.4f",(i+j),(i-j),fundE);
-                if (verbose == 3) {
-                    printf("\nStates : ");
-                    states_block.show_all_states();
-                    printf("Matrix\n");
-                    std::vector<vType> mat(states_block.get_length()*states_block.get_length(),0);
-                    states_block.matrix_creation(mat.data());
-                    print_matrix(mat.data(),states_block.get_length(),states_block.get_length());
-                }
-                printf("\n");
+                sym_block[sector].add(states_block.get_at(k));
             }
-            //Look for minimum energy
-			if (fundE < minEnergy) {
-				minEnergy = fundE;
-				min_block_electrons = elec;
-			}
+
+
+            if (verbose == 2 || verbose ==3)
+                printf("\tSz=%2d\n",jj);
+            for(int k = 0; k < jMV.hubP.n_sites; k++) {
+
+                sym_block[k].set_hubbard_parameters(jMV.hubP);
+                sym_block[k].electrons = elec;
+                sym_block[k].set_sampling_parameters(sP);
+                //Find ground state
+                std::vector<vType> fund_state = std::vector<vType>(sym_block[k].get_length(),0);
+                initial_vector(sym_block[k].get_length(), fund_state.data());
+                std::vector<double> fund_state_lanczos_basis;
+                LanczosSolver<vType,arrType> LS;
+                int deg = 1;
+                double fundE = NULL;
+                int iter = 0;
+                std::vector<double> alpha, beta;
+
+                if (sym_block[k].get_length() != 0) {
+                    fundE = LS.fund_energy(&fund_state, &sym_block[k], &deg);
+                    //LS.lanczos_energy(&fund_state_lanczos_basis, fund_state.data(),sym_block+k, &alpha, &beta, &fundE, &iter, &deg);
+                }
+
+                if (verbose == 2 || verbose ==3) {
+                    printf("\t\tk = (%d, %d, %d)",
+                           K_index.at(k*3+0),
+                           K_index.at(k*3+1),
+                           K_index.at(k*3+2));
+                    //printf("\t\tk = (%d\u03C0/%d, %d\u03C0/%d, %d\u03C0/%d)",
+                    //       K_index.at(k*3+0),jMV.hubP.dimension.at(0),
+                    //       K_index.at(k*3+1),jMV.hubP.dimension.at(1),
+                    //       K_index.at(k*3+2),jMV.hubP.dimension.at(2));
+
+                    if (sym_block[k].get_length() != 0) {
+                        printf("\t(%lu)\tenergy = %+5.4f",sym_block[k].get_length(),fundE);
+                    }
+                    else {
+                        printf("\t(%lu)\tNo states",sym_block[k].get_length());
+                    }
+                    if (verbose == 3) {
+                        printf("\nStates : ");
+                        states_block.show_all_states();
+                        printf("Matrix\n");
+                        std::vector<vType> mat(states_block.get_length()*states_block.get_length(),0);
+                        states_block.matrix_creation(mat.data());
+                        print_matrix(mat.data(),states_block.get_length(),states_block.get_length());
+                    }
+                    printf("\n");
+                }
+                //Look for minimum energy
+                if (fundE < minEnergy) {
+                    minEnergy = fundE;
+                    min_block_electrons = elec;
+                }
+            }
+            delete[] sym_block;
 		}
 	}
 	auto step3 = std::chrono::high_resolution_clock::now();

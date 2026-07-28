@@ -335,14 +335,14 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
         &vec_BL, sites, new_space_len, states_excited, &BL_space_size,
         &BL_space_evectors, &prod_c_omega);
 
-    std::cout<<"Energies Electrons"<<std::endl;
-    print_vector(BL_space_evalues.data(), BL_space_evalues.size(), 3);
-    std::cout<<"VECTORS E"<<std::endl;
+    //std::cout<<"Energies Electrons"<<std::endl;
+    //print_vector(BL_space_evalues.data(), BL_space_evalues.size(), 3);
+    //std::cout<<"VECTORS E"<<std::endl;
     double phase = std::arg(BL_space_evectors.at(0));
     for (int i = 0; i < BL_space_evectors.size(); i++){
         BL_space_evectors.at(i) = BL_space_evectors.at(i) * exp(-std::complex<double>(0,1)*phase);
     }
-    print_matrix(BL_space_evectors.data(), new_space_len, BL_space_evectors.size() / new_space_len,1,3);
+    //print_matrix(BL_space_evectors.data(), new_space_len, BL_space_evectors.size() / new_space_len,1,3);
 
     conjugate_vector(BL_space_evectors.data(), BL_space_size*BL_space_size);
 
@@ -772,8 +772,8 @@ template <class StatesArrType> void compute_green_long(
                     states_array, states_excited_e,
                     arr_BL_e + i * new_space_len_e);
 			}
-            print_matrix(arr_BL_e,sites,new_space_len_e,1,4);
-            std::cout<<std::endl;
+            //print_matrix(arr_BL_e,sites,new_space_len_e,1,4);
+            //std::cout<<std::endl;
 
             //Truncated wH
             if (states_array->sys_sP.wH != 0 && states_array->sys_sP.nHapply != 0) {
@@ -804,7 +804,7 @@ template <class StatesArrType> void compute_green_long(
             std::complex<double>* hE = new std::complex<double>[new_space_len_e*new_space_len_e]();
 			states_excited_e->matrix_creation(hE);
 
-            print_matrix(hE, new_space_len_e, new_space_len_e,2,4);
+            //print_matrix(hE, new_space_len_e, new_space_len_e,2,4);
 
 			char jobs = 'V', uplo='U';
 			double* eigen_value_e = new double[new_space_len_e]();
@@ -820,15 +820,15 @@ template <class StatesArrType> void compute_green_long(
 
 			eigen_e = std::vector<double>(eigen_value_e,
                                             eigen_value_e + new_space_len_e);
-            std::cout<<"Energies Electrons"<<std::endl;
-            print_vector(eigen_e.data(), eigen_e.size(), 3);
+            //std::cout<<"Energies Electrons"<<std::endl;
+            //print_vector(eigen_e.data(), eigen_e.size(), 3);
 
             double phase = std::arg(hE[0]);
             for (int i = 0; i < new_space_len_e*new_space_len_e; i++){
                 hE[i] = hE[i] * exp(-std::complex<double>(0,1)*phase);
             }
-            std::cout<<"VECTORS EIGEN"<<std::endl;
-            print_matrix(hE,new_space_len_e,new_space_len_e,1,3);
+            //std::cout<<"VECTORS EIGEN"<<std::endl;
+            //print_matrix(hE,new_space_len_e,new_space_len_e,1,3);
 
 
             //Convert arr_BL_e to col-major.

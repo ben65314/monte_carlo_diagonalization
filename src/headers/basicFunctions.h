@@ -154,7 +154,7 @@ template <class T, class R> void initial_vector(
 		double a = (double)rand() / RAND_MAX;
 		double b = (double)rand() / RAND_MAX;
         std::complex<double> z(a,b);
-        std::cout<<z<<std::endl;
+        //std::cout<<z<<std::endl;
 		v[i] = z;
 	}
 
@@ -465,6 +465,8 @@ template <class T> void conjugate_vector(std::complex<double>* vec, T N){
 		vec[i] = conjugate(vec[i]);
 	}
 }
+
+
 
 void print_progress(double percentage);
 void print_iteration(int iteration, const char* str, int show_freq=10);

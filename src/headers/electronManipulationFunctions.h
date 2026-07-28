@@ -16,6 +16,8 @@ sType create_anti_ferro(unsigned int sites, int n_up, int n_down);
 
 Electrons transform_NSz(int nElec, int spin);
 
+int state_sym_locator(sType state, hubbardParam* hubP, std::vector<int>* k_index);
+
 void t_jump_energy(sType right_state, std::vector<sType>* states,
                    std::vector<double>* energies, hubbardParam* hubP);
 
@@ -157,6 +159,9 @@ template <class A> void Ht_subspace_condition_expanding(
 		}
 	}
 }
+
+
+
 
 
 template<class T, class U> void write_state_with_double(
