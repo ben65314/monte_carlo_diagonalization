@@ -8,12 +8,6 @@ import csv
 
 from scipy.signal import argrelextrema as extrema
 
-import sys
-import os
-# add the parent directory (where stack_axes.py lives) to the path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
-from stack_axes import make_stacked_axes
-
 def norm(data):
     return (data)/(max(data)-min(data))
 
@@ -28,46 +22,34 @@ def reader(file_name):
                 continue
             x.append(float(lines[0]))
             #y.append(float(lines[1])+float(lines[2]))
-            if len(lines)>2:
-                y.append(float(lines[1])+float(lines[2]))
-            else:
-                y.append(float(lines[1]))
-
-    return x,y
-def reader2(file_name):
-    x = []
-    y = []
-    #y = []
-    with open(file_name) as file:
-        reader = csv.reader(file,delimiter=' ')
-        for lines in reader:
-            if(lines[0].startswith('#') or lines[0].startswith('PARAMETERS') or lines[0].startswith('NEXT_SITE')):
-                continue
-            x.append(float(lines[0]))
-            #y.append(float(lines[1])+float(lines[2]))
-            y.append(float(lines[4]))
-
-    return x,y
-def reader3(file_name):
-    x = []
-    y = []
-    #y = []
-    with open(file_name) as file:
-        reader = csv.reader(file,delimiter=' ')
-        for lines in reader:
-            if(lines[0].startswith('#') or lines[0].startswith('PARAMETERS') or lines[0].startswith('NEXT_SITE')):
-                continue
-            x.append(float(lines[0]))
-            #y.append(float(lines[1])+float(lines24]))
-            y.append(float(lines[4])/24)
-
+            y.append(float(lines[1])+float(lines[2]))
     return x,y
 
+def gapWidth(x_data,y_data):
+    n_points = len(y_data)
+
+    left_x = x_data[:n_points//2]
+    right_x = x_data[n_points//2:]
+    
+    left_y = y_data[:n_points//2]
+    right_y = y_data[n_points//2:]
+
+    left_index = extrema(np.array(left_y),np.greater)
+    right_index = extrema(np.array(right_y),np.greater)
+
+    max_left = left_index[0][-1]
+    max_right = right_index[0][0]
+
+    max_x_left = left_x[max_left]
+    max_x_right = right_x[max_right]
+
+    return max_x_left, max_x_right
+    
 
 
 ##Curves information
 #limits
-xlims_min = 0
+xlims_min = -7
 xlims_max = 7
 #position of # of states abs position
 pos_x_name = 0.005
@@ -76,12 +58,12 @@ pos_y_name = 0.975
 #data
 #JUST NEED TO CHANGE THOSE VALUES, works up to 4 graphs 
 mh_beta = ['02','02','02']
-data_perc = ['DDMRG.txt','dVMC.txt','MCD.txt']
+data_perc = ['10e-5','10e-7','10e-10']
 data_perc__ = ['0.00001']
 site = ['24','28','32']
 data_dim = ['1D']
 #data_site = ['16']
-ylims = [0.45,0.8,0.5,0.45]
+ylims = [0.6,0.8,0.5,0.45]
 
 
 
@@ -101,11 +83,12 @@ colors = [cmap(i) for i in colorsa]
 labels = []
 letters = ['a) ','b) ','c) ','d) ']
 for i,j in zip(letters,data_perc):
-    labels.append(i)
+    labels.append('{:.2f}'.format(float(j)/100))
 handles = []
 labels = []
-for d in data_perc:
-    labels.append(d[0:-4])
+labels.append(r'$N_c=24$ ($f\sim10^{-5}$)')
+labels.append(r'$N_c=28$ ($f\sim10^{-7}$)')
+labels.append(r'$N_c=32$ ($f\sim10^{-10}$)')
 
 #Set font family
 hfont = {'fontname':'Times'}
@@ -114,7 +97,7 @@ plt.rc('text', usetex=True)
 plt.rc('legend', fontsize=24)
 #mpl.rcParams['text.latex.preamble'] = r'\boldmath'
 #plt.rcParams["font.family"] = "Computer Modern"
-size_text = 16
+size_text = 14
 size_text_gap = 9
 
 #Compare Width
@@ -126,24 +109,27 @@ q_matrix_files =[]
 for j in data_dim:
     q_matrix_files.append([])
     for i,k,l in zip(data_perc,mh_beta,site):
-        file = i
+        file = './large_cluster_data/dos_'+j+'_'+l+'green'+i + '_' + k+'.txt'
         q_matrix_files[-1].append(file)
         c_width.append(file)
 
 #Find gap width
 left_w, right_w = [], []
-#for w in c_width : 
-#    x,y = reader(w)
-#    a,b = gapWidth(x,y)
-#    left_w.append(a)
-#    right_w.append(b)
+for w in c_width : 
+    x,y = reader(w)
+    a,b = gapWidth(x,y)
+    left_w.append(a)
+    right_w.append(b)
 
 
 # Create subplots with shared x-axis
 n_subplots = len(data_dim)
-fig,axes = make_stacked_axes(n_panels=1,panel_height_cm=3.2,left=0.01,right=0.99,top_margin_cm=0.1)
+fig, axes = plt.subplots(n_subplots, 1, sharex=True, figsize=(6, 1.6+n_subplots),constrained_layout=True)
+#plt.subplots_adjust(left=.02,right=.98,bottom=.16,top=.90)  #Change top space
+#plt.subplots_adjust(hspace=.1)  # Reduce vertical space between plots
+#plt.subplots_adjust(left=0, bottom=0, right=1, top=0, wspace=0, hspace=0)
 if n_subplots == 1 :
-    pass#axes = [axes]
+    axes = [axes]
 
 #BOX PARAMS
 ss_x = 0.93#xlims_max*0.50
@@ -166,22 +152,13 @@ for i,ax in enumerate(axes):
     #print(q_files)
     for j in range(len(q_matrix_files[i])):
         #print(f"i:{i}\tj:{j}")
-        print(q_files[j])
-        if q_files[j]=='MCD.txt':
-            x,y = reader(q_files[j])
-        elif q_files[j]=='dVMC.txt':
-            x,y = reader3(q_files[j])
-        elif q_files[j]=='DDMRG.txt':
-            x,y = reader2(q_files[j])
-        else:
-            x,y=[],[]
-
+        x,y = reader(q_files[j])
         handle, = ax.plot(x, np.array(y),linestyle=line_style[j],lw=line_width[j],color=colors[j],label=labels[j],zorder=-j)
 
         ax.set_ylim(0, float(ylims[i]))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.set_xlim(xlims_min,xlims_max)
-        ax.tick_params(axis='x',labelsize=size_text)
+        ax.tick_params(axis='x',labelsize=size_text+1)
         ax.set_yticks([0, float(ylims[i])])  # Tick only at 0 and 1 and 2
         
         #Vert line at 0
@@ -250,7 +227,7 @@ for i,ax in enumerate(axes):
 
 
 # Set x-axis label on the bottom subplot only
-fig.legend(handles=handles,loc='upper right',bbox_to_anchor=(0.99,1),fontsize=size_text-4,ncol=1,
+fig.legend(handles=handles,loc='upper right',bbox_to_anchor=(1,1),fontsize=size_text-4,ncol=1,
         columnspacing=0.5,labelspacing=0.1,handletextpad=0.1,handlelength=1,borderpad=0.1, frameon=True)
 axes[-1].set_xlabel('$\omega$',fontsize = size_text)
 
