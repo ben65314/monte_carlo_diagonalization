@@ -561,8 +561,8 @@ double state_energy(sType x, hubbardParam* hubP){
     }
 
     //U terms
-    Electrons elec = find_number_of_electron(x, hubP->n_sites);
-	energy += hubP->u / hubP->n_sites * elec.up * elec.down;
+    //Electrons elec = find_number_of_electron(x, hubP->n_sites);
+	//energy += hubP->u / hubP->n_sites * elec.up * elec.down;
 
     return energy;
 }
