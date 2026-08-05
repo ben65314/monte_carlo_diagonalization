@@ -194,7 +194,7 @@ int main(int argc, char *argv[]){
     //std::ofstream out_file;
 	//out_file.open(out_file_dir, std::ios::app);
 
-	//std::cout << writes << std::endl;
+	if (verbose > 1) std::cout << writes << std::endl;
 	//out_file << writes;
 
 	//out_file.close();

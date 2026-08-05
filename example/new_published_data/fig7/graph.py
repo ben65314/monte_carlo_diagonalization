@@ -95,6 +95,7 @@ line_width = [1.5]*5
 cmap = plt.get_cmap('gnuplot')
 colorsa = np.linspace(0.2,0.90,num=len(data_perc));
 colors = [cmap(i) for i in colorsa]
+colors = ['#160e33','#b186eb','#4dab21']
 
 
 #legend labels

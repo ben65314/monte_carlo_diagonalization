@@ -49,12 +49,12 @@ pos_y_name = 0.975
 
 #data
 #JUST NEED TO CHANGE THOSE VALUES, works up to 4 graphs
-data_perc = ['100','05']
+data_perc = ['100', '05']
 data_r = ['1', '09999', '0999', '099', '09']
 data_r_float_w = ['1.0000', '0.9999', '0.999', '0.99', '0.9']
 data_r_float = ['0.00000', '0.0001', '0.001', '0.01', '0.1']
 #exp_label_10 = [r'$10^{-\infty}$',r'$10^{-3}$',r'$10^{-2}$',r'$10^{-1}$']
-data_site = ['16','16']
+data_site = ['16']
 
 ylims = [0.44,0.44]
 
@@ -78,7 +78,7 @@ labels = []
 letters = ['a) ','b) ','c) ','d) ']
 for j in data_perc:
     labels.append('{:.2f}'.format(float(j)/100))
-labels.append(r'$\chi^2(w_t)$')
+labels.append(r'$\chi^2$')
 handles = []
 
 #Set font family
@@ -97,7 +97,7 @@ for i in data_perc:
 
 #print(q_matrix_files)
 # Create subplots with shared x-axis
-fig,axes = make_stacked_axes(n_panels=2,panel_height_cm=3.2,left=0.01,right=0.99,top_margin_cm=0.1)
+fig,axes = make_stacked_axes(n_panels=len(data_perc),panel_height_cm=3.2,left=0.01,right=0.99,top_margin_cm=0.1)
 gs = gridspec.GridSpec(2, 1, figure=fig, height_ratios=[1, 1])
 
 # Create inset axis (for c)) positioned relative to the lower plot
@@ -106,7 +106,7 @@ rect = 0.42,0.40,0.16,0.30
 inset_ax = fig.add_axes(rect)
 axes.append(inset_ax)  # c), 2, figsize=(6, 3),constrained_layout=True)
 #Shared x-axes
-axes[1].sharex(axes[0])
+if len(axes)>2 : axes[1].sharex(axes[0])
 axes[0].label_outer()   # hides x labels on top row
 
 #BOX PARAMS
@@ -128,7 +128,7 @@ A_omega = [r"$A(\omega)$",r"$A(\omega)_{reduced}$"]
 #SPECTRAL FUNCTIONS
 for i,ax in enumerate(axes):
 
-    if i < 2 :
+    if i < (len(axes)-1) :
         q_files = q_matrix_files[i]
         #print(q_files)
         x_ref,y_ref,_ = reader(q_files[0])
@@ -161,7 +161,7 @@ for i,ax in enumerate(axes):
                 print(chi_2)
 
 
-                axes[2].scatter(float(data_r_float[j]),chi_2,color=colors[j], marker=markers[i],s=m_size[i])
+                axes[-1].scatter(float(data_r_float[j]),chi_2,color=colors[j], marker=markers[i],s=m_size[i])
 
     # Optionally add individual titles a), b), ...
     if i == 2 : shift = 0.025
@@ -190,9 +190,9 @@ axes[1].set_xlabel('$\omega$',fontsize = size_text)
 
 #axes[2].set_xlabel('1-$w_t$',fontsize = size_text-4,labelpad=0)
 #axes[2].set_ylabel('$\chi^2$',fontsize = size_text-4,rotation=0)
-axes[2].set_facecolor((1, 1, 1, 0.8))  # RGBA, alpha=0.5
-axes[2].set_xscale('log')
-axes[2].tick_params(
+axes[-1].set_facecolor((1, 1, 1, 0.8))  # RGBA, alpha=0.5
+axes[-1].set_xscale('log')
+axes[-1].tick_params(
     axis='both',        # both x and y
     which='both',       # major and minor
     bottom=False,       # remove bottom ticks
@@ -202,9 +202,9 @@ axes[2].tick_params(
     labelbottom=False,  # remove x labels
     labelleft=False     # remove y labels
 )
-axes[2].set_xlim(2e-1,5e-5)
-axes[2].set_ylim(-0.005,0.15)
-axes[2].axhline(0,c='k',lw=0.7,linestyle='--')
+axes[-1].set_xlim(2e-1,5e-5)
+axes[-1].set_ylim(-0.005,0.15)
+axes[-1].axhline(0,c='k',lw=0.7,linestyle='--')
 
 plt.savefig('further_truncation.pdf')
 

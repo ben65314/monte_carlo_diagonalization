@@ -68,6 +68,7 @@ lwidth = 1.5 #if j!=0 else 5
 cmap = plt.get_cmap('gnuplot')
 colorsa = np.linspace(0,.90,num=4);
 colors = [cmap(i) for i in colorsa]
+colors = ['#000000', '#cf4e4e', '#f2bb00', '#7177d1']
 
 betas = ['ED', 0.1, 0.2, 0.3]
 betas_label = ['ED   ', r'$\beta:0.1$', 0.2, 0.3]
@@ -127,7 +128,7 @@ for i,ax in enumerate(axes):
 
         x,y,y_both = reader(q_files[j])
         print(q_files[j][18:-4])
-        handle, = ax.plot(x, np.array(y),linestyle=line_style[j],lw=lwidth,color=color_dict[data_beta[i][j]],label=labels[j],alpha=0.65)
+        handle, = ax.plot(x, np.array(y),linestyle=line_style[j],lw=lwidth,color=color_dict[data_beta[i][j]],label=labels[j],alpha=0.95)
         ax.set_ylim(0, float(ylims[i]))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         ax.set_xlim(xlims_min,xlims_max)
