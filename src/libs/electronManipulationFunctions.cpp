@@ -236,7 +236,7 @@ int state_sym_locator(sType state, hubbardParam* hubP, std::vector<int>* k_index
             k[2] += k_index->at(i*3+2);
         }
     }
-    
+
     //Modulo
     k[0]%= hubP->dimension.at(0);
     k[1]%= hubP->dimension.at(1);
@@ -552,7 +552,9 @@ double state_energy(sType x, hubbardParam* hubP){
 
     double energy = 0;
     //Epsilon terms
-    sType scan = 1 << 2*hubP->n_sites;
+    sType scan = 1;
+    scan <<= (2*hubP->n_sites);
+
     for (int i=0; i < 2*hubP->n_sites; i++){
         scan >>= 1;
         if ((x & scan) != 0){
