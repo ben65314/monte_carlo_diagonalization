@@ -88,18 +88,14 @@ void print_bin_from_dec(sType decimal_number, int resolution) {
 	* -------
 	* NONE
     ******************************************/
-    bool not_zero = false;
-    for (int i = resolution; i >= 0; i--){
+    for (int i = resolution-1; i >= 0; i--){
         int64_t power = pow(2,i);
         if ((int64_t)decimal_number-power >= 0){
             decimal_number -= power;
             printf("%d",1);
-            not_zero = true;
         }
         else {
-            if (not_zero) {
-                printf("%d",0);
-            }
+            printf("%d",0);
         }
     }
 }

@@ -13,6 +13,7 @@ int Hu(sType state, unsigned char sites);
 Electrons find_number_of_electron(sType state, unsigned char sites);
 
 sType create_anti_ferro(unsigned int sites, int n_up, int n_down);
+sType create_min_k(int n_up, int n_down, hubbardParam* hubP);
 
 Electrons transform_NSz(int nElec, int spin);
 

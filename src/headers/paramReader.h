@@ -289,23 +289,6 @@ struct justManyVariables readParameters(const std::string file) {
 	send_info.hubP.t_matrix = std::vector<double>(
         t_matrix, t_matrix + (send_info.hubP.n_sites*send_info.hubP.n_sites));
 	delete[] t_matrix;
-
-	init = create_anti_ferro(send_info.hubP.n_sites, up_f, down_f);
-
-	std::vector<sType> temp;
-	temp.push_back(init);
-
-	//Using entered or calculated states
-	if (percentage_of_states > 1) percentage_of_states = 1;
-	if (use_specified) send_info.sP.init_state = init_state;
-	else send_info.sP.init_state = temp;
-
-
-	send_info.hubP.N_e = N;
-	send_info.hubP.S_z = Sz;
-
-	if(send_info.sP.sampling_size <=0) send_info.sP.sampling_size = 1;
-
     // k-basis
     //Find dimensions of lattice
     for (int i = 0; i < send_info.hubP.n_sites; i++){
@@ -329,6 +312,24 @@ struct justManyVariables readParameters(const std::string file) {
 	int n = send_info.hubP.n_sites*send_info.hubP.n_sites;
 	send_info.hubP.matEpsilon = std::vector<std::complex<double>>(n,0);
 	calculate_epsilon_3d(&send_info.hubP);
+
+	//init = create_anti_ferro(send_info.hubP.n_sites, up_f, down_f);
+    init = create_min_k(up_f, down_f, &send_info.hubP);
+
+	std::vector<sType> temp;
+	temp.push_back(init);
+
+	//Using entered or calculated states
+	if (percentage_of_states > 1) percentage_of_states = 1;
+	if (use_specified) send_info.sP.init_state = init_state;
+	else send_info.sP.init_state = temp;
+
+
+	send_info.hubP.N_e = N;
+	send_info.hubP.S_z = Sz;
+
+	if(send_info.sP.sampling_size <=0) send_info.sP.sampling_size = 1;
+
 
 
 	return send_info;

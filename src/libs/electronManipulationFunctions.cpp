@@ -195,6 +195,55 @@ sType create_anti_ferro(unsigned int sites, int n_up, int n_down){
 	return bi_state;
 }
 
+sType create_min_k(int n_up, int n_down, hubbardParam* hubP){
+	/*******************************************************************
+	* Creates the best antiferromagnetic state
+	*
+	* Parameters
+	* ----------
+	* sites : (unsigned int) Number of sites of the system
+	* n_up	: (int) number of up electrons
+	* n_down : (int) number of down electrons
+	*
+	* Returns
+	* -------
+	* bi_state : (sType) Anti-Ferro state
+	*****************************************************************/
+    sType sites = hubP->n_sites;
+    std::vector<double> electron_epsilon_energy;
+    for (sType i = 0; i < sites; i++) {
+        double eps = hubP->matEpsilon.at(i*sites+i).real();
+        electron_epsilon_energy.push_back(eps);
+    }
+    ///Sort from the lea
+	// Create index vector: [0, 1, 2, 3]
+    std::vector<uLong> indices(sites);
+    std::iota(indices.begin(), indices.end(), 0);
+
+    // Sort indices based on keys
+    std::sort(indices.begin(), indices.end(), [&](size_t i, size_t j) {
+        return electron_epsilon_energy.at(i) < electron_epsilon_energy.at(j);
+    });
+    //print_vector(electron_epsilon_energy.data(),sites,2);
+    //print_vector(indices.data(),sites,2);
+
+    sType bi_state = 0;
+	unsigned long one = 1;
+
+    //print_bin_from_dec(bi_state, 2*sites);std::cout<<std::endl;
+	//Fills the electrons in the order of 'indices'
+	for(int i = 0; i < n_down; i++){
+        bi_state |= one << (sites-1-indices.at(i));
+        //print_bin_from_dec(bi_state, 2*sites);std::cout<<std::endl;
+	}
+	for(int i = 0; i < n_up; i++){
+        bi_state |= one << (2*sites-1-indices.at(i));
+        //print_bin_from_dec(bi_state, 2*sites);std::cout<<std::endl;
+	}
+
+	return bi_state;
+}
+
 Electrons transform_NSz(int n_elec, int spin) {
 	/*****************************************
 	* Transforms the total number of electron of the system and the total spin

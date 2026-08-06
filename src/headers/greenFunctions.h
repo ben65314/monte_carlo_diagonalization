@@ -755,7 +755,6 @@ template <class StatesArrType> void compute_green_long(
 	//Vectors
 	//ELECTONS
 	int new_space_len_e = states_excited_e->get_length();
-    states_excited_e->show_all_states();
 
 	written_q_matrix += "\n# Eigen values E -- Q-Matrixes E\n";
 
