@@ -97,6 +97,7 @@ template <class T>void HuN(T state, std::vector<T>* proj_states, int sites) {
 void Hepsilon(sType state, std::vector<sType>* proj_states, hubbardParam* hubP);
 void u_jump_energy(sType right_state, Electrons elec, std::vector<sType>* states, std::vector<double>* energies, hubbardParam* hubP);
 void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vector<std::complex<double>>* energies, hubbardParam* hubP);
+void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vector<double>* energies, hubbardParam* hubP);
 double state_energy(sType x, hubbardParam* hubP);
 void calculate_epsilon_1d(hubbardParam* hubP);
 void calculate_epsilon_3d(hubbardParam* hubP);
@@ -214,7 +215,8 @@ template<class T, class U> void write_state_with_double(
 	std::string fund_txt = "";
 	double cummul = 0;
 	for (uLong i = 0 ; i < sorted_fund.size(); i++) {
-		cummul += (double)(conjugate(sorted_fund.at(i))*sorted_fund.at(i)).real();
+        std::complex<double> sorted_fund_index = sorted_fund.at(i);
+		cummul += (double)(conjugate(sorted_fund_index)*sorted_fund_index).real();
 		fund_txt += to_string_pq(sorted_fund.at(i), 4, 14) + "\t"
             + to_string_pq((double)sorted_states.at(i), 10, 0) + "\t"
 			+ to_string_pq((double)Hu(sorted_states.at(i), sites), 10, 0)+ "\t"
@@ -249,7 +251,7 @@ template<class T, class U> void write_state_with_double(
 }
 
 template<class T, class U> void count_contribution_wH(
-    T* fund, U* states, U* states_to_probe, unsigned int sites, double wH) {
+    T* fund, U* states, U* states_to_probe, double wH) {
 	/*******************************************************
 	* Sort the states according to their fund weight, creates a reduced
     * subspace keeping only the most dominant elements and write everything in
@@ -272,8 +274,7 @@ template<class T, class U> void count_contribution_wH(
 	* NONE
 	********************************************************/
     sType size = states->get_length();
-    int one = 1;
-    wH *= pow(dznrm2_(&size, fund, &one),2);
+    wH *= pow(nrm2_blas(&size, fund),2);
 	// Create index vector: [0, 1, 2, 3]
     std::vector<uLong> indices(states->get_length());
     std::iota(indices.begin(), indices.end(), 0);
@@ -296,7 +297,8 @@ template<class T, class U> void count_contribution_wH(
 	std::string fund_txt = "";
 	double cummul = 0;
 	for (uLong i = 0 ; i < indices.size(); i++) {
-		cummul += (double)(conjugate(fund[indices[i]])*fund[indices[i]]).real();
+        std::complex<double> fund_index = fund[indices[i]];
+		cummul += (double)(conjugate(fund_index)*fund_index).real();
 
         //Add the states back in the States array but in order of their weight
         if (verbose > 9) std::cout<<cummul<<"/"<<wH<<std::endl;

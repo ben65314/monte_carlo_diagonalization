@@ -57,36 +57,23 @@ private:
 		* -------
         * None
 		*****************************************************************/
-        //std::cout<<"MH_SAMPLING"<<std::endl;
-		//Initial states
+		//Allocate memory
 		allocate_more_nodes(sampling_size);
 
-        //Each nU counter
-        int nu_poss_value = (this->electrons.up > this->electrons.down) ? \
-            this->electrons.up : this->electrons.down;
-        nu_poss_value += 1;
-        std::vector<sType> nu_state_counter(nu_poss_value, 0);
-        //Maximum number of possible state for each nu value
-        std::vector<sType> nb_state_per_nu;
-        for (int i = 0; i < nu_poss_value; i++) {
-            sType n_states = comb_specified(i, this->sys_hubP.n_sites,
-                                            this->electrons.up,this->electrons.down);
-            nb_state_per_nu.push_back(n_states);
-        }
-
-        int filled_nu_layer = 0;
 
         //StatesArr* currentState = this->clone();
+        //Declare current_state and next_step_eval data structures
         decltype(this) current_state = new StatesK_T(50);
-        //*currentState = StatesArr(arrR.size());
+		decltype(this) next_step_eval = new StatesK_T(50);
 
+        //Adds the states already here to current_state
 		for (unsigned int i = 0; i < this->arr.size(); i++) {
             sType starting_states = this->arr.at(i).key;
 			current_state->add(starting_states);
-            int nu_add = Hu(starting_states,this->sys_hubP.n_sites);
-            nu_state_counter[nu_add] += 1;
 		}
 
+        //Optimization so that an accepted state isn't proposed again.
+        //Useful when f=1.00.
 		bool tree_like_sampling = false;
 		if(verbose == -1){tree_like_sampling = true;}
 
@@ -94,14 +81,9 @@ private:
 
 		StateType size_current_step_eval = this->arr.size();
 		StateType size_next_step_eval = reticle * size_current_step_eval;
-		//StatesArr* nextStepEval = this->clone();
-		decltype(this) next_step_eval = new StatesK_T(50);
 
-        //Only used when verbose needs it to be
-        std::vector<sType> proposed_array (nu_poss_value, 0);
-        std::vector<sType> current_nu_state (nu_poss_value, 0);
         decltype(this) possible_state = new StatesK_T(50);
-        //
+
 
 		unsigned int g = 0;
 		auto step1 = std::chrono::high_resolution_clock::now();
@@ -109,40 +91,12 @@ private:
 		while (MH_size < sampling_size) {
 			size_current_step_eval = current_state->get_length();
 			step2 = std::chrono::high_resolution_clock::now();
-            if (verbose > 4) {
-                for (unsigned long i = 0; i < size_current_step_eval;i++)
-                {
-                    int this_nu = Hu(current_state->get_at(i),this->sys_hubP.n_sites);
-                    current_nu_state[this_nu]++;
-                }
-                for (unsigned long i = 0; i < possible_state->get_length();i++)
-                {
-                    int this_nu = Hu(possible_state->get_at(i),this->sys_hubP.n_sites);
-                    proposed_array[this_nu]++;
-                }
-
-                printf("Sampled(%5ld/%5ld) [",MH_size,sampling_size);
-                for (int i = 0; i < nu_poss_value; i++) {
-                    printf("%6ld/%ld", nu_state_counter[i],
-                           nb_state_per_nu[i]);
-                }
-                printf("] \033[42m|\033[0m size_ceval:%6ld [", size_current_step_eval);
-                for (int i = 0; i < nu_poss_value; i++) {
-                    printf("%6ld ",current_nu_state[i]);
-                }
-                printf("] \033[42m|\033[0m size_prop:%8ld [", possible_state->get_length());
-                for (int i = 0; i < nu_poss_value; i++) {
-                    printf("%6ld ",proposed_array[i]);
-                }
-                printf("] \033[42m|\033[0m dt = %s\n",time_formating(step1,step2).c_str());
-
-                proposed_array = std::vector<sType>(nu_poss_value, 0);
-                possible_state->remove_all();
-                current_nu_state = std::vector<sType>(nu_poss_value, 0);
-            }
 			step1 = std::chrono::high_resolution_clock::now();
+            if (verbose > 4) {
+                printf("Subspace size : %10lu(%1.4f)",MH_size,(double)MH_size/sampling_size);
+            }
 
-
+            //Assures that the reticle isn't bigger than the subspace size.
             bool big_sample = reticle * size_current_step_eval > sampling_size;
 			size_next_step_eval = big_sample ? sampling_size :
                 reticle * size_current_step_eval;
@@ -153,25 +107,17 @@ private:
 
 			float current_energy;
 			std::vector<StateType> possible_new_state;
-
+            //Iterates for each current state.
 			for (StateType i = 0; i < size_current_step_eval; i++) {
 				//Evolution of Hamiltonian of the current state
                 //and energy of the current state
                 current_energy = state_energy(current_state->get_at(i),&this->sys_hubP);
 				possible_new_state.clear();
+
+                //Proposes states
                 Hepsilon(current_state->get_at(i), &possible_new_state, &this->sys_hubP);
                 HuN(current_state->get_at(i), &possible_new_state,
                         this->sys_hubP.n_sites);
-                
-
-                if (verbose > 4) {
-                    //Compute proposed states for print
-                    for (unsigned long i = 0; i < possible_new_state.size();i++)
-                    {
-                        possible_state->add(possible_new_state.at(i));
-                    }
-                }
-
 
 				if (possible_new_state.size() != 0) {
 					StateType new_state;
@@ -187,18 +133,13 @@ private:
 							}
 						}
 
-						//#Calculates new Energy and accept factor
+						//Calculates new Energy and accept factor
                         new_energy = state_energy(new_state, &this->sys_hubP);
 
-						float diff_energy = new_energy - current_energy;
 						float a = (float)rand() / (float)RAND_MAX;
-						bool accepted;
-						//accepted = exp(-beta*(this->sys_hubP.u*(new_nu) - current_nu)) > a;
 
-                        //Nouvelle methode echantillojn acceptation
-                        //bool accepted = exp(-beta*this->sys_hubP.u*(new_nu-filled_nu_layer+1)) > a;
-                        accepted = exp(-beta*(new_energy-a_sample*current_energy-b_sample*filled_nu_layer)) > a;
-
+                        //Nouvelle methode echantillon acceptation
+                        bool accepted = exp(-beta*(new_energy-a_sample*current_energy)) > a;
 
 						//Energy MONTE CARLO Condition
 						if (accepted){
@@ -224,6 +165,7 @@ private:
                             rdm_arr, rdm_arr + all_accepted_states.size(),
                             std::default_random_engine(std::time(NULL)));
 
+                        //Choose accepted states at random
 						for (StateType q = 0; q < reticle; q++) {
 							StateType item = all_accepted_states.at(rdm_arr[q]);
 
@@ -249,30 +191,11 @@ private:
                         StateType l = 0; l < all_accepted_states.size(); l++){
 							StateType item = all_accepted_states.at(l);
 
-
 							next_step_eval->add(item);
 							if (!this->countains_element(item)) {
 								add(item);
 								MH_size++;
 								g=0;
-
-                                //Add to counter for each type of nu
-                                int new_nu = Hu(item,this->sys_hubP.n_sites);
-                                nu_state_counter[new_nu] += 1;
-                                // Prevents already filled sampling
-                                bool filled_layer = nu_state_counter[new_nu] \
-                                    == nb_state_per_nu[new_nu];
-                                bool prev_filled = true;
-                                if (new_nu>0){
-                                    prev_filled = nu_state_counter[new_nu-1] \
-                                    == nb_state_per_nu[new_nu-1];
-                                }
-                                if (filled_layer && prev_filled &&
-                                        filled_nu_layer+1 == new_nu ) {
-                                    filled_nu_layer = new_nu;
-                                    if (verbose > 4) std::cout<<"FILLED : " <<filled_nu_layer<<std::endl;
-                                }
-                                //print_vector(nu_state_counter.data(),nu_state_counter.size());
 							}
 							if (MH_size >= sampling_size) {
                                 //This is a nested break to get out of the for
@@ -359,19 +282,11 @@ public:
 
     template<class T> void subspace_condition_expanding_weighted(T* fund_vector, std::vector<StateType>* states_added) {
 		if (verbose > 5) std::cout<<"nHapply weighted = "<<this->sys_sP.nHapply<<std::endl;
-        if (verbose > 99) {
-            this->show_all_states();
-            print_vector(fund_vector, this->get_length(),3);
-        }
         StatesK_T* states_to_probe = new StatesK_T<StateType, VectorType>(50);
         states_to_probe->set_hubbard_parameters(this->sys_hubP);
         //Finds the states with the most weight and put them in
-        count_contribution_wH(fund_vector, this, states_to_probe, this->sys_hubP.n_sites, this->sys_sP.wH);
+        count_contribution_wH(fund_vector, this, states_to_probe, this->sys_sP.wH);
 
-        if (verbose > 99) {
-            this->show_all_states();
-            print_vector(fund_vector, this->get_length(),3);
-        }
 		for(uInt i = 0; i < this->sys_sP.nHapply; i++) {
             HuN_subspace_condition_expanding(states_to_probe,0,states_to_probe->get_length());
 		}
@@ -400,7 +315,7 @@ public:
 	}
 
 	//Function overload
-	void matrix_creation(std::complex<double>* result_matrix) {
+	void matrix_creation(VectorType* result_matrix) {
 		/*******************************************************************
 		Create the matrix of the block of state given
 
@@ -421,7 +336,7 @@ public:
 
 			//He
 			std::vector<sType> proj;
-			std::vector<std::complex<double>> epsilon_energies;
+			std::vector<VectorType> epsilon_energies;
 			epsilon_jump_energy(this->get_at(i), &proj, &epsilon_energies, &this->sys_hubP);
             //std::cout<<"r_state : "<<this->get_at(i)<<std::endl;
             //print_vector(proj.data(), proj.size());
@@ -433,7 +348,7 @@ public:
 				if ((unsigned long)(index) < i) continue;
 
 				result_matrix[index * cols + i] += epsilon_energies.at(j);
-				if (i != (unsigned long)index) 
+				if (i != (unsigned long)index)
                     result_matrix[i * cols + index] += conjugate(epsilon_energies.at(j));
 			}
 
@@ -481,7 +396,7 @@ public:
 
 		    //He
 			std::vector<StateType> proj;
-			std::vector<std::complex<double>> energies;
+			std::vector< VectorType> energies;
 			epsilon_jump_energy(this->get_at(i), &proj, &energies, &this->sys_hubP);
 			//printf("tJump size:%ld\n",proj.size());
 			//fflush(stdout);

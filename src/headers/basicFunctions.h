@@ -81,7 +81,7 @@ template <class T, class U> void make_tri_diag(
 }
 
 //Vector manipulation
-template <class R> void normalize(double* vec, R size) {
+template <class D> void normalize(D* vec, sType size) {
 	/***********************************************************
 	* Normalizes a vector
 
@@ -99,35 +99,10 @@ template <class R> void normalize(double* vec, R size) {
 	* NONE
 	*************************************************************/
 	//Normalisation of vec
-    int one = 1;
-	double norm = 1 / dnrm2_(&size, vec, &one);
-	dscal_(&size, &norm, vec, &one);
+	double norm = 1 / nrm2_blas(&size, vec);
+	scal_blas(&size, &norm, vec);
 }
 //
-//Vector manipulation
-template <class R> void normalize(std::complex<double>* vec, R size) {
-	/***********************************************************
-	* Normalizes a vector
-
-	* Parameters
-	* ----------
-	* vec	: (double*) vector to normalize
-	* size	: (R) Number of elements of the vector
-	*
-	* Templates
-	* ---------
-	* R		: int, long, unsigned
-	*
-	* Returns
-	* -------
-	* NONE
-	*************************************************************/
-	//Normalisation of vec
-    int one = 1;
-	double norm = 1 / dznrm2_(&size, vec, &one);
-	zdscal_(&size, &norm, vec, &one);
-}
-
 template <class T, class R> void initial_vector(
         R const SIZE, T* v, uInt seed=clock()) {
 	/*********************************************************
@@ -151,9 +126,7 @@ template <class T, class R> void initial_vector(
 	//Initialize seed
 	srand(seed);
 	for (R i = 0; i < SIZE; i++) {
-		double a = (double)rand() / RAND_MAX;
-		double b = (double)rand() / RAND_MAX;
-        std::complex<double> z(a,b);
+		double z = (double)rand() / RAND_MAX;
         //std::cout<<z<<std::endl;
 		v[i] = z;
 	}
@@ -381,8 +354,8 @@ template <class T, class R> T* row2col_major(T* mat, R n_rows, R n_cols) {
 	****************************************/
 
     T* new_mat = new T[n_rows*n_cols]();
-    for (int i = 0; i < n_rows; i++) {
-        for (int j = 0; j < n_cols; j++) {
+    for (R i = 0; i < n_rows; i++) {
+        for (R j = 0; j < n_cols; j++) {
             new_mat[j*n_rows+i] = mat[i*n_cols+j];
         }
     }
@@ -408,8 +381,8 @@ template <class T, class R> T* col2row_major(T* mat, R n_rows, R n_cols) {
 	* new_mat   : (double*) pointer of the converted matrix.
 	****************************************/
     T* new_mat = new T[n_rows*n_cols]();
-    for (int i = 0; i < n_rows; i++) {
-        for (int j = 0; j < n_cols; j++) {
+    for (R i = 0; i < n_rows; i++) {
+        for (R j = 0; j < n_cols; j++) {
             new_mat[i*n_cols+j] = mat[j*n_rows+i];
         }
     }

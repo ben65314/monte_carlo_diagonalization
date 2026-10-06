@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include "paramReader.h"
 
-typedef StatesK_T<sType,vType> arrType;
+typedef StatesR_T<sType,vType> arrType;
 
 int main(int argc, char *argv[]){
 	//Args

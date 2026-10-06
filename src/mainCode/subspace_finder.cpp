@@ -38,8 +38,8 @@ int main(int argc, char *argv[]){
 
 	//Parallel implementation
 #ifdef _OPENMP
-    if (jMV.hubP.n_sites > 10) omp_set_num_threads(NUM_THREADS_USED);
-	else omp_set_num_threads(1);
+    if (jMV.hubP.n_sites > 10) {omp_set_num_threads(NUM_THREADS_USED);}
+    else {omp_set_num_threads(1);}
 #endif // _OPENMP
 
 	//Start computing
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
 
     //Symetry indices
     std::vector<int> K_index;
-    for (int k = 0; k < jMV.hubP.K.size(); k++){
+    for (sType k = 0; k < jMV.hubP.K.size(); k++){
         K_index.push_back(jMV.hubP.K.at(k)/M_PI);
     }
 
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]){
 
             //Bloc symetries
             arrType* sym_block = new arrType[jMV.hubP.n_sites];
-            for(int k = 0; k < states_block.get_length(); k++) {
+            for(sType k = 0; k < states_block.get_length(); k++) {
 
                 //Check the k-sector of every state
                 int sector = state_sym_locator(states_block.get_at(k), &jMV.hubP, &K_index);
@@ -128,8 +128,7 @@ int main(int argc, char *argv[]){
                 std::vector<double> fund_state_lanczos_basis;
                 LanczosSolver<vType,arrType> LS;
                 int deg = 1;
-                double fundE = NULL;
-                int iter = 0;
+                double fundE = 0;
                 std::vector<double> alpha, beta;
 
                 if (sym_block[k].get_length() != 0) {

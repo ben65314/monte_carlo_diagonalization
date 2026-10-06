@@ -113,7 +113,7 @@ struct justManyVariables readParameters(const std::string file) {
 			else if (lines.find("Sz") != std::string::npos) {
 				Sz = value_int;
 			}
-		    else if (lines.find("beta") != std::string::npos) {
+            else if (lines.find("beta") != std::string::npos) {
 				send_info.sP.beta_MH = value_float;
 			}
 			else if (lines.find("Beta_Happly") != std::string::npos) {
@@ -292,7 +292,7 @@ struct justManyVariables readParameters(const std::string file) {
     // k-basis
     //Find dimensions of lattice
     for (int i = 0; i < send_info.hubP.n_sites; i++){
-        for (int d = 0; d < send_info.hubP.DIM; d++){
+        for (sType d = 0; d < send_info.hubP.DIM; d++){
 
             send_info.hubP.R.push_back(sites_pos.at(i*send_info.hubP.DIM + d));
 
@@ -304,7 +304,7 @@ struct justManyVariables readParameters(const std::string file) {
 
     //Build k-vectors
     for (int i = 0; i < send_info.hubP.n_sites; i++){
-        for (int d = 0; d < send_info.hubP.DIM; d++){
+        for (sType d = 0; d < send_info.hubP.DIM; d++){
             send_info.hubP.K.push_back(2*M_PI*send_info.hubP.R[i*send_info.hubP.DIM + d]/send_info.hubP.dimension[d]);
         }
     }

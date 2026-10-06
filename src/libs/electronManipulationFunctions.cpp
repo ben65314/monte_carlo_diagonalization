@@ -584,6 +584,91 @@ void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vec
     //print_vector(states->data(),states->size());
     //print_matrix(energies->data(),states->size(),(uLong)1,1,2);
 }
+void epsilon_jump_energy(sType right_state, std::vector<sType>* states, std::vector<double>* energies, hubbardParam* hubP) {
+	/******************************************************
+	* Calculates the energy of a He jump between two given states
+	*
+	* Parameters
+	* ----------
+	* right_state	: (sType) state to jump from
+	* states		: (std::vector<sType>*) receptacles of the states accessible from right_state
+	* energies		: (std::vector<std::complec<double>>*) receptacles of the energies for each states
+	* hubP		: (hubbardParam*) System parameters
+	*
+	* Returns
+	* -------
+	* NONE
+	*******************************************************/
+	//Calculates the electron jump sites
+	int sites = hubP->n_sites;
+	for (int i = 0; i < sites; i++) {
+        for (int j = i+1; j < sites; j++) {
+			//Jump energy
+            double jumpFactor = hubP->matEpsilon.at(i * sites + j).real();
+			if (jumpFactor == 0) continue;
+
+			for (int k = 0; k < 2; k++) {//Iteration over spins
+				sType temp_stateJI = right_state;
+				sType temp_stateIJ = right_state;
+
+				int indexJ = (sites-j-1 + k*sites);
+				int indexI = (sites-i-1 + k*sites);
+				//From J -> I
+				if (c_dag_operator(&temp_stateIJ, indexJ)
+                    && c_operator(&temp_stateIJ, indexI)) {
+					//Add to the receptacle
+					states->push_back(temp_stateIJ);
+
+					//Phase
+					temp_stateIJ >>= indexJ + 1;
+					int phase = 1;
+					for (int l = indexJ + 1; l < indexI; l++) {
+						if ((temp_stateIJ & 1) == 1) phase *= -1;
+						temp_stateIJ >>= 1;
+					}
+					//Add the energy to the receptacle
+					energies->push_back(jumpFactor * phase);
+				}
+				//From I -> J
+				if (c_dag_operator(&temp_stateJI, indexI)
+                    && c_operator(&temp_stateJI, indexJ)) {
+					//Add to the receptacle
+					states->push_back(temp_stateJI);
+
+					//Phase
+					temp_stateJI >>= indexJ + 1;
+					int phase = 1;
+					for (int l = indexJ + 1; l < indexI; l++) {
+						if ((temp_stateJI & 1) == 1) phase *= -1;
+						temp_stateJI >>= 1;
+					}
+					//Add the energy to the receptacle
+					energies->push_back(jumpFactor * phase);
+				}
+			}
+		}
+	}
+
+    //No movement
+    double energy = 0;
+    //Epsilon terms
+    sType scan = 1 << 2*hubP->n_sites;
+    for (int i=0; i < 2*hubP->n_sites; i++){
+        scan >>= 1;
+        if ((right_state & scan) != 0){
+            energy += hubP->matEpsilon[(i%hubP->n_sites)*(1+hubP->n_sites)].real();
+        }
+    }
+    if (energy!=0){
+        states->push_back(right_state);
+        energies->push_back(energy);
+    }
+
+
+    //std::cout<<"R STATE:"<<right_state<<std::endl;
+    //print_vector(states->data(),states->size());
+    //print_matrix(energies->data(),states->size(),(uLong)1,1,2);
+}
 
 double state_energy(sType x, hubbardParam* hubP){
 	/*****************************************
