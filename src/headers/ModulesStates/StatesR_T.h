@@ -509,9 +509,7 @@ private:
 
 						//#Calculates new Energy and accept factor
 						new_nu = Hu(new_state,this->sys_hubP.n_sites);
-                        float new_energy = new_nu * this->sys_hubP.u;
 
-						float diff_energy = new_energy - current_energy;
 						float a = (float)rand() / (float)RAND_MAX;
 						bool accepted;
 						//accepted = exp(-beta*(this->sys_hubP.u*(new_nu) - current_nu)) > a;
@@ -588,10 +586,10 @@ private:
                                     == nb_state_per_nu[new_nu];
                                 bool prev_filled = true;
                                 if (new_nu>0){
-                                    prev_filled = nu_state_counter[new_nu-1] \ 
+                                    prev_filled = nu_state_counter[new_nu-1] \
                                     == nb_state_per_nu[new_nu-1];
                                 }
-                                if (filled_layer && prev_filled && 
+                                if (filled_layer && prev_filled &&
                                         filled_nu_layer+1 == new_nu ) {
                                     filled_nu_layer = new_nu;
                                     if (verbose > 4) std::cout<<"FILLED : " <<filled_nu_layer<<std::endl;

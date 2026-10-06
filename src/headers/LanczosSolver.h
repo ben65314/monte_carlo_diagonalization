@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ModulesStates/StatesR_T.h"
-#include "ModulesStates/StatesK_T.h"
 #include "ModulesStates/StatesR_H.h"
 
 //GENERIC TEMPLATE

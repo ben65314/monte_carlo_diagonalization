@@ -415,7 +415,6 @@ void combination_all(int n_up, int n_down, int sites, int nU,
 
 bool accept_function(sType state, float acceptQuota=0.5);
 
-// k-basis
 template <class T> T conjugate(T c);
 template <class T> void conjugate_vector(std::complex<double>* vec, T N){
 	/*****************************************

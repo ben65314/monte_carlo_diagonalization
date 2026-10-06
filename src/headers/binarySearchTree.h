@@ -1,3 +1,4 @@
+#include "blas_lapack_wrappers.h"
 #include "utilities.h"
 #ifndef __binarySearchTree_h__
 #define __binarySearchTree_h__

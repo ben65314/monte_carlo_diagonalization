@@ -685,6 +685,37 @@ bool accept_function(sType state, float acceptQuota){
 	return accepted;
 }
 
+template <> std::complex<double> conjugate(std::complex<double> c) {
+	/***************************************
+	* Computes the complex conjugate
+	*
+	* Parameters
+	* ----------
+	* c		: (std::complex<double>) complex number
+	*
+	* Returns
+	* -------
+	* newC	: (std::complex<double>) conjugated c number
+	****************************************/
+	double real = c.real(), imag = c.imag();
+	std::complex<double> newC(real, -imag);
+	return newC;
+}
+template <> double conjugate(double c) {
+	/*****************************************
+	* Computes the 'complex' conjugate (dummy function to satisfy templates)
+	*
+	* Parameters
+	* ----------
+	* c		: (double) "complex" number
+	*
+	* Returns
+	* -------
+	* newC	: (double) "conjugated" c number
+	****************************************/
+	return c;
+}
+
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 void print_progress(double percentage) {
     int val = (int) (percentage * 100);
