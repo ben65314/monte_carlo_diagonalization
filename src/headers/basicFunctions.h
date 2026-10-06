@@ -81,7 +81,7 @@ template <class T, class U> void make_tri_diag(
 }
 
 //Vector manipulation
-template <class R> void normalize(double* vec, R size) {
+template <class D> void normalize(D* vec, sType size) {
 	/***********************************************************
 	* Normalizes a vector
 
@@ -99,12 +99,12 @@ template <class R> void normalize(double* vec, R size) {
 	* NONE
 	*************************************************************/
 	//Normalisation of vec
-    int one = 1;
-	double norm = 1 / dnrm2_(&size, vec, &one);
-	dscal_(&size, &norm, vec, &one);
+	double norm = 1 / nrm2_blas(&size, vec);
+	scal_blas(&size, &norm, vec);
 }
-template <class R> void initial_vector(
-        R const SIZE, double* v, uInt seed=clock()) {
+//
+template <class T, class R> void initial_vector(
+        R const SIZE, T* v, uInt seed=clock()) {
 	/*********************************************************
 	* Creates a random vector of size 'SIZE' and normalizes it
 	*
@@ -126,8 +126,9 @@ template <class R> void initial_vector(
 	//Initialize seed
 	srand(seed);
 	for (R i = 0; i < SIZE; i++) {
-		double a = (double)rand() / RAND_MAX;
-		v[i] = a;
+		double z = (double)rand() / RAND_MAX;
+        //std::cout<<z<<std::endl;
+		v[i] = z;
 	}
 
 	normalize(v,SIZE);
@@ -135,13 +136,45 @@ template <class R> void initial_vector(
 
 //Formating functions
 std::string to_string_p(const double a_value, const int n=16);
+std::string to_string_p(const std::complex<double> a_value, const int n=16);
 template <class T> std::string to_string_pq(
     const T a_value, const uInt integers=18, const uInt decimals=12);
 
 template <class T> T remove_zeros(T a);
 
 //Print vec and matrix
-template <class T, class R> std::string write_vector(const T* vec, R size){
+template <class R> std::string write_matrix(
+        const sType* mat, R rows, R cols){
+	/*****************************************
+	* Writes a double matrix has a string
+	*
+	* Parameters
+	* ----------
+	* mat	    : (double*) pointer of the double matrix to stringify
+	* rows	    : (R) number of rows of the matrix
+	* cols	    : (R) number of cols of the matrix
+    * integers  : (int) number of int spaces
+    * precision : (int) number of float spaces
+	*
+	* Templates
+	* ---------
+	* R		: int, long, unsigned
+	*
+	* Returns
+	* -------
+	* write	: (std::string) double matrix in string form
+	****************************************/
+	std::string write = "";
+	for (R i = 0; i < rows; i++) {
+		write += "[";
+		for (R j = 0; j < cols; j++) {
+			write += std::to_string(mat[i * cols + j])+"\t";
+		}
+		write += "]\n";
+	}
+	return write;
+}
+template <class T, class R> std::string write_vector(const T* vec, R size, int decimals=0){
 	/*****************************************
 	* Writes a double vector has a string
 	*
@@ -161,7 +194,7 @@ template <class T, class R> std::string write_vector(const T* vec, R size){
 	****************************************/
 	std::string write = "[";
 	for (R i = 0; i < size; i++) {
-		write += to_string_p(vec[i], 3) + "\t";
+		write += to_string_p(vec[i], decimals) + "\t";
 		if ((i+1) % 10 == 0) write += "";
 	}
 	write += "]\n";
@@ -199,8 +232,40 @@ template <class R> std::string write_matrix(
 	}
 	return write;
 }
+template <class R> std::string write_matrix(
+        const std::complex<double>* mat, R rows, R cols,
+        int integers = 2, int precision = 0){
+	/*****************************************
+	* Writes a double matrix has a string
+	*
+	* Parameters
+	* ----------
+	* mat	    : (double*) pointer of the double matrix to stringify
+	* rows	    : (R) number of rows of the matrix
+	* cols	    : (R) number of cols of the matrix
+    * integers  : (int) number of int spaces
+    * precision : (int) number of float spaces
+	*
+	* Templates
+	* ---------
+	* R		: int, long, unsigned
+	*
+	* Returns
+	* -------
+	* write	: (std::string) double matrix in string form
+	****************************************/
+	std::string write = "";
+	for (R i = 0; i < rows; i++) {
+		write += "[";
+		for (R j = 0; j < cols; j++) {
+			write += to_string_pq(mat[i * cols + j],integers,precision)+"\t";
+		}
+		write += "]\n";
+	}
+	return write;
+}
 
-template <class T, class R> void print_vector(const T* vec, R size){
+template <class T, class R> void print_vector(const T* vec, R size, int decimals=0){
 	/*****************************************
 	* Prints a given vector
 	*
@@ -218,9 +283,32 @@ template <class T, class R> void print_vector(const T* vec, R size){
 	* -------
 	* NONE
 	****************************************/
-	std::cout << write_vector(vec, size);
+	std::cout << write_vector(vec, size, decimals);
 }
-template <class R> void print_matrix(const double* mat, R rows, R cols,
+template <class R> void print_matrix_i(sType* mat, R rows, R cols){
+	/*****************************************
+	* Prints the given matrix
+	*
+	* Parameters
+	* ----------
+	* mat	: (double*) pointer of the complex matrix to stringify
+	* rows	: (R) number of rows of the matrix
+	* cols	: (R) number od cols of the matrix
+    * integers  : (int) number of int spaces
+    * precision : (int) number of float spaces
+    *
+	* Templates
+	* ---------
+	* T		: double, std::complex<double>
+	* R		: int, long, unsigned
+	*
+	* Returns
+	* -------
+	* NONE
+	****************************************/
+	std::cout << write_matrix(mat, rows, cols);
+}
+template <class T, class R> void print_matrix(const T* mat, R rows, R cols,
                                      int integers = 2, int precision = 0){
 	/*****************************************
 	* Prints the given matrix
@@ -245,7 +333,7 @@ template <class R> void print_matrix(const double* mat, R rows, R cols,
 	std::cout << write_matrix(mat, rows, cols, integers, precision);
 }
 
-template <class R> double* row2col_major(double* mat, R n_rows, R n_cols) {
+template <class T, class R> T* row2col_major(T* mat, R n_rows, R n_cols) {
 	/*****************************************
 	* Converts a row-major stocked array into a col-major stocked array.
 	*
@@ -257,6 +345,7 @@ template <class R> double* row2col_major(double* mat, R n_rows, R n_cols) {
     *
 	* Templates
 	* ---------
+	* T		    : double, complex
 	* R		    : int, long, unsigned
 	*
 	* Returns
@@ -264,15 +353,15 @@ template <class R> double* row2col_major(double* mat, R n_rows, R n_cols) {
 	* new_mat   : (double*) pointer of the converted matrix.
 	****************************************/
 
-    double* new_mat = new double[n_rows*n_cols]();
-    for (int i = 0; i < n_rows; i++) {
-        for (int j = 0; j < n_cols; j++) {
+    T* new_mat = new T[n_rows*n_cols]();
+    for (R i = 0; i < n_rows; i++) {
+        for (R j = 0; j < n_cols; j++) {
             new_mat[j*n_rows+i] = mat[i*n_cols+j];
         }
     }
     return new_mat;
 }
-template <class R> double* col2row_major(double* mat, R n_rows, R n_cols) {
+template <class T, class R> T* col2row_major(T* mat, R n_rows, R n_cols) {
 	/*****************************************
 	* Converts a col-major stocked array into a row-major stocked array.
 	*
@@ -284,15 +373,16 @@ template <class R> double* col2row_major(double* mat, R n_rows, R n_cols) {
     *
 	* Templates
 	* ---------
+	* T		    : double, complex
 	* R		    : int, long, unsigned
 	*
 	* Returns
 	* -------
 	* new_mat   : (double*) pointer of the converted matrix.
 	****************************************/
-    double* new_mat = new double[n_rows*n_cols]();
-    for (int i = 0; i < n_rows; i++) {
-        for (int j = 0; j < n_cols; j++) {
+    T* new_mat = new T[n_rows*n_cols]();
+    for (R i = 0; i < n_rows; i++) {
+        for (R j = 0; j < n_cols; j++) {
             new_mat[i*n_cols+j] = mat[j*n_rows+i];
         }
     }
@@ -324,5 +414,32 @@ void combination_all(int n_up, int n_down, int sites, int nU,
                      std::vector<sType>* all_states);
 
 bool accept_function(sType state, float acceptQuota=0.5);
+
+// k-basis
+template <class T> T conjugate(T c);
+template <class T> void conjugate_vector(std::complex<double>* vec, T N){
+	/*****************************************
+	* Conjugates the vector
+	*
+	* Parameters
+	* ----------
+	* vec	: (std::complex<double> *) complex vector to conjugate
+	* N		: (T) number of elements of the vector
+	*
+	* Templates:
+	* ----------
+	* T		: int, long, unsigned
+	*
+	* Returns
+	* -------
+	* NONE
+	****************************************/
+	for (T i = 0; i < N; i++) {
+		vec[i] = conjugate(vec[i]);
+	}
+}
+
+
+
 void print_progress(double percentage);
 void print_iteration(int iteration, const char* str, int show_freq=10);
