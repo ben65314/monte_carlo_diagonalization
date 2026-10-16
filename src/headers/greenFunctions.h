@@ -487,17 +487,10 @@ template <class StatesArrType> void compute_green_long(
 			double* hE = new double[new_space_len_e*new_space_len_e]();
 			states_excited_e->matrix_creation(hE);
 
-			char jobs = 'V', uplo='U';
 			double* eigen_value_e = new double[new_space_len_e]();
-			int lwork = new_space_len_e*(new_space_len_e+1);
-			double* work = new double[lwork];
-			int info;
-
 			//Eigen values of hE|E> = E|E>
-			dsyev_(&jobs, &uplo, &new_space_len_e, hE, &new_space_len_e,
-                   eigen_value_e, work, &lwork, &info);
+			heev_lapack('V', 'U', &new_space_len_e, hE, eigen_value_e);
 
-			delete[] work;
 
 			eigen_e = std::vector<double>(eigen_value_e,
                                             eigen_value_e + new_space_len_e);
@@ -508,9 +501,8 @@ template <class StatesArrType> void compute_green_long(
 
 			//<OMEGA|c Ue
             char trans_a = 'N', trans_b = 'N';
-			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_e, &new_space_len_e, &ALPHA_D,
-                  arr_BL_e, &sites, hE, &new_space_len_e, &BETA_D,
-                  q_matrix_e.data(), &sites);
+			gemm_blas(trans_a, trans_b, &sites, &new_space_len_e, &new_space_len_e,
+                  arr_BL_e, hE, q_matrix_e.data());
 
 			delete[] hE; delete[] arr_BL_e;	delete[] eigen_value_e;
 
@@ -553,17 +545,10 @@ template <class StatesArrType> void compute_green_long(
 			double* hH = new double[new_space_len_h*new_space_len_h]();
 			states_excited_h->matrix_creation(hH);
 
-			char jobs = 'V', uplo='U';
 			double* eigen_value_h = new double[new_space_len_h]();
-			int lwork = new_space_len_h*(new_space_len_h+1);
-			double* work = new double[lwork];
-			int info;
 
 			//Eigen values of hH|E> = E |E>
-			dsyev_(&jobs, &uplo, &new_space_len_h, hH, &new_space_len_h,
-                   eigen_value_h, work, &lwork, &info);
-
-			delete[] work;
+			heev_lapack('V', 'U', &new_space_len_h, hH, eigen_value_h);
 
 			eigen_h = std::vector<double>(eigen_value_h,
                                             eigen_value_h + new_space_len_h);
@@ -575,9 +560,8 @@ template <class StatesArrType> void compute_green_long(
 
 			//<OMEGA|c Uh
             char trans_a = 'N', trans_b = 'N';
-			dgemm_(&trans_a, &trans_b, &sites, &new_space_len_h, &new_space_len_h, &ALPHA_D,
-                  arr_BL_h, &sites, hH, &new_space_len_h, &BETA_D,
-                  q_matrix_h.data(), &sites);
+			gemm_blas(trans_a, trans_b, &sites, &new_space_len_h, &new_space_len_h,
+                  arr_BL_h, hH, q_matrix_h.data());
 
 			delete[] hH; delete[] arr_BL_h; delete[] eigen_value_h;
 

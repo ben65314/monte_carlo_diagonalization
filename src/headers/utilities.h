@@ -33,30 +33,6 @@
 //For more than 16 sites
 typedef uint64_t sType;
 
-extern "C" {
-
-//BLAS
-void dscal_(sType* n, double* alpha, double* x, int* incx);
-double dnrm2_(sType*, double*, int*);
-void daxpy_(sType*, double*, double*, int*, double*, int*);
-double ddot_(sType*, double*, int*, double*, int*);
-void dswap_(sType*, double*, int*, double*, int*);
-
-void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*,
-          int*, double*, double*, int*);
-
-//LAPACK
-/* Subroutine */ int dsyev_(char *jobz, char *uplo, int *n, double *a,
-	int *lda, double *w, double *work, int *lwork,
-	int *info);
-
-/* Subroutine */ int dstev_(char *jobz, int *n, double *d__,
-	double *e, double *z__, int *ldz, double *work,
-	int *info);
-}
-
-
-
 ///Types of the states;
 //For 4 sites or less
 //typedef uint8_t sType;
