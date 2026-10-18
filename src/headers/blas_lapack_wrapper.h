@@ -19,7 +19,7 @@ void dswap_(sType*, double*, int*, double*, int*);
 void zswap_(sType*, std::complex<double>*, int*, std::complex<double>*, int*);
 
 void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
-void zgemm_(char*, char*, sType*, sType*, sType*, std::complex<double>*, std::complex<double>*, sType*, std::complex<double>*, sType*, std::complex<double>*, std::complex<double>*, sType*);
+void zgemm_(char*, char*, int*, int*, int*, std::complex<double>*, std::complex<double>*, int*, std::complex<double>*, int*, std::complex<double>*, std::complex<double>*, int*);
 
 sType sdot_(sType*, sType*, int*, sType*, int*);
 double ddot_(sType*, double*, int*, double*, int*);
@@ -90,7 +90,7 @@ template <class D> void gemm_blas(char trans_a, char trans_b, int* m, int* n, in
     int* ldb = (trans_a == 'N' || trans_a == 'n') ? k : n;
     int* ldc = m;
     if constexpr(std::is_same_v<D,double>) {
-      dgemm_(&trans_a, &trans_b, m, n, k, &a, A, lda, B, ldb, &b, C, ldc);
+        dgemm_(&trans_a, &trans_b, m, n, k, &a, A, lda, B, ldb, &b, C, ldc);
     }
     else if constexpr(std::is_same_v<D,std::complex<double>>) {
         zgemm_(&trans_a, &trans_b, m, n, k, &a, A, lda, B, ldb, &b, C, ldc);

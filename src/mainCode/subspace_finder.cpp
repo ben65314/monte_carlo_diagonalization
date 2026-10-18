@@ -2,7 +2,6 @@
 #include "paramReader.h"
 
 //Type to use in code
-typedef double vType;
 typedef StatesR_H<sType,vType> arrType;
 
 int main(int argc, char *argv[]){
@@ -78,8 +77,8 @@ int main(int argc, char *argv[]){
             //Find ground state
 			std::vector<vType> fund_state = std::vector<vType>(sP.sampling_size,0);
             initial_vector(sP.sampling_size, fund_state.data());
-			std::vector<vType> fund_state_lanczos_basis;
-			LanczosSolver<vType,arrType> LS;
+			std::vector<double> fund_state_lanczos_basis;
+			LanczosSolver<arrType> LS;
 			int deg = 1;
 			double fundE;
             int iter = 0;
@@ -94,7 +93,7 @@ int main(int argc, char *argv[]){
                     printf("\nStates : ");
                     states_block.show_all_states();
                     printf("Matrix\n");
-                    std::vector<double> mat(states_block.get_length()*states_block.get_length(),0);
+                    std::vector<vType> mat(states_block.get_length()*states_block.get_length(),0);
                     states_block.matrix_creation(mat.data());
                     print_matrix(mat.data(),states_block.get_length(),states_block.get_length());
                 }

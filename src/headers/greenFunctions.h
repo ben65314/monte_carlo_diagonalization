@@ -80,7 +80,7 @@ template <class StatesArrType> void green_space_projection(
 }
 
 std::string write_q_system(double fundE, double eta, Electrons elec,
-                          hubbardParam* hubP_to_write, float perc_states) {
+                          hubbardParam* hubP_to_write, double perc_states) {
 	/****************************************************************
 	* Writes the system parameters for the qMatrices.txt file
 	*
@@ -97,14 +97,14 @@ std::string write_q_system(double fundE, double eta, Electrons elec,
 	* text			: (std::string) String of parameters
 	*****************************************************************/
 	std::string text = "";
-	text += to_string_p(hubP_to_write->n_sites, 0) + "\t";
-	text += to_string_p(hubP_to_write->u, 0) + "\t";
-	text += to_string_p(hubP_to_write->mu, 0) + "\t";
-	text += to_string_p((elec.up+elec.down), 0) + "\t";
-	text += to_string_p((elec.up-elec.down), 0) + "\t";
-	text += to_string_p(fundE, 16) + "\t";
-	text += to_string_p(eta, 5) + "\t";
-	text += to_string_p(perc_states, 2) + "\t";
+	text += to_string_precise(hubP_to_write->n_sites, 2) + "\t";
+	text += to_string_precise(hubP_to_write->u, 2,1) + "\t";
+	text += to_string_precise(hubP_to_write->mu, 2,1) + "\t";
+	text += to_string_precise((elec.up+elec.down), 2) + "\t";
+	text += to_string_precise((elec.up-elec.down), 2) + "\t";
+	text += to_string_precise(fundE, 4,12) + "\t";
+	text += to_string_precise(eta, 1,5) + "\t";
+	text += to_string_precise(perc_states, 2,2) + "\t";
 	return text;
 }
 
@@ -129,9 +129,9 @@ template <class T> std::string write_q_matrix_string(
 	*****************************************************************/
 	std::string text = "";
 	for (uInt j = 0; j < eigen_val->size(); j++) {
-		text += to_string_pq(eigen_val->at(j),5,12) + "\t";
+		text += to_string_precise(eigen_val->at(j),5,12) + "\t";
 		for (int i = 0; i < ns; i++) {
-			text += to_string_pq(QM->at(i * eigen_val->size() + j), 4, 14)
+			text += to_string_precise(QM->at(i * eigen_val->size() + j), 4, 14)
                     + "\t";
 		}
 		if (j < eigen_val->size()-1) text+="\n";
@@ -309,7 +309,7 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 
 	vec_BL = std::vector<T>(arr_BL, arr_BL + new_space_len * sites);
 	//Band lanczos
-	LanczosSolver<T,StatesArrType> LS;
+	LanczosSolver<StatesArrType> LS;
 	BL_space_evalues = LS.band_lanczos_algorithm(
         &vec_BL, sites, new_space_len, states_excited, &BL_space_size,
         &BL_space_evectors, &prod_c_omega);
@@ -406,7 +406,7 @@ template <class T, class StatesArrType> void compute_q_matrix_band_lanczos(
 }
 
 template <class StatesArrType> void compute_green_long(
-        int spin, std::vector<double>* fund_state, double fundE,
+        int spin, std::vector<vType>* fund_state, double fundE,
         StatesArrType* const states_array, greenParam gP, int deg){
 	/***************************************************************
 	* Calculates the Q matrix and writes them in a qMatrices.txt
@@ -469,11 +469,11 @@ template <class StatesArrType> void compute_green_long(
 	written_q_matrix += "\n# Eigen values E -- Q-Matrixes E\n";
 
 	for (int m = 0; m < deg; m++) {
-		std::vector<double> q_matrix_e = std::vector<double>(
+		std::vector<vType> q_matrix_e = std::vector<vType>(
                                                     sites*new_space_len_e, 0);
 		std::vector<double> eigen_e;
 		if (new_space_len_e > 0) {
-			double* arr_BL_e = new double[new_space_len_e * sites]();
+			vType* arr_BL_e = new vType[new_space_len_e * sites]();
 			//Creation of the vectors c_mu^(dag)|Omega>
 			for (int i = 0; i < sites; i++){
 				excited_vector_projection(
@@ -484,7 +484,7 @@ template <class StatesArrType> void compute_green_long(
 			}
 
 			//Hamiltonian matrices
-			double* hE = new double[new_space_len_e*new_space_len_e]();
+			vType* hE = new vType[new_space_len_e*new_space_len_e]();
 			states_excited_e->matrix_creation(hE);
 
 			double* eigen_value_e = new double[new_space_len_e]();
@@ -495,21 +495,20 @@ template <class StatesArrType> void compute_green_long(
 			eigen_e = std::vector<double>(eigen_value_e,
                                             eigen_value_e + new_space_len_e);
             //Convert arr_BL_e to col-major.
-            double* temp_array = row2col_major(arr_BL_e, sites, new_space_len_e);
+            vType* temp_array = row2col_major(arr_BL_e, sites, new_space_len_e);
             delete[] arr_BL_e;
             arr_BL_e = temp_array;
 
 			//<OMEGA|c Ue
-            char trans_a = 'N', trans_b = 'N';
-			gemm_blas(trans_a, trans_b, &sites, &new_space_len_e, &new_space_len_e,
+			gemm_blas('N', 'N', &sites, &new_space_len_e, &new_space_len_e,
                   arr_BL_e, hE, q_matrix_e.data());
 
 			delete[] hE; delete[] arr_BL_e;	delete[] eigen_value_e;
 
-            double* temp_q = col2row_major(q_matrix_e.data(), sites,
+            vType* temp_q = col2row_major(q_matrix_e.data(), sites,
                                       new_space_len_e);
             q_matrix_e.clear();
-            q_matrix_e = std::vector<double>(temp_q,
+            q_matrix_e = std::vector<vType>(temp_q,
                                              temp_q + sites*new_space_len_e);
             delete[] temp_q;
 		}
@@ -527,11 +526,11 @@ template <class StatesArrType> void compute_green_long(
 	written_q_matrix += "\n# Eigen values H -- Q-Matrixes H\n";
 
 	for (int m = 0; m < deg; m++) {
-		std::vector<double> q_matrix_h = std::vector<double>(
+		std::vector<vType> q_matrix_h = std::vector<vType>(
                                                     sites*new_space_len_h, 0);
 		std::vector<double> eigen_h;
 		if (new_space_len_h > 0) {
-			double* arr_BL_h = new double[new_space_len_h * sites]();
+			vType* arr_BL_h = new vType[new_space_len_h * sites]();
 			//Creation of the vectors c_mu^(dag)|Omega>
 			for (int i = 0; i < sites; i++){
 				excited_vector_projection(
@@ -542,7 +541,7 @@ template <class StatesArrType> void compute_green_long(
 			}
 
 			//Hamiltonian matrices
-			double* hH = new double[new_space_len_h*new_space_len_h]();
+            vType* hH = new vType[new_space_len_h*new_space_len_h]();
 			states_excited_h->matrix_creation(hH);
 
 			double* eigen_value_h = new double[new_space_len_h]();
@@ -554,21 +553,20 @@ template <class StatesArrType> void compute_green_long(
                                             eigen_value_h + new_space_len_h);
             //
             //Convert arr_BL_e to col-major.
-            double* temp_array = row2col_major(arr_BL_h, sites, new_space_len_h);
+            vType* temp_array = row2col_major(arr_BL_h, sites, new_space_len_h);
             delete[] arr_BL_h;
             arr_BL_h = temp_array;
 
 			//<OMEGA|c Uh
-            char trans_a = 'N', trans_b = 'N';
-			gemm_blas(trans_a, trans_b, &sites, &new_space_len_h, &new_space_len_h,
+			gemm_blas('N', 'N', &sites, &new_space_len_h, &new_space_len_h,
                   arr_BL_h, hH, q_matrix_h.data());
 
 			delete[] hH; delete[] arr_BL_h; delete[] eigen_value_h;
 
-            double* temp_q = col2row_major(q_matrix_h.data(), sites,
+            vType* temp_q = col2row_major(q_matrix_h.data(), sites,
                                       new_space_len_h);
             q_matrix_h.clear();
-            q_matrix_h = std::vector<double>(temp_q,
+            q_matrix_h = std::vector<vType>(temp_q,
                                              temp_q + sites*new_space_len_h);
             delete[] temp_q;
 		}

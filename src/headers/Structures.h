@@ -19,7 +19,7 @@ const uInt BAND_LANCZOS_MAX_ITERATIONS = 1500;
 
 struct hubbardParam{ //Hubbard parameters
 	int n_sites;
-	float u, mu;
+	double u, mu;
 	std::vector<double> t_matrix;
 
 	//Used only for diagExact

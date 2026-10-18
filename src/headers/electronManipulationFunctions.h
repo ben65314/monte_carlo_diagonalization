@@ -86,8 +86,8 @@ template<class T, class U> void write_state_with_double(
     });
 
 	// Apply the sorting to keys and values
-    std::vector<T> sorted_fund(fund->size());
-    std::vector<uLong> sorted_states(states->get_length());
+    std::vector<vType> sorted_fund(fund->size());
+    std::vector<sType> sorted_states(states->get_length());
     for (uLong i = 0; i < indices.size(); ++i) {
         sorted_fund[i] = fund->at(indices[i]);
         sorted_states[i] = states->get_at(indices[i]);
@@ -101,11 +101,16 @@ template<class T, class U> void write_state_with_double(
 	std::string fund_txt = "";
 	double cummul = 0;
 	for (uLong i = 0 ; i < sorted_fund.size(); i++) {
-		cummul += sorted_fund.at(i)*sorted_fund.at(i);
-		fund_txt += to_string_pq(sorted_fund.at(i), 4, 14) + "\t"
-            + to_string_pq((double)sorted_states.at(i), 10, 0) + "\t"
-			+ to_string_pq((double)Hu(sorted_states.at(i), sites), 10, 0)+ "\t"
-            + to_string_pq(cummul, 2, 16)+"\n";
+        if constexpr(std::is_same_v<vType,double>) {
+            cummul += (sorted_fund.at(i)*sorted_fund.at(i));
+        }
+        else if constexpr(std::is_same_v<vType, std::complex<double>>) {
+            cummul += (sorted_fund.at(i)*std::conj(sorted_fund.at(i))).real();
+        }
+		fund_txt += to_string_precise(sorted_fund.at(i), 4, 14) + "\t"
+            + to_string_precise(sorted_states.at(i), 10) + "\t"
+			+ to_string_precise(Hu(sorted_states.at(i), sites), 10)+ "\t"
+            + to_string_precise(cummul, 2, 16)+"\n";
 
 		//Create reduced sampling size
 		if (cummul < keep || keep==1) {
@@ -114,7 +119,7 @@ template<class T, class U> void write_state_with_double(
                 sorted_states.at(i) << "\t" << sorted_fund.at(i) << std::endl;
             }
 			states->add(sorted_states.at(i));
-			fund->push_back(sorted_fund.at(i));
+            fund->push_back(sorted_fund.at(i));
 		}
 
 	}

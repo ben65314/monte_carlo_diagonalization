@@ -845,7 +845,7 @@ public:
 	}
 
 	//Function overload
-	void matrix_creation(double* result_matrix) {
+	void matrix_creation(VectorType* result_matrix) {
 		/*******************************************************************
 		Create the matrix of the block of state given
 

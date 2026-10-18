@@ -278,26 +278,7 @@ int deg_fundamental_check(double* eV, sType n, double eps) {
 //void initial_vector(R const SIZE, T* v, uInt seed) in header file
 //void gramSchmidtIteration(double* prev_vectors, R const size_vectors, R const num_vectors, double* to_ortho_vector) in header file
 
-std::string to_string_p(const double a_value, const int n) {
-	/*****************************************
-	* Transforms a double value in a string with a given precicion
-	*
-	* Parameters
-	* ----------
-	* a_value	: (const double) value to stringify
-	* n			: (const int) precision requested
-	*
-	* Returns
-	* -------
-	* string	: (double) converted to string with precision n
-	***************************************/
-	std::ostringstream out;
-	out.precision(n);
-	out << std::fixed << a_value;
-	return std::move(out).str();
-}
-
-template <> std::string to_string_pq(const double a_value, const uInt integers,
+std::string to_string_precise(const double a_value, const uInt integers,
                                      const uInt decimals) {
 	/*****************************************
 	* Transforms a double value in a string with a given precicion
@@ -321,6 +302,32 @@ template <> std::string to_string_pq(const double a_value, const uInt integers,
     }
 
 	std::string str(s);
+	return str;
+}
+std::string to_string_precise(const std::complex<double> a_value, const uInt integers,
+                                     const uInt decimals) {
+	/*****************************************
+	* Transforms a double value in a string with a given precicion
+	*
+	* Parameters
+	* ----------
+	* a_value	: (const double) value to stringify
+	* integers	: (const unsigned int) precision of integer part
+	* decimals	: (const unsigned int) precision of decimal part
+	*
+	* Returns
+	* -------
+	* string	: (double) converted to string
+	***************************************/
+	char s[100];
+    double a_real = (std::abs(a_value.real()) > 1e-9) ? a_value.real() : 0.0;
+    double a_imag = (std::abs(a_value.imag()) > 1e-9) ? a_value.imag() : 0.0;
+
+    snprintf(s, sizeof s, "% *.*f%c%.*fj",
+             integers + decimals, decimals, a_real,
+             a_imag < 0 ? '-' : '+',
+             decimals, std::abs(a_imag));
+    std::string str(s);
 	return str;
 }
 
@@ -371,22 +378,22 @@ std::string time_formating(
 	//Minutes
 	if(duration_cast<minutes>(end - start).count() > 1){
 		min = floor((double)duration_cast<minutes>(end - start).count());
-		time += to_string_p(min, 0) + "min ";
+		time += to_string_precise(min, 6, 0) + "min ";
 	}
 	//Seconds
 	if(duration_cast<seconds>(end - start).count() > 1){
 		sec = floor((double)duration_cast<seconds>(end - start).count());
-		time += to_string_p(sec- min * 60, 0) + "s ";
+		time += to_string_precise(sec- min * 60, 2,0) + "s ";
 	}
 	//Milliseconds
 	if(duration_cast<milliseconds>(end - start).count() > 1){
 		ms = floor((double)duration_cast<milliseconds>(end - start).count());
-		time += to_string_p(ms - sec * 1000, 0) + "ms ";
+		time += to_string_precise(ms - sec * 1000, 3,0) + "ms ";
 	}
 	//Microseconds
 	if(duration_cast<microseconds>(end - start).count() > 1){
 		mus = floor((double)duration_cast<microseconds>(end - start).count());
-		time += to_string_p(mus - 1000 * ms, 0) + "μs ";
+		time += to_string_precise(mus - 1000 * ms, 3,0) + "μs ";
 	}
 	return time;
 }

@@ -46,6 +46,7 @@ typedef uint64_t sType;
 
 //Type of the vector
 typedef double vType;
+//typedef std::complex<double> vType;
 
 
 
