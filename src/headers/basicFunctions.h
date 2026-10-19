@@ -18,6 +18,10 @@ double find_min_of_array(std::vector<double> array);
 //Maths
 unsigned long comb(uLong n, uLong r);
 unsigned long comb_specified(int nU, int sites, int up, int down);
+template <typename T>
+inline T conj(const T& x) { return x; }
+template <typename T>
+inline std::complex<T> conj(const std::complex<T>& x) { return std::conj(x); }
 double fermi_dirac_function(float x, float beta,float mu);
 double boltzmann_distribution_function(float dE, float beta);
 double calculate_sd(std::vector<double> data);
