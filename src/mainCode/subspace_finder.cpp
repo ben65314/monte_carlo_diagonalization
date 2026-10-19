@@ -1,5 +1,3 @@
-#include "basicFunctions.h"
-#include "electronManipulationFunctions.h"
 #include "paramReader.h"
 
 //Type to use in code
@@ -126,7 +124,7 @@ int main(int argc, char *argv[]){
                 std::vector<vType> fund_state = std::vector<vType>(sym_block[k].get_length(),0);
                 initial_vector(sym_block[k].get_length(), fund_state.data());
                 std::vector<double> fund_state_lanczos_basis;
-                LanczosSolver<vType,arrType> LS;
+                LanczosSolver<arrType> LS;
                 int deg = 1;
                 double fundE = 0;
                 std::vector<double> alpha, beta;

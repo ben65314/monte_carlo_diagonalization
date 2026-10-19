@@ -3,15 +3,12 @@
 #include "ModulesStates/StatesR_T.h"
 #include "ModulesStates/StatesK_T.h"
 #include "ModulesStates/StatesR_H.h"
+#include "basicFunctions.h"
 
-//GENERIC TEMPLATE
-//template<class T, class StatesArrType> class LanczosSolver;
-
-//DOUBLE TEMPLATE
-template<class D, class StatesArrType> class LanczosSolver{
+template<class StatesArrType> class LanczosSolver{
 	public:
 	void lanczos_energy(
-        std::vector<double>* fundState_lanczos_basis, D* init_vector,
+        std::vector<double>* fundState_lanczos_basis, vType* init_vector,
         StatesArrType* sArr, std::vector<double>* alpha,
         std::vector<double>* beta, double* fund_energy, int* iter, int* deg,
         double epsilon=10e-12) {
@@ -43,8 +40,8 @@ template<class D, class StatesArrType> class LanczosSolver{
 		beta->clear();	beta->reserve(*iter);
 
 		//Two main vectors
-		std::vector<D> r(init_vector, init_vector + size);
-		std::vector<D> q(size);
+		std::vector<vType> r(init_vector, init_vector + size);
+		std::vector<vType> q(size);
 
 		//Energies to converge
 		double prev_iter_energy = 10e10;
@@ -53,17 +50,16 @@ template<class D, class StatesArrType> class LanczosSolver{
 		sType current_iteration = 1;
 		bool converged = false;
 
-
 		while (!converged) {
             //Normalization
 			if (beta->size()) {
                 double beta_m1 = 1/beta->back();
                 double minus_beta = -beta->back();
-			    scal_blas(&size, &beta_m1, r.data());
-			    scal_blas(&size, &minus_beta, q.data());
+                scal_blas(&size, &beta_m1, r.data());
+                scal_blas(&size, &minus_beta, q.data());
 			}
 
-			std::vector<D> H_tmp(size);
+			std::vector<vType> H_tmp(size);
 			//Applies the vector r on the matrix H and stores it in H_tmp
 			sArr->H(H_tmp.data(), r.data());
 
@@ -76,7 +72,7 @@ template<class D, class StatesArrType> class LanczosSolver{
 			alpha->push_back(dot_product.real());
 
             //r = r - q*alpha
-            D minus_alpha = -alpha->back();
+            vType minus_alpha = -alpha->back();
 			axpy_blas(&size, q.data(), r.data(), minus_alpha);
 
 			beta->push_back(nrm2_blas(&size, r.data()));
@@ -102,14 +98,16 @@ template<class D, class StatesArrType> class LanczosSolver{
 			energy = arr_a[0];
 
 
-			if (abs(prev_iter_energy - energy) < epsilon && current_iteration > 3) {
+			if (abs(prev_iter_energy - energy) < epsilon
+                && current_iteration > 3) {
 				converged = true;
                 //Check degeneracy
 				*deg = deg_fundamental_check(arr_a, n);
 				fundState_lanczos_basis->clear();
 				*fundState_lanczos_basis = std::vector<double>(vecs,
                                                               vecs + n*(*deg));
-			} else if (current_iteration == size) {
+			}
+            else if (current_iteration == size) {
 				converged = true;
                 //Check degeneracy
 				*deg = deg_fundamental_check(arr_a, n);
@@ -124,11 +122,9 @@ template<class D, class StatesArrType> class LanczosSolver{
                 printf("\rLanczos energy iteration : %4ld\tdE = %1.5e",current_iteration,abs(prev_iter_energy - energy));
                 fflush(stdout);
 			}
+			current_iteration++;
 
-            current_iteration++;
-            //if (current_iteration > 5) break;
 		}
-
 		if (verbose > 4) {
 			std::cout << "\nLanczos iteration used : "
                 << current_iteration << std::endl;
@@ -137,7 +133,7 @@ template<class D, class StatesArrType> class LanczosSolver{
 		*fund_energy = energy;
 	}
 	void lanczos_vectors(
-        std::vector<double>* fundState_lanczos_basis, D* gs,
+        std::vector<double>* fundState_lanczos_basis, vType* gs,
         StatesArrType* sArr, std::vector<double>* alpha,
         std::vector<double>* beta, int* deg) {
 		/*******************************************************
@@ -159,10 +155,10 @@ template<class D, class StatesArrType> class LanczosSolver{
 		* NONE
 		*******************************************************/
 		sType size = sArr->get_length();
-		sType size_proj = alpha->size();
+		int size_proj = alpha->size();
 
-		std::vector<D> r(gs, gs + size);
-		std::vector<D> q(size);
+		std::vector<vType> r(gs, gs + size);
+		std::vector<vType> q(size);
 
 		for (int d = 0; d < *deg; d++) {
             double scal = fundState_lanczos_basis->at(size_proj*d);
@@ -170,23 +166,23 @@ template<class D, class StatesArrType> class LanczosSolver{
         }
 
 
-		for (sType j = 1; j < size_proj; j++) {
-			std::vector<D> H_tmp(size);
+		for (unsigned int j = 1; j < fundState_lanczos_basis->size(); j++) {
+			std::vector<vType> H_tmp(size);
 			sArr->H(H_tmp.data(), r.data());
 
 			axpy_blas(&size, H_tmp.data(), q.data());	//q = q + H*r
 
             //r = r - q*alpha
-            D minus_alpha = -alpha->at(j-1);
+            vType minus_alpha = -alpha->at(j-1);
 			axpy_blas(&size, r.data(), q.data(), minus_alpha);
 			for (unsigned int i = 0; i < r.size(); i++) {
-				D tmp = r[i];
+				vType tmp = r[i];
 				r[i] = q[i]/beta->at(j-1);
 				q[i] = -beta->at(j-1)*tmp;
 			}
 
 			for (int d = 0; d < *deg; d++) {
-				D scal = fundState_lanczos_basis->at(j + size_proj*d);
+                vType scal = fundState_lanczos_basis->at(j + size_proj*d);
                 //r = r - q*alpha
 				axpy_blas(&size, r.data(), gs + d*size, scal);
 			}
@@ -197,7 +193,7 @@ template<class D, class StatesArrType> class LanczosSolver{
 		}
 	}
 	double lanczos_algorithm(
-        std::vector<D>* fundState, StatesArrType* sArr, int* deg,
+        std::vector<vType>* fundState, StatesArrType* sArr, int* deg,
         double epsilon = 10e-12) {
 		/*************************************************
 		* Redefines a given matrix with the Lanczos Algorithm without needing the Hamiltonian matrix
@@ -241,10 +237,10 @@ template<class D, class StatesArrType> class LanczosSolver{
 
 
 	std::vector<double> band_lanczos_algorithm(
-        std::vector<D>* vk, uInt n_bk, sType len_bk,
+        std::vector<vType>* vk, uInt n_bk, sType len_bk,
         StatesArrType* sArr, uInt* nIter,
-        std::vector<D>* sub_space_vectors,
-        std::vector<D>* product_c_omega, double dtol = 10e-10){
+        std::vector<vType>* sub_space_vectors,
+        std::vector<vType>* product_c_omega, double dtol = 10e-10){
 		/*************************************************
 		* Band lanczos algorithm
 		*
@@ -269,7 +265,7 @@ template<class D, class StatesArrType> class LanczosSolver{
 
 		//Number of elements in array_bk
 		product_c_omega->reserve(n_bk*5);
-		std::vector<D> temp(n_bk* *nIter, 0);
+		std::vector<vType> temp(n_bk* *nIter, 0);
 		*product_c_omega = temp;
 
 		//MinEnergy
@@ -280,7 +276,7 @@ template<class D, class StatesArrType> class LanczosSolver{
 		std::vector<int> index_array; index_array.reserve(n_bk);
 		//(1) Orthogonal basis
 		double* zero = new double[len_bk]();
-		std::vector<D> bk(vk->begin(), vk->end());
+		std::vector<vType> bk(vk->begin(), vk->end());
 
 		//(2) number of maximum deflation
 		int pc = n_bk;
@@ -292,18 +288,17 @@ template<class D, class StatesArrType> class LanczosSolver{
 		int iterations = *nIter;
 
 		//Elements for the new matrixes
-		D* t_jpc = new D[iterations * iterations]();
-		D* s_jpc = new D[iterations * iterations]();
+		vType* t_jpc = new vType[iterations * iterations]();
+		vType* s_jpc = new vType[iterations * iterations]();
 
 		int j = 0;
 		for (j = 0; j < iterations; j++){
-
 			if(j%10 == 0 && verbose > 4)
                 print_iteration(j,"Band Lanczos iteration :");
 			if(verbose > 99){
 				for (int i = 0; i < M0; i++){
 					double nn = nrm2_blas(&len_bk, vk->data() + i*len_bk);
-					std::cout << "vec[" << i << "] = " << to_string_pq(nn)
+					std::cout << "vec[" << i << "] = " << to_string_precise(nn)
                         << std::endl;
 				}
 			}
@@ -330,13 +325,13 @@ template<class D, class StatesArrType> class LanczosSolver{
 			}
 			//(5) Normalize v_j
 			double t_m1 = 1 / v_norm;
-			scal_blas(&len_bk, &t_m1, vk->data() + (j%M0) * len_bk);
+            scal_blas(&len_bk, &t_m1, vk->data() + (j%M0) * len_bk);
 
 			//Add terms to t matrix
 			if (j >= pc) {t_jpc[j * iterations + j - pc] = v_norm;}
 
 			//Qmatrix product requirements <phi|c_mu|Omega>
-			D dot_product;
+			vType dot_product;
 			for (uInt k = 0; k < n_bk; k++) {
 				dot_product = dot_blas(&len_bk, bk.data() + k * len_bk,
                                          vk->data() + (j%M0) * len_bk);
@@ -347,12 +342,12 @@ template<class D, class StatesArrType> class LanczosSolver{
 			//(6) Makes all the next vectors orthogonal to vj
 			for (int k = j + 1; k < j + pc; k++) {
 				//Dot product between vj and vk
-				D vjvk;
+				vType vjvk;
 				vjvk = dot_blas(&len_bk, vk->data() + (j%M0) * len_bk,
                                   vk->data() + (k%M0) * len_bk);
 
 				//Makes orthogonality
-				D a = - vjvk;
+				vType a = - vjvk;
 				axpy_blas(&len_bk, vk->data() + len_bk * (j%M0),
                       vk->data() + len_bk * (k%M0), a);
 
@@ -372,7 +367,7 @@ template<class D, class StatesArrType> class LanczosSolver{
 			for (int k = k0; k < j; k++){
 				//Makes t_jpc hermitian
 				t_jpc[k * iterations + j] = t_jpc[j * iterations + k];
-				D a = -t_jpc[k * iterations + j];
+				vType a = -t_jpc[k * iterations + j];
 			    axpy_blas(&len_bk, vk->data() + len_bk * (k%M0),
                       vk->data() + len_bk * ((j + pc)%M0), a);
 			}
@@ -385,19 +380,19 @@ template<class D, class StatesArrType> class LanczosSolver{
 			for (unsigned long k = 0; k < index_array.size(); k++) {
 				if(index_array.at(k) != j) continue;
 
-				D dot_product;
+				vType dot_product;
 				dot_product = dot_blas(
                     &len_bk, vk->data() + (index_array.at(k)%M0) * len_bk,
                     vk->data() + ((j + pc)%M0) * len_bk);
 				t_jpc[index_array.at(k) * iterations + j] = dot_product;
 
-				D a = -t_jpc[index_array.at(k) * iterations + j];
+				vType a = -t_jpc[index_array.at(k) * iterations + j];
 				axpy_blas(&len_bk, vk->data() + len_bk * (index_array.at(k)%M0),
                             vk->data() + len_bk * ((j + pc)%M0), a);
 			}
 
 			////Diag element t(j,j)
-			D VkVjpc, temp_minus;
+			vType VkVjpc, temp_minus;
 			VkVjpc = dot_blas(&len_bk, vk->data() + (j%M0) * len_bk,
                                 vk->data() + ((j + pc)%M0) * len_bk);
 			t_jpc[j *iterations +j] = VkVjpc;
@@ -408,12 +403,18 @@ template<class D, class StatesArrType> class LanczosSolver{
 
 			//(10) Manages Deflation
 			for (unsigned long k = 0; k < index_array.size(); k++) {
-				s_jpc[j * iterations + index_array.at(k)] = conjugate(t_jpc[index_array.at(k) * iterations + j]);
+                vType temp = t_jpc[index_array.at(k) * iterations + j];
+                if constexpr(std::is_same_v<vType,double>) {
+                    s_jpc[j * iterations + index_array.at(k)] = temp;
+                }
+                else if constexpr(std::is_same_v<vType,std::complex<double>>) {
+                    s_jpc[j * iterations + index_array.at(k)] = std::conj(temp);
+                }
 			}
 			if ((j+1)%n_bk == 0 && j >= ((int)n_bk-1)) {
 				int jj = j+1;
 				//(11) Creates the T_j matrix to solve
-				D* T_jPr = new D[jj * jj]();
+				vType* T_jPr = new vType[jj * jj]();
 				for (int i = 0; i < jj; i++) {
 					for (int l = i; l < jj; l++) {
 						T_jPr[i * jj + l] = t_jpc[i * iterations + l]
@@ -429,17 +430,9 @@ template<class D, class StatesArrType> class LanczosSolver{
 				//(12) Solve T_j to check for convergence only eigen values
 				double* eigen_values = new double[jj];
 				//Tools for dsyev
-				char jobs = 'N', uplo='U';
-				int lwork = (jj)*(jj+1);
-				D* work = new D[lwork];
-				double* rwork = new double[lwork];
-
-                sType row = jj;
-                heev_lapack(jobs, uplo, &row, T_jPr, eigen_values);
-
+				heev_lapack('N', 'U', &jj, T_jPr, eigen_values);
 				delete[] T_jPr;
 				//Delete dsyev tools
-				delete[] work; delete[] rwork;
 
 				double current_energy = eigen_values[0];
 
@@ -452,13 +445,11 @@ template<class D, class StatesArrType> class LanczosSolver{
 				previous_energy = current_energy;
 				delete[] eigen_values;
 			}//END OF IF
-
 		}//End of For
-
 
 		//Finds eigen vectors
 		int jj = j;
-		D* T_jPr = new D[jj * jj]();
+		vType* T_jPr = new vType[jj * jj]();
 		///Create the T_j matrix
 		for (int i = 0; i < jj; i++) {
 			for (int l = i; l < jj; l++) {
@@ -474,19 +465,12 @@ template<class D, class StatesArrType> class LanczosSolver{
 		double* eigen_values = new double[jj];
 
 		///Tools for dsyev
-		char jobs = 'V', uplo='U';
-		int lwork = (jj)*(jj+1);
-		double* work = new double[lwork];
-		double* rwork = new double[lwork];
-
-        sType row = jj;
-        heev_lapack(jobs, uplo, &row, T_jPr, eigen_values);
+		heev_lapack('V','U',&jj,T_jPr,eigen_values);
 		///Delete tools for dsyev
-		delete[] work; delete[] rwork;
 
 		///Put the energies and the eigen vectors in vector
 		energies = std::vector<double>(eigen_values, eigen_values + jj);
-		*sub_space_vectors = std::vector<D>(T_jPr, T_jPr + jj * jj);
+		*sub_space_vectors = std::vector<vType>(T_jPr, T_jPr + jj * jj);
 
 		if(verbose > 4) std::cout << "\nBand Lanczos number of iteration until"
                                   << " convergence : "<< j+1 << std::endl;
@@ -501,7 +485,7 @@ template<class D, class StatesArrType> class LanczosSolver{
 		return energies;
 	}
 
-	double fund_energy(std::vector<D>* fund_state, StatesArrType* states, int* deg){
+	double fund_energy(std::vector<vType>* fund_state, StatesArrType* states, int* deg){
 		/***************************************************
 		* Finds the fundamental energy by repeating the Lanczos algorithm until the minimum value has converged on a value
 		*
@@ -517,26 +501,21 @@ template<class D, class StatesArrType> class LanczosSolver{
 		****************************************************/
 		if(verbose == -1) std::cout << "double fundEnergy(...) called\n";
 		double fund_energy;
-		sType rows = states->get_length();
+		int rows = states->get_length();
 
 		if (rows > LANCZOS_SIZE) {
 			fund_energy = lanczos_algorithm(fund_state, states, deg);
 		}
 		else {
             //Will do the same as above put with a smaller matrix
-			D* H = new D[rows*rows]();
+			vType* H = new vType[rows*rows]();
 
 			states->matrix_creation(H);
 
-			char jobs = 'V', uplo='U';
 			double* eigen_values = new double[rows];
-			int lwork = rows*(rows+1);
-			double* work = new double[lwork];
-			double* rwork = new double[lwork];
-            heev_lapack(jobs, uplo, &rows, H, eigen_values);
+			heev_lapack('V', 'U', &rows, H, eigen_values);
 
 			fund_energy = eigen_values[0];
-			delete[] work; delete[] rwork;
 
 			//Check degeneracy
 			*deg = deg_fundamental_check(eigen_values, rows);
@@ -546,7 +525,7 @@ template<class D, class StatesArrType> class LanczosSolver{
 			//Stores the fundamental vector and
             //if needed the degenerated ones too
 			for (int j = 0; j < *deg; j++) {
-				for(sType i = 0; i < rows; i++){
+				for(int i = 0; i<rows; i++){
 					fund_state->at(i+j*rows) = H[i+rows*j];
 				}
 			}
@@ -556,4 +535,3 @@ template<class D, class StatesArrType> class LanczosSolver{
 		return fund_energy;
 	}
 };
-

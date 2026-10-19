@@ -88,14 +88,18 @@ void print_bin_from_dec(sType decimal_number, int resolution) {
 	* -------
 	* NONE
     ******************************************/
-    for (int i = resolution-1; i >= 0; i--){
+    bool not_zero = false;
+    for (int i = resolution; i >= 0; i--){
         int64_t power = pow(2,i);
         if ((int64_t)decimal_number-power >= 0){
             decimal_number -= power;
             printf("%d",1);
+            not_zero = true;
         }
         else {
-            printf("%d",0);
+            if (not_zero) {
+                printf("%d",0);
+            }
         }
     }
 }
@@ -274,50 +278,7 @@ int deg_fundamental_check(double* eV, sType n, double eps) {
 //void initial_vector(R const SIZE, T* v, uInt seed) in header file
 //void gramSchmidtIteration(double* prev_vectors, R const size_vectors, R const num_vectors, double* to_ortho_vector) in header file
 
-std::string to_string_p(const double a_value, const int n) {
-	/*****************************************
-	* Transforms a double value in a string with a given precicion
-	*
-	* Parameters
-	* ----------
-	* a_value	: (const double) value to stringify
-	* n			: (const int) precision requested
-	*
-	* Returns
-	* -------
-	* string	: (double) converted to string with precision n
-	***************************************/
-	std::ostringstream out;
-	out.precision(n);
-	out << std::fixed << a_value;
-	return std::move(out).str();
-}
-std::string to_string_p(const std::complex<double> a_value, const int n) {
-	/*****************************************
-	* Transforms a double value in a string with a given precicion
-	*
-	* Parameters
-	* ----------
-	* a_value	: (const double) value to stringify
-	* n			: (const int) precision requested
-	*
-	* Returns
-	* -------
-	* string	: (double) converted to string with precision n
-	***************************************/
-	std::ostringstream out;
-	out.precision(n);
-    if (a_value.imag()<0) {
-        out << std::fixed << a_value.real() << a_value.imag();
-    }
-    else {
-        out << std::fixed << a_value.real() << "+" << a_value.imag();
-    }
-
-	return std::move(out).str();
-}
-
-template <> std::string to_string_pq(const double a_value, const uInt integers,
+std::string to_string_precise(const double a_value, const uInt integers,
                                      const uInt decimals) {
 	/*****************************************
 	* Transforms a double value in a string with a given precicion
@@ -343,47 +304,30 @@ template <> std::string to_string_pq(const double a_value, const uInt integers,
 	std::string str(s);
 	return str;
 }
-template <> std::string to_string_pq(const std::complex<double> a_value, const uInt integers, const uInt decimals) {
+std::string to_string_precise(const std::complex<double> a_value, const uInt integers,
+                                     const uInt decimals) {
 	/*****************************************
 	* Transforms a double value in a string with a given precicion
 	*
 	* Parameters
 	* ----------
-	* a_value	: (const std::complex<double>) value to stringify
+	* a_value	: (const double) value to stringify
 	* integers	: (const unsigned int) precision of integer part
 	* decimals	: (const unsigned int) precision of decimal part
 	*
 	* Returns
 	* -------
-	* string: double converted to string with precision n
+	* string	: (double) converted to string
 	***************************************/
-	char s[120];
-	double real = (abs(a_value.real())>10e-8) ? a_value.real() : 0;
-	double imag = (abs(a_value.imag())>10e-8) ? a_value.imag() : 0;
-	if (imag >= 0)
-    {
-        if (real >= 0)
-        {
-            sprintf(s,"%*.*f+%*.*fj",integers+decimals+2,decimals,real,integers,decimals,imag);
-        }
-        else
-        {
-            sprintf(s,"%*.*f+%*.*fj",integers+decimals+2,decimals,real,integers,decimals,imag);
-        }
-    }
-    else
-    {
-        if (real >= 0)
-        {
-            sprintf(s,"%*.*f-%*.*fj",integers+decimals+2,decimals,real,integers,decimals,abs(imag));
-        }
-        else
-        {
-            sprintf(s,"%*.*f-%*.*fj",integers+decimals+2,decimals,real,integers,decimals,abs(imag));
-        }
-    }
+	char s[100];
+    double a_real = (std::abs(a_value.real()) > 1e-9) ? a_value.real() : 0.0;
+    double a_imag = (std::abs(a_value.imag()) > 1e-9) ? a_value.imag() : 0.0;
 
-	std::string str(s);
+    snprintf(s, sizeof s, "% *.*f%c%.*fj",
+             integers + decimals, decimals, a_real,
+             a_imag < 0 ? '-' : '+',
+             decimals, std::abs(a_imag));
+    std::string str(s);
 	return str;
 }
 
@@ -414,8 +358,11 @@ template <> std::complex<double> remove_zeros(std::complex<double> a){
 	* -------
 	* a: (double) number with near zero ->  zero
 	****************************************/
-	if (abs(a.real()) < 10e-13){a = std::complex<double>(0,a.imag());}
-	if (abs(a.imag()) < 10e-13){a = std::complex<double>(a.real(),0);}
+    double real = a.real();
+    double imag = a.imag();
+	if (abs(real) < 10e-13){real = 0;}
+	if (abs(imag) < 10e-13){imag = 0;}
+    a = std::complex<double>(real,imag);
 	return a;
 }
 
@@ -450,22 +397,22 @@ std::string time_formating(
 	//Minutes
 	if(duration_cast<minutes>(end - start).count() > 1){
 		min = floor((double)duration_cast<minutes>(end - start).count());
-		time += to_string_p(min, 0) + "min ";
+		time += to_string_precise(min, 6, 0) + "min ";
 	}
 	//Seconds
 	if(duration_cast<seconds>(end - start).count() > 1){
 		sec = floor((double)duration_cast<seconds>(end - start).count());
-		time += to_string_p(sec- min * 60, 0) + "s ";
+		time += to_string_precise(sec- min * 60, 2,0) + "s ";
 	}
 	//Milliseconds
 	if(duration_cast<milliseconds>(end - start).count() > 1){
 		ms = floor((double)duration_cast<milliseconds>(end - start).count());
-		time += to_string_p(ms - sec * 1000, 0) + "ms ";
+		time += to_string_precise(ms - sec * 1000, 3,0) + "ms ";
 	}
 	//Microseconds
 	if(duration_cast<microseconds>(end - start).count() > 1){
 		mus = floor((double)duration_cast<microseconds>(end - start).count());
-		time += to_string_p(mus - 1000 * ms, 0) + "μs ";
+		time += to_string_precise(mus - 1000 * ms, 3,0) + "μs ";
 	}
 	return time;
 }
@@ -762,37 +709,6 @@ bool accept_function(sType state, float acceptQuota){
 	bool accepted = (rng_number < acceptQuota);
 
 	return accepted;
-}
-// k-basis
-template <> std::complex<double> conjugate(std::complex<double> c) {
-	/***************************************
-	* Computes the complex conjugate
-	*
-	* Parameters
-	* ----------
-	* c		: (std::complex<double>) complex number
-	*
-	* Returns
-	* -------
-	* newC	: (std::complex<double>) conjugated c number
-	****************************************/
-	double real = c.real(), imag = c.imag();
-	std::complex<double> newC(real, -imag);
-	return newC;
-}
-template <> double conjugate(double c) {
-	/*****************************************
-	* Computes the 'complex' conjugate (dummy function to satisfy templates)
-	*
-	* Parameters
-	* ----------
-	* c		: (double) "complex" number
-	*
-	* Returns
-	* -------
-	* newC	: (double) "conjugated" c number
-	****************************************/
-	return c;
 }
 
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"

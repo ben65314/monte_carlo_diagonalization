@@ -127,8 +127,7 @@ public:
 	virtual std::string show_all_states_string() const = 0;
 
 	//Matrices operations
-	void matrix_creation(double* result_matrix);
-	void matrix_creation(std::complex<double>* result_matrix);
+	virtual void matrix_creation(VectorType* result_matrix) = 0;
 	virtual void H(VectorType* h_phi_n, VectorType* phi_n) = 0;
 
 	virtual void s_matrix_creation(VectorType* s_matrix) {
@@ -139,7 +138,7 @@ public:
 	virtual void sampling() = 0;
 	virtual void sampling_least_energy() = 0;
 
-	//virtual void subspace_condition_expanding() = 0;
+	virtual void subspace_condition_expanding() = 0;
 
     //Rebalance the binary tree
     void rebalance(){

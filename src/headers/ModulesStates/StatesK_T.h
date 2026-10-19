@@ -1,8 +1,5 @@
 #include "StatesArr.h"
-#include "Structures.h"
-#include "basicFunctions.h"
-#include "electronManipulationFunctions.h"
-#include "utilities.h"
+#include "kBasisFunctions.h"
 
 #ifndef __StatesK_T_h__
 #define __StatesK_T_h__
@@ -348,8 +345,14 @@ public:
 				if ((unsigned long)(index) < i) continue;
 
 				result_matrix[index * cols + i] += epsilon_energies.at(j);
-				if (i != (unsigned long)index)
-                    result_matrix[i * cols + index] += conjugate(epsilon_energies.at(j));
+				if (i != (unsigned long)index) { 
+                    if constexpr(std::is_same_v<vType,double>) {
+                        result_matrix[i * cols + index] += epsilon_energies.at(j);
+                    }
+                    else if constexpr(std::is_same_v<vType, std::complex<double>>) {
+                        result_matrix[i * cols + index] += std::conj(epsilon_energies.at(j));
+                    }
+                }
 			}
 
 

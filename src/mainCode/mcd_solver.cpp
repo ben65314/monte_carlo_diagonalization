@@ -1,7 +1,6 @@
-#include "basicFunctions.h"
 #include "paramReader.h"
 
-typedef StatesR_T<sType,vType> arrType;
+typedef StatesK_T<sType,vType> arrType;
 
 int main(int argc, char *argv[]){
 	//Args
@@ -103,8 +102,9 @@ int main(int argc, char *argv[]){
 
 	std::vector<vType> fund_state = std::vector<vType>(got_subspace_len, 0);
 	int deg = 1;
-	LanczosSolver<vType,decltype(MH_Block)> LS;
+	LanczosSolver<decltype(MH_Block)> LS;
 	double fundE = LS.fund_energy(&fund_state, &MH_Block, &deg);
+    std::cout<<"Deg="<<deg<<std::endl;
 
 	if (verbose > 99) std::cout << "FUND VECTOR" << std::endl;
 	if (verbose > 9) {
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]){
         MH_Block.show_all_states();
         for (int i = 0; i < deg; i++) {
             std::cout<<"Fund state #"<<i<<std::endl;
-            print_vector(fund_state.data() + got_subspace_len*i, got_subspace_len,5);
+            print_vector(fund_state.data() + got_subspace_len*i, got_subspace_len);
         }
     }
 	//MH_Block.show_all_states();
@@ -165,11 +165,11 @@ int main(int argc, char *argv[]){
 
 	std::string writes = (std::string)"\nRun Parameters: --"
                         + std::ctime(&end_time) + (std::string)"#Sites = "
-                        + to_string_p(MH_Block.sys_hubP.n_sites, 1) + "\tu = "
-                        + to_string_p(MH_Block.sys_hubP.u, 1) + "\tmu = "
-                        + to_string_p(MH_Block.sys_hubP.mu, 1) + "\n";
+                        + to_string_precise(MH_Block.sys_hubP.n_sites, 2,0) + "\tu = "
+                        + to_string_precise(MH_Block.sys_hubP.u, 2,1) + "\tmu = "
+                        + to_string_precise(MH_Block.sys_hubP.mu, 2,1) + "\n";
 
-	float per = (float)MH_Block.get_length()
+	double per = (double)MH_Block.get_length()
                 / (comb(MH_Block.sys_hubP.n_sites,elec.up)
                     * comb(MH_Block.sys_hubP.n_sites,elec.down));
 
@@ -178,25 +178,24 @@ int main(int argc, char *argv[]){
                            MH_Block.sys_sP.init_state.size());
 
 	writes += "\nSampling Size  = "
-            + to_string_p(MH_Block.get_length(), 0) + "(" + to_string_p(per, 4)
-            + ")\tReticle = " + to_string_p(MH_Block.sys_sP.reticle, 1)
-            + "\tBeta = " + to_string_p(MH_Block.sys_sP.beta_MH, 3) + "\n";
+            + to_string_precise(MH_Block.get_length())
+            + "(" + to_string_precise(per, 2,3)
+            + ")\tReticle = " + to_string_precise(MH_Block.sys_sP.reticle, 1,2)
+            + "\tBeta = " + to_string_precise(MH_Block.sys_sP.beta_MH, 1,4) + "\n";
 
-	if (verbose == 2) {
+	if (verbose == 5) {
         writes += "States taken = " + MH_Block.show_all_states_string() + "\n";
     }
 
 
-	writes += "\nFund energy : " + to_string_p(fundE);
+	writes += "\nFund energy : " + to_string_precise(fundE,4,12);
 	writes += "\n----------------------------------------------\n";
 
-    if (verbose > 0)
-        std::cout<<writes<<std::endl;
 	//Out and writings in files
     //std::ofstream out_file;
 	//out_file.open(out_file_dir, std::ios::app);
 
-	//std::cout << writes << std::endl;
+	if (verbose > 1) std::cout << writes << std::endl;
 	//out_file << writes;
 
 	//out_file.close();

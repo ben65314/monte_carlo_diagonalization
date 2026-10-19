@@ -1,5 +1,4 @@
 #include "LanczosSolver.h"
-#include "basicFunctions.h"
 
 #ifndef __greenFunctions_h__
 #define __greenFunctions_h__
@@ -80,7 +79,7 @@ template <class StatesArrType> void green_space_projection(
 }
 
 std::string write_q_system(double fundE, double eta, Electrons elec,
-                          hubbardParam* hubP_to_write, float perc_states) {
+                          hubbardParam* hubP_to_write, double perc_states) {
 	/****************************************************************
 	* Writes the system parameters for the qMatrices.txt file
 	*
@@ -97,14 +96,14 @@ std::string write_q_system(double fundE, double eta, Electrons elec,
 	* text			: (std::string) String of parameters
 	*****************************************************************/
 	std::string text = "";
-	text += to_string_p(hubP_to_write->n_sites, 0) + "\t";
-	text += to_string_p(hubP_to_write->u, 0) + "\t";
-	text += to_string_p(hubP_to_write->mu, 0) + "\t";
-	text += to_string_p((elec.up+elec.down), 0) + "\t";
-	text += to_string_p((elec.up-elec.down), 0) + "\t";
-	text += to_string_p(fundE, 16) + "\t";
-	text += to_string_p(eta, 5) + "\t";
-	text += to_string_p(perc_states, 2) + "\t";
+	text += to_string_precise(hubP_to_write->n_sites, 2) + "\t";
+	text += to_string_precise(hubP_to_write->u, 2,1) + "\t";
+	text += to_string_precise(hubP_to_write->mu, 2,1) + "\t";
+	text += to_string_precise((elec.up+elec.down), 2) + "\t";
+	text += to_string_precise((elec.up-elec.down), 2) + "\t";
+	text += to_string_precise(fundE, 4,12) + "\t";
+	text += to_string_precise(eta, 1,5) + "\t";
+	text += to_string_precise(perc_states, 2,2) + "\t";
 	return text;
 }
 
@@ -129,9 +128,9 @@ template <class T> std::string write_q_matrix_string(
 	*****************************************************************/
 	std::string text = "";
 	for (uInt j = 0; j < eigen_val->size(); j++) {
-		text += to_string_pq(eigen_val->at(j),5,12) + "\t";
+		text += to_string_precise(eigen_val->at(j),5,12) + "\t";
 		for (int i = 0; i < ns; i++) {
-			text += to_string_pq(QM->at(i * eigen_val->size() + j), 4, 14)
+			text += to_string_precise(QM->at(i * eigen_val->size() + j), 4, 14)
                     + "\t";
 		}
 		if (j < eigen_val->size()-1) text+="\n";
@@ -285,70 +284,35 @@ template <class T, class StatesArrType> std::vector<double> compute_q_matrix (
 
 	//Projected Space
 	green_space_projection(states_array, spin, creation, states_excited);
-
-    //states_excited->subspace_condition_expanding();
-    //states_excited->rebalance();
+    states_excited->rebalance();
 
 	//Number of times H is applied to generate new states
-    new_space_len = states_excited->get_length();
-	if (verbose > 4) {
-        std::cout << "Before H excitation : "<< new_space_len << std::endl;
-        states_excited->show_all_states();
-    }
-    
-    arr_BL = new T[new_space_len * sites]();
-    //Creation of the vectors c_mu^(dag)|Omega>
-    for (int i = 0; i < sites; i++){
-        excited_vector_projection(creation, i, spin, fund_state, states_array, states_excited, arr_BL + i * new_space_len);
-    }
+	if (verbose > 9) std::cout << "Before H excitation : "
+                               << states_excited->get_length() << std::endl;
 
-    //Truncated wH
-    if constexpr(std::is_same_v<T,std::complex<double>>) {
-        std::vector<sType> all_states_to_add;
-        for (int i = 0; i < sites; i++) {
-            std::vector<sType> temp;
-            states_excited->subspace_condition_expanding_weighted(arr_BL+i*new_space_len, &temp);
-            all_states_to_add.insert(all_states_to_add.end(),temp.begin(),temp.end());
-        }
-        for (sType i = 0; i < all_states_to_add.size(); i++)
-            states_excited->add(all_states_to_add.at(i));
-        states_excited->rebalance();
-        new_space_len = states_excited->get_length();
-        delete[] arr_BL;
-        arr_BL = new T[new_space_len * sites]();
-    }
+	//states_excited->subspace_condition_expanding();
 
-    //Countains all the initial vectors for the band Lanczos algorithm
+	if (verbose > 9) std::cout << "After H excitation : "
+                               << states_excited->get_length() << std::endl;
+
+	new_space_len = states_excited->get_length();
+	arr_BL = new T[new_space_len * sites]();
+
+//Countains all the initial vectors for the band Lanczos algorithm
 	//Creation of the p vectors for bandLanczos
 	for (int i = 0; i < sites; i++){
 		excited_vector_projection(creation, i, spin, fund_state, states_array,
                                   states_excited, arr_BL + i*new_space_len);
 	}
 
-	if (verbose > 4) {
-        std::cout << "After H excitation : " << states_excited->get_length() << std::endl;
-        states_excited->show_all_states();
-    }
 
-    vec_BL = std::vector<T>(arr_BL, arr_BL + new_space_len * sites);
+	vec_BL = std::vector<T>(arr_BL, arr_BL + new_space_len * sites);
 	//Band lanczos
-	LanczosSolver<T,StatesArrType> LS;
+	LanczosSolver<StatesArrType> LS;
 	BL_space_evalues = LS.band_lanczos_algorithm(
         &vec_BL, sites, new_space_len, states_excited, &BL_space_size,
         &BL_space_evectors, &prod_c_omega);
 
-    //std::cout<<"Energies Electrons"<<std::endl;
-    //print_vector(BL_space_evalues.data(), BL_space_evalues.size(), 3);
-    //std::cout<<"VECTORS E"<<std::endl;
-    if constexpr (std::is_same_v<T,std::complex<double>>) {
-        double phase = std::arg(BL_space_evectors.at(0));
-        for (sType i = 0; i < BL_space_evectors.size(); i++){
-            BL_space_evectors.at(i) = BL_space_evectors.at(i) * exp(-std::complex<double>(0,1)*phase);
-        }
-        //print_matrix(BL_space_evectors.data(), new_space_len, BL_space_evectors.size() / new_space_len,1,3);
-
-        conjugate_vector(BL_space_evectors.data(), BL_space_size*BL_space_size);
-    }
 	//Clear mem
 	std::vector<T>().swap(vec_BL);
 	states_excited->remove_all();
@@ -440,8 +404,8 @@ template <class T, class StatesArrType> void compute_q_matrix_band_lanczos(
 	//////
 }
 
-template <class StatesArrType, class D> void compute_green_long(
-        int spin, std::vector<D>* fund_state, double fundE,
+template <class StatesArrType> void compute_green_long(
+        int spin, std::vector<vType>* fund_state, double fundE,
         StatesArrType* const states_array, greenParam gP, int deg){
 	/***************************************************************
 	* Calculates the Q matrix and writes them in a qMatrices.txt
@@ -465,7 +429,7 @@ template <class StatesArrType, class D> void compute_green_long(
 	*****************************************************************/
 	if(verbose < -4) std::cout<<"computeGreen_long(...)"<<std::endl;
 
-	sType sites = states_array->sys_hubP.n_sites;
+	int sites = states_array->sys_hubP.n_sites;
 	//Projected excited states
 	StatesArrType* states_excited_e = states_array->clone();
 	states_excited_e->electrons.up += spin ;
@@ -477,11 +441,16 @@ template <class StatesArrType, class D> void compute_green_long(
 	//Projected Space
 	green_space_projection(states_array, spin, true, states_excited_e);
 	green_space_projection(states_array, spin, false, states_excited_h);
+    states_excited_e->rebalance();
+    states_excited_h->rebalance();
+
+    //states_excited_e->subspace_condition_expanding();
+	//states_excited_h->subspace_condition_expanding();
 
 	if (verbose > 99) {
-		std::cout<<"PROJ STATES E ("<<states_excited_e->get_length()<<")"<<std::endl;
+		std::cout<<"PROJ STATES E"<<std::endl;
 		states_excited_e->show_all_states();
-		std::cout<<"PROJ STATES H ("<<states_excited_h->get_length()<<")"<<std::endl;
+		std::cout<<"PROJ STATES H"<<std::endl;
 		states_excited_h->show_all_states();
 	}
 
@@ -494,86 +463,51 @@ template <class StatesArrType, class D> void compute_green_long(
 
 	//Vectors
 	//ELECTONS
-	sType new_space_len_e = states_excited_e->get_length();
+	int new_space_len_e = states_excited_e->get_length();
 
 	written_q_matrix += "\n# Eigen values E -- Q-Matrixes E\n";
 
 	for (int m = 0; m < deg; m++) {
-		std::vector<D> q_matrix_e = std::vector<D>(
+		std::vector<vType> q_matrix_e = std::vector<vType>(
                                                     sites*new_space_len_e, 0);
 		std::vector<double> eigen_e;
 		if (new_space_len_e > 0) {
-            D* arr_BL_e = new D[new_space_len_e * sites]();
+			vType* arr_BL_e = new vType[new_space_len_e * sites]();
 			//Creation of the vectors c_mu^(dag)|Omega>
-			for (sType i = 0; i < sites; i++){
+			for (int i = 0; i < sites; i++){
 				excited_vector_projection(
                     true, i, spin,
                     fund_state->data() + states_array->get_length() * m,
                     states_array, states_excited_e,
                     arr_BL_e + i * new_space_len_e);
 			}
-            //Truncated wH
-            if constexpr(std::is_same_v<D,std::complex<double>>) {
-                std::vector<sType> all_states_to_add;
-                for (sType i = 0; i < sites; i++) {
-                    std::vector<sType> temp;
-                    states_excited_e->subspace_condition_expanding_weighted(arr_BL_e+i*new_space_len_e, &temp);
-                    all_states_to_add.insert(all_states_to_add.end(),temp.begin(),temp.end());
-                }
-                for (sType i = 0; i < all_states_to_add.size(); i++)
-                    states_excited_e->add(all_states_to_add.at(i));
-                states_excited_e->rebalance();
-                sType old_space_len = new_space_len_e;
-                new_space_len_e = states_excited_e->get_length();
-
-                D* arr_BL_e_temp = new D[new_space_len_e * sites]();
-                for (sType i = 0; i < sites; i++) {
-                    for (sType j = 0; j < new_space_len_e; j++) {
-                    if (j < old_space_len) {
-                        arr_BL_e_temp[i*new_space_len_e+j] = arr_BL_e[i*old_space_len+j];
-                    }
-                    else {
-                        arr_BL_e_temp[i*new_space_len_e+j] = 0;
-                        }
-                    }
-                }
-                delete[] arr_BL_e;
-                arr_BL_e = arr_BL_e_temp;
-            }
 
 			//Hamiltonian matrices
-			D* hE = new D[new_space_len_e*new_space_len_e]();
+			vType* hE = new vType[new_space_len_e*new_space_len_e]();
 			states_excited_e->matrix_creation(hE);
 
 			double* eigen_value_e = new double[new_space_len_e]();
-			sType lwork = new_space_len_e*(new_space_len_e+1);
-			D* work = new D[lwork];
-
 			//Eigen values of hE|E> = E|E>
-			//dsyev_(&jobs, &uplo, &new_space_len_e, hE, &new_space_len_e,
-            //       eigen_value_e, work, &lwork, &info);
-            heev_lapack('V', 'U', &new_space_len_e, hE, eigen_value_e);
-			delete[] work;
+			heev_lapack('V', 'U', &new_space_len_e, hE, eigen_value_e);
+
 
 			eigen_e = std::vector<double>(eigen_value_e,
                                             eigen_value_e + new_space_len_e);
             //Convert arr_BL_e to col-major.
-            D* temp_array = row2col_major(arr_BL_e, (sType)sites, new_space_len_e);
+            vType* temp_array = row2col_major(arr_BL_e, sites, new_space_len_e);
             delete[] arr_BL_e;
             arr_BL_e = temp_array;
 
 			//<OMEGA|c Ue
-            gemm_blas('N', 'N', &sites, &new_space_len_e, &new_space_len_e, arr_BL_e, hE, q_matrix_e.data());
-			//dgemm_(&trans_a, &trans_b, &sites, &new_space_len_e, &new_space_len_e, &ALPHA_D,
-            //      arr_BL_e, &sites, hE, &new_space_len_e, &BETA_D,
-            //      q_matrix_e.data(), &sites);
+			gemm_blas('N', 'N', &sites, &new_space_len_e, &new_space_len_e,
+                  arr_BL_e, hE, q_matrix_e.data());
 
 			delete[] hE; delete[] arr_BL_e;	delete[] eigen_value_e;
 
-            D* temp_q = col2row_major(q_matrix_e.data(), (sType)sites,
+            vType* temp_q = col2row_major(q_matrix_e.data(), sites,
                                       new_space_len_e);
             q_matrix_e.clear();
-            q_matrix_e = std::vector<D>(temp_q,
+            q_matrix_e = std::vector<vType>(temp_q,
                                              temp_q + sites*new_space_len_e);
             delete[] temp_q;
 		}
@@ -584,20 +518,20 @@ template <class StatesArrType, class D> void compute_green_long(
 
 
 	//HOLES
-	sType new_space_len_h = states_excited_h->get_length();
+	int new_space_len_h = states_excited_h->get_length();
 
 
 	//Wrtiting the Q-Matrix and the eigen values in a txt file
 	written_q_matrix += "\n# Eigen values H -- Q-Matrixes H\n";
 
 	for (int m = 0; m < deg; m++) {
-		std::vector<D> q_matrix_h = std::vector<D>(
+		std::vector<vType> q_matrix_h = std::vector<vType>(
                                                     sites*new_space_len_h, 0);
 		std::vector<double> eigen_h;
 		if (new_space_len_h > 0) {
-			D* arr_BL_h = new D[new_space_len_h * sites]();
+			vType* arr_BL_h = new vType[new_space_len_h * sites]();
 			//Creation of the vectors c_mu^(dag)|Omega>
-			for (sType i = 0; i < sites; i++){
+			for (int i = 0; i < sites; i++){
 				excited_vector_projection(
                     false, i, spin,
                     fund_state->data() + states_array->get_length() * m,
@@ -605,70 +539,33 @@ template <class StatesArrType, class D> void compute_green_long(
                     arr_BL_h + i * new_space_len_h);
 			}
 
-            //Truncated wH
-            if constexpr(std::is_same_v<D,std::complex<double>>) {
-                std::vector<sType> all_states_to_add;
-                for (sType i = 0; i < sites; i++) {
-                    std::vector<sType> temp;
-                    states_excited_h->subspace_condition_expanding_weighted(arr_BL_h+i*new_space_len_h, &temp);
-                    all_states_to_add.insert(all_states_to_add.end(),temp.begin(),temp.end());
-                }
-                for (sType i = 0; i < all_states_to_add.size(); i++)
-                    states_excited_h->add(all_states_to_add.at(i));
-                states_excited_h->rebalance();
-                sType old_space_len = new_space_len_h;
-                new_space_len_h = states_excited_h->get_length();
-
-                D* arr_BL_h_temp = new D[new_space_len_h * sites]();
-                for (sType i = 0; i < sites; i++) {
-                    for (sType j = 0; j < new_space_len_h; j++) {
-                    if (j < old_space_len) {
-                        arr_BL_h_temp[i*new_space_len_h+j] = arr_BL_h[i*old_space_len+j];
-                    }
-                    else {
-                        arr_BL_h_temp[i*new_space_len_h+j] = 0;
-                        }
-                    }
-                }
-                delete[] arr_BL_h;
-                arr_BL_h = arr_BL_h_temp;
-            }
-
 			//Hamiltonian matrices
-			D* hH = new D[new_space_len_h*new_space_len_h]();
+            vType* hH = new vType[new_space_len_h*new_space_len_h]();
 			states_excited_h->matrix_creation(hH);
 
 			double* eigen_value_h = new double[new_space_len_h]();
-			sType lwork = new_space_len_h*(new_space_len_h+1);
-			D* work = new D[lwork];
 
 			//Eigen values of hH|E> = E |E>
-			//dsyev_(&jobs, &uplo, &new_space_len_h, hH, &new_space_len_h,
-            //       eigen_value_h, work, &lwork, &info);
-            heev_lapack('V', 'U', &new_space_len_h, hH, eigen_value_h);
-
-			delete[] work;
+			heev_lapack('V', 'U', &new_space_len_h, hH, eigen_value_h);
 
 			eigen_h = std::vector<double>(eigen_value_h,
                                             eigen_value_h + new_space_len_h);
             //
             //Convert arr_BL_e to col-major.
-            D* temp_array = row2col_major(arr_BL_h, (sType)sites, new_space_len_h);
+            vType* temp_array = row2col_major(arr_BL_h, sites, new_space_len_h);
             delete[] arr_BL_h;
             arr_BL_h = temp_array;
 
 			//<OMEGA|c Uh
-            gemm_blas('N', 'N', &sites, &new_space_len_h, &new_space_len_h, arr_BL_h, hH, q_matrix_h.data());
-			//dgemm_(&trans_a, &trans_b, &sites, &new_space_len_h, &new_space_len_h, &ALPHA_D,
-            //      arr_BL_h, &sites, hH, &new_space_len_h, &BETA_D,
-            //      q_matrix_h.data(), &sites);
+			gemm_blas('N', 'N', &sites, &new_space_len_h, &new_space_len_h,
+                  arr_BL_h, hH, q_matrix_h.data());
 
 			delete[] hH; delete[] arr_BL_h; delete[] eigen_value_h;
 
-            D* temp_q = col2row_major(q_matrix_h.data(), (sType)sites,
+            vType* temp_q = col2row_major(q_matrix_h.data(), sites,
                                       new_space_len_h);
             q_matrix_h.clear();
-            q_matrix_h = std::vector<D>(temp_q,
+            q_matrix_h = std::vector<vType>(temp_q,
                                              temp_q + sites*new_space_len_h);
             delete[] temp_q;
 		}
