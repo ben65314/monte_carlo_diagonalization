@@ -159,7 +159,7 @@ template <class T> std::string to_string_precise(const T a_value, const uInt int
 template <class T> T remove_zeros(T a);
 
 //Print vec and matrix
-template <class T, class R> std::string write_vector(const T* vec, R size){
+template <class T, class R> std::string write_vector(const T* vec, R size, int integers=1, int decimals=3){
 	/*****************************************
 	* Writes a double vector has a string
 	*
@@ -179,7 +179,7 @@ template <class T, class R> std::string write_vector(const T* vec, R size){
 	****************************************/
 	std::string write = "[";
 	for (R i = 0; i < size; i++) {
-		write += to_string_precise(vec[i], 2, 4) + "\t";
+		write += to_string_precise(vec[i], integers, decimals) + "\t";
 		if ((i+1) % 10 == 0) write += "";
 	}
 	write += "]\n";
@@ -218,7 +218,7 @@ template <class D, class R> std::string write_matrix(
 	return write;
 }
 
-template <class T, class R> void print_vector(const T* vec, R size){
+template <class T, class R> void print_vector(const T* vec, R size, int integers = 1, int decimals = 3){
 	/*****************************************
 	* Prints a given vector
 	*
@@ -236,7 +236,7 @@ template <class T, class R> void print_vector(const T* vec, R size){
 	* -------
 	* NONE
 	****************************************/
-	std::cout << write_vector(vec, size);
+	std::cout << write_vector(vec, size, integers, decimals);
 }
 template <class D, class R> void print_matrix(const D* mat, R rows, R cols,
                                      int integers = 2, int precision = 0){

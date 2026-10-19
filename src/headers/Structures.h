@@ -84,8 +84,8 @@ struct samplingParam{ //Sampling parameters
 	float beta_MH;
 
 	//H application for green
-	uInt nHapply;
-	float beta_Happly;
+	uInt nHapply = 0;
+	float beta_Happly = 0;
 
 	//Fundamental truncation cutoff value
 	float fund_tc = 1;
@@ -101,7 +101,7 @@ struct samplingParam{ //Sampling parameters
 		std::cout << "# H applied = " << nHapply << "\tBeta_Happly = " 
             << beta_Happly << std::endl;
 		std::cout << "Initial states:" << std::endl;
-		print_vector(init_state.data(), init_state.size());
+		print_vector(init_state.data(), init_state.size(),1,0);
 		std::cout << std::endl;
 	}
 };

@@ -175,20 +175,20 @@ int main(int argc, char *argv[]){
 
 	writes += "Initial State = "
             + write_vector(MH_Block.sys_sP.init_state.data(),
-                           MH_Block.sys_sP.init_state.size());
+                           MH_Block.sys_sP.init_state.size(),1,0);
 
 	writes += "\nSampling Size  = "
-            + to_string_precise(MH_Block.get_length())
-            + "(" + to_string_precise(per, 2,3)
+            + to_string_precise(MH_Block.get_length(),1,0)
+            + "(" + to_string_precise(per, 1,3)
             + ")\tReticle = " + to_string_precise(MH_Block.sys_sP.reticle, 1,2)
             + "\tBeta = " + to_string_precise(MH_Block.sys_sP.beta_MH, 1,4) + "\n";
 
-	if (verbose == 2) {
+	if (verbose == 5) {
         writes += "States taken = " + MH_Block.show_all_states_string() + "\n";
     }
 
 
-	writes += "\nFund energy : " + to_string_precise(fundE,4,12);
+	writes += "\nFund energy : " + to_string_precise(fundE,4,16);
 	writes += "\n----------------------------------------------\n";
 
 	//Out and writings in files
