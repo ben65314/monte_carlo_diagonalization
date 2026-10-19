@@ -286,6 +286,19 @@ struct justManyVariables readParameters(const std::string file) {
         t_matrix, t_matrix + (send_info.hubP.n_sites*send_info.hubP.n_sites));
 	delete[] t_matrix;
 
+    //Find dimensions of lattice
+    for (int i = 0; i < send_info.hubP.n_sites; i++){
+        for (sType d = 0; d < send_info.hubP.DIM; d++){
+
+            send_info.hubP.R.push_back(sites_pos.at(i*send_info.hubP.DIM + d));
+
+            //Find x,y,z dimensions
+            if (send_info.hubP.R[i*send_info.hubP.DIM + d] + 1 > send_info.hubP.dimension.at(d))
+                send_info.hubP.dimension[d] = send_info.hubP.R[i*send_info.hubP.DIM + d] + 1;
+        }
+    }
+
+
 	init = create_anti_ferro(send_info.hubP.n_sites, up_f, down_f);
 
 	std::vector<sType> temp;

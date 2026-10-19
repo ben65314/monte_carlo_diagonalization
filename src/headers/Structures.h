@@ -5,8 +5,8 @@
 
 //Declaration of constants
 const std::vector<double> EPSILON_NULL;
-const long PERMISSION = 500000000;
-const int LANCZOS_SIZE = 50;
+const long PERMISSION = 500;
+const int LANCZOS_SIZE = 10;
 const uInt BAND_LANCZOS_MAX_ITERATIONS = 1500;
 //const uInt NUM_THREADS_USED = 1;
 //
@@ -22,15 +22,25 @@ struct hubbardParam{ //Hubbard parameters
 	double u, mu;
 	std::vector<double> t_matrix;
 
+    std::vector<double> R;
+    std::vector<double> K;
+    std::vector<int> dimension = {0,0,0};
+    sType DIM = 3;
+
+
 	//Used only for diagExact
 	int N_e, S_z;
 
 	void print() {
 		cct("--- HUBBARD PARAMETERS ---",33);
 		std::cout << "\nSites = " << n_sites << "\n";
+        std::cout << "Lattice ("<<dimension.at(0)<<"x"<<dimension.at(1)<<"x"<<dimension.at(2)<<")"<<std::endl;
+        std::cout<<"R:"<<std::endl;
+        print_matrix(R.data(),n_sites,(int)DIM,1,0);
+
 		std::cout << "Hubbard block used : N" << N_e << "Sz" << S_z << "\n";
 		std::cout << "U = " << u << "\tmu = " << mu << "\n";
-		std::cout << "tMatrix = " << "\n";
+		std::cout << "t-Matrix = " << "\n";
 		print_matrix(t_matrix.data(), n_sites, n_sites);
 		std::cout << std::endl;
 	}
