@@ -34,10 +34,10 @@ allow_jump: {(7,0,0)} {-1}
 
 ################################# SAMPLING PARAMETERS ##############################
 #(THOSE PARAMETERS ARE REQUIRED FOR SAMPLING PROGRAMS)
-N: {8}
+Ne: {8}
 Sz: {0}
 
-beta: {0}
+beta: {0.1}
 
 #	Reticle of the breadth sampling. 0 will be set the reticle to its maximum value
 reticle: {0}
@@ -62,6 +62,11 @@ compute_green: {YES}
 added_spin: {0} #Must be 0 (down) or 1 (up)
 eta: {0.05}
 
+
+######################## SAMPLING SPEED UP PARAMETERS #############################
+tree_like_sampling : {NO}
+pre_filling_layers : {NO}
+propose_filled_layer_state : {YES}
 
 
 

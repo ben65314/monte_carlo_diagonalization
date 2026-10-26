@@ -164,200 +164,6 @@ private:
 		delete next_step_eval;
 	}
 
-	void MHSamplingOfStates_OLD_VERSION(unsigned long sampling_size, float beta,
-                            unsigned long reticle) {
-		/****************************************************************
-		* Samples states arround the one given and grows a subspace
-        * around of desired size
-		*
-		* Parameters
-		* ----------
-		* sampling_size : (unsigned long) size of the subspace desired
-		* beta : (float) beta value desired for MonteCarlo sampling
-		* reticle : (unsigned long) reticle of breadth-first search sampling
-        *
-		* Returns
-		* -------
-        * None
-		*****************************************************************/
-		//Initial states
-		allocate_more_nodes(sampling_size);
-        //StatesArr* currentState = this->clone();
-        decltype(this) current_state = new StatesR_T(50);
-        //*currentState = StatesArr(arrR.size());
-
-		for (unsigned int i = 0; i < this->arr.size(); i++) {
-			current_state->add(this->arr.at(i).key);
-		}
-
-		bool tree_like_sampling = false;
-		if(verbose == -1){tree_like_sampling = true;}
-
-		unsigned long MH_size = this->arr.size();
-
-		StateType size_current_step_eval = this->arr.size();
-		StateType size_next_step_eval = reticle * size_current_step_eval;
-		//StatesArr* nextStepEval = this->clone();
-		decltype(this) next_step_eval = new StatesR_T(50);
-
-		unsigned int g = 0;
-		auto step1 = std::chrono::high_resolution_clock::now();
-		auto step2 = std::chrono::high_resolution_clock::now();
-		while (MH_size < sampling_size) {
-
-			size_current_step_eval = current_state->get_length();
-
-
-			step2 = std::chrono::high_resolution_clock::now();
-			if (verbose > 5) {
-                std::cout << "\nCURRENT SAMPLE SIZE:" << MH_size << " ("
-                      << (float)MH_size / sampling_size << "\nCurrentStateLen:"
-                      << current_state->get_length()
-                      << "\nTime to gather current sample:"
-                      << time_formating(step1, step2) << std::endl;
-            }
-			step1 = std::chrono::high_resolution_clock::now();
-
-
-            bool big_sample = reticle * size_current_step_eval > sampling_size;
-			size_next_step_eval = big_sample ? sampling_size :
-                reticle * size_current_step_eval;
-
-			next_step_eval->remove_all();
-			next_step_eval->allocate_more_nodes(size_next_step_eval);
-			g++;
-
-			float current_energy;
-			std::vector<StateType> possible_new_state;
-
-			for (StateType i = 0; i < size_current_step_eval; i++) {
-				//Evolution of Hamiltonian of the current state
-                //and energy of the current state
-				current_energy = Hu(current_state->get_at(i),
-                        this->sys_hubP.n_sites);
-                ///THIS SINGLE LINE CORRECTS THE WRONG BOLTZMANN DISTRIBUTION!
-                //std::cout<<"no bug"<<std::endl;
-                //current_energy *= this->sys_hubP.u;
-
-				possible_new_state.clear();
-				Ht(current_state->get_at(i), &possible_new_state,
-                        &this->sys_hubP);
-
-				if (possible_new_state.size() != 0) {
-					StateType new_state;
-					std::vector<StateType> all_accepted_states;
-					//Test the breadth algorithm for all possible states found
-                    int new_nu;
-					for (StateType j = 0; j < possible_new_state.size(); j++)
-					{
-						new_state = possible_new_state.at(j);
-						if (tree_like_sampling) {
-							if(this->countains_element(new_state)){
-								continue;
-							}
-						}
-
-						//#Calculates new Energy and accept factor
-						new_nu = Hu(new_state,this->sys_hubP.n_sites);
-                        float new_energy = new_nu * this->sys_hubP.u;
-
-						float diff_energy = new_energy - current_energy;
-						float a = (float)rand() / (float)RAND_MAX;
-						bool accepted = exp(-beta * diff_energy) > a;
-
-						//Energy MONTE CARLO Condition
-						if (accepted){
-                            all_accepted_states.push_back(new_state);
-						}
-					}
-
-					//If no states are accepted
-					if (all_accepted_states.size() == 0) {
-						continue;
-					}
-					//If the number of accepted states is bigger than reticle
-					else if (all_accepted_states.size() > reticle) {
-						int* rdm_arr = new int[all_accepted_states.size()];
-						for (
-                        StateType p = 0; p < all_accepted_states.size(); p++)
-						{
-							rdm_arr[p] = p;
-						}
-						std::shuffle(
-                            rdm_arr, rdm_arr + all_accepted_states.size(),
-                            std::default_random_engine(std::time(NULL)));
-
-						for (StateType q = 0; q < reticle; q++) {
-							StateType item = all_accepted_states.at(rdm_arr[q]);
-
-							next_step_eval->add(item);
-							if(!this->countains_element(item)){
-								add(item);
-								MH_size++;
-								g=0;
-							}
-							if (MH_size >= sampling_size) {
-								delete[] rdm_arr;
-                                //This is a nested break to get out of the for
-                                //loop of the evolution and the for loop of the
-                                //currentState to evaluate.
-								goto nestedBreakForEnoughSampling;
-							}
-						}
-						delete[] rdm_arr;
-					}
-					//If the number of accepted states is less than reticle
-					else {
-						for (
-                        StateType l = 0; l < all_accepted_states.size(); l++){
-							StateType item = all_accepted_states.at(l);
-
-
-							next_step_eval->add(item);
-							if (!this->countains_element(item)) {
-								add(item);
-								MH_size++;
-								g=0;
-							}
-							if (MH_size >= sampling_size) {
-                                //This is a nested break to get out of the for
-                                //loop of the evolution and the for loop of the
-                                //currentState to evaluate.
-								goto nestedBreakForEnoughSampling;
-							}
-						}
-					}
-				}
-				else {//Prevents solo block breaking
-					std::cout << "No Evolution\n";
-					std::cout << "Current: " << current_state->get_at(i)
-                              << "   E : " << current_energy;
-					break;
-				}
-                //std::cout<<"new total"<<this->get_length()<<std::endl;
-
-			}//END OF FOR
-
-            //std::cout<<"g:"<<g<<std::endl;
-		nestedBreakForEnoughSampling:
-			if (g > PERMISSION) {
-				std::cout << "The sample size entered couldn't be met. "
-                          << "This can be a result of:\n\t-An unattainable "
-                          << "sample size\n\t-A beta value too large\n";
-				break;
-			}
-			//std::swap(currentState,nextStepEval);
-			if (next_step_eval->get_length()>0){
-				decltype(current_state) temp = current_state;
-				current_state = next_step_eval;
-				next_step_eval = temp;
-			}
-			next_step_eval->remove_all();
-		}
-
-		delete current_state;
-		delete next_step_eval;
-	}
 	void MHSamplingOfStates(unsigned long sampling_size, float beta,
                             unsigned long reticle) {
 		/****************************************************************
@@ -375,123 +181,120 @@ private:
         * None
 		*****************************************************************/
         //std::cout<<"MH_SAMPLING"<<std::endl;
-		//Initial states
-		allocate_more_nodes(sampling_size);
 
         //Each nU counter
-        int nu_poss_value = (this->electrons.up > this->electrons.down) ? \
+        ///Maximum nu value for the system min(electrons.up, electrons.down)
+        int max_nU = (this->electrons.up > this->electrons.down) ? \
             this->electrons.up : this->electrons.down;
-        nu_poss_value += 1;
-        std::vector<sType> nu_state_counter(nu_poss_value, 0);
+        std::vector<sType> nu_state_counter(max_nU+1, 0);
+
         //Maximum number of possible state for each nu value
         std::vector<sType> nb_state_per_nu;
-        for (int i = 0; i < nu_poss_value; i++) {
+        for (int i = 0; i < max_nU+1; i++) {
             sType n_states = comb_specified(i, this->sys_hubP.n_sites,
-                                            this->electrons.up,this->electrons.down);
+                                    this->electrons.up, this->electrons.down);
             nb_state_per_nu.push_back(n_states);
         }
 
+        //Currently filled nu layer
         int filled_nu_layer = 0;
+        if (this->sys_sP.pre_filling_layers && !this->sys_sP.propose_filled_layer_state) {
+            uLong remaining_states = this->sys_sP.sampling_size;
+            for (uLong i = 0; i < nb_state_per_nu.size(); i++) {
+                remaining_states -= nb_state_per_nu.at(i);
+                if (remaining_states > this->sys_sP.sampling_size) {
+                    filled_nu_layer = i-1;
+                    break;
+                }
+            }
+        }
 
-        //StatesArr* currentState = this->clone();
+
+        //Current states to evaluate and propose states from.
         decltype(this) current_state = new StatesR_T(50);
-        //*currentState = StatesArr(arrR.size());
 
-		for (unsigned int i = 0; i < this->arr.size(); i++) {
-            sType starting_states = this->arr.at(i).key;
-			current_state->add(starting_states);
-            int nu_add = Hu(starting_states,this->sys_hubP.n_sites);
-            nu_state_counter[nu_add] += 1;
-		}
+		//Initial states
+		allocate_more_nodes(sampling_size);
+        if (this->sys_sP.pre_filling_layers && filled_nu_layer >= 0) {
+            //Creating layers of nU for all the full layers who won't
+            //need Monte-Carlo sampling
+            for (uShort i = 0; i <= filled_nu_layer; i++) {
+                std::vector<StateType> all_combinations_for_this_nU;
 
-		bool tree_like_sampling = false;
-		if(verbose == -1){tree_like_sampling = true;}
+                //Calculates all states for a given nUp, nDown, nU
+                combination_all(this->electrons.up, this->electrons.down,
+                       this->sys_hubP.n_sites, i, &all_combinations_for_this_nU);
+                for (uLong j = 0; j < all_combinations_for_this_nU.size(); j++) {
+                    //Will take the last filled level has the starting point
+                    //in the Monte-Carlo sampling
+                    if (i == filled_nu_layer) {
+                        current_state->add(all_combinations_for_this_nU.at(j));
+                    }
 
-		unsigned long MH_size = this->arr.size();
+                    //Adds the state to the StatesArr
+                    add(all_combinations_for_this_nU.at(j));
+                    nu_state_counter[i] += 1;
+                }
+            }
+        }
+        else {
+            for (unsigned int i = 0; i < this->arr.size(); i++) {
+                sType starting_states = this->arr.at(i).key;
+                current_state->add(starting_states);
+                int nu_add = Hu(starting_states,this->sys_hubP.n_sites);
+                nu_state_counter[nu_add] += 1;
+            }
+        }
+        //Size of the subspace
+		unsigned long sampled_size = this->arr.size();
 
-		StateType size_current_step_eval = this->arr.size();
+
+        //Data to store the newly accepted states
+		StateType size_current_step_eval = current_state->arr.size();
 		StateType size_next_step_eval = reticle * size_current_step_eval;
-		//StatesArr* nextStepEval = this->clone();
 		decltype(this) next_step_eval = new StatesR_T(50);
 
-        //Only used when verbose needs it to be
-        std::vector<sType> proposed_array (nu_poss_value, 0);
-        std::vector<sType> current_nu_state (nu_poss_value, 0);
-        decltype(this) possible_state = new StatesR_T(50);
-        //
-
-		unsigned int g = 0;
+        //Stalling counter
+		unsigned int stall = 0;
+        //Time for each loop length
 		auto step1 = std::chrono::high_resolution_clock::now();
 		auto step2 = std::chrono::high_resolution_clock::now();
-		while (MH_size < sampling_size) {
-
+		while (sampled_size < sampling_size) {
 			size_current_step_eval = current_state->get_length();
 
-
+            //Verbose info table
 			step2 = std::chrono::high_resolution_clock::now();
             if (verbose > 4) {
-                for (unsigned long i = 0; i < size_current_step_eval;i++)
-                {
-                    int this_nu = Hu(current_state->get_at(i),this->sys_hubP.n_sites);
-                    current_nu_state[this_nu]++;
-                }
-                for (unsigned long i = 0; i < possible_state->get_length();i++)
-                {
-                    int this_nu = Hu(possible_state->get_at(i),this->sys_hubP.n_sites);
-                    proposed_array[this_nu]++;
-                }
-
-                printf("Sampled(%5ld/%5ld) [",MH_size,sampling_size);
-                for (int i = 0; i < nu_poss_value; i++) {
+                printf("Sampled(%5ld/%5ld) \033[42m|\033[0m nU [",sampled_size,sampling_size);
+                for (int i = 0; i < max_nU+1; i++) {
                     printf("%6ld/%ld", nu_state_counter[i],
                            nb_state_per_nu[i]);
                 }
-                printf("] \033[42m|\033[0m size_ceval:%6ld [", size_current_step_eval);
-                for (int i = 0; i < nu_poss_value; i++) {
-                    printf("%6ld ",current_nu_state[i]);
-                }
-                printf("] \033[42m|\033[0m size_prop:%8ld [", possible_state->get_length());
-                for (int i = 0; i < nu_poss_value; i++) {
-                    printf("%6ld ",proposed_array[i]);
-                }
                 printf("] \033[42m|\033[0m dt = %s\n",time_formating(step1,step2).c_str());
-
-                proposed_array = std::vector<sType>(nu_poss_value, 0);
-                possible_state->remove_all();
-                current_nu_state = std::vector<sType>(nu_poss_value, 0);
             }
 			step1 = std::chrono::high_resolution_clock::now();
 
-
+            //The number of state for the next step can't be more than the sampling_size
             bool big_sample = reticle * size_current_step_eval > sampling_size;
 			size_next_step_eval = big_sample ? sampling_size :
                 reticle * size_current_step_eval;
 
+            //Empty next_step_eval data
 			next_step_eval->remove_all();
 			next_step_eval->allocate_more_nodes(size_next_step_eval);
-			g++;
+			stall++;
 
-			float current_energy;
+			double current_energy;
 			std::vector<StateType> possible_new_state;
-
 			for (StateType i = 0; i < size_current_step_eval; i++) {
 				//Evolution of Hamiltonian of the current state
                 //and energy of the current state
 				int current_nu = Hu(current_state->get_at(i),
-                        this->sys_hubP.n_sites);
+                                    this->sys_hubP.n_sites);
                 current_energy = current_nu*this->sys_hubP.u;
 				possible_new_state.clear();
 				Ht(current_state->get_at(i), &possible_new_state,
                         &this->sys_hubP);
-
-                if (verbose > 4) {
-                    //Compute proposed states for print
-                    for (unsigned long i = 0; i < possible_new_state.size();i++)
-                    {
-                        possible_state->add(possible_new_state.at(i));
-                    }
-                }
-
 
 				if (possible_new_state.size() != 0) {
 					StateType new_state;
@@ -501,7 +304,12 @@ private:
 					for (StateType j = 0; j < possible_new_state.size(); j++)
 					{
 						new_state = possible_new_state.at(j);
-						if (tree_like_sampling) {
+						if (this->sys_sP.tree_like_sampling) {
+                            /*
+                            tree_like_sampling will speed up the sampling process by never
+                            proposing a state that already was accepted. There is no garanty
+                            that the sample size will be met.
+                            */
 							if(this->countains_element(new_state)){
 								continue;
 							}
@@ -509,24 +317,20 @@ private:
 
 						//#Calculates new Energy and accept factor
 						new_nu = Hu(new_state,this->sys_hubP.n_sites);
-                        float new_energy = new_nu * this->sys_hubP.u;
 
-						float diff_energy = new_energy - current_energy;
 						float a = (float)rand() / (float)RAND_MAX;
 						bool accepted;
 						//accepted = exp(-beta*(this->sys_hubP.u*(new_nu) - current_nu)) > a;
 
                         //Nouvelle methode echantillojn acceptation
-                        //bool accepted = exp(-beta*this->sys_hubP.u*(new_nu-filled_nu_layer+1)) > a;
                         //MCD
                         accepted = exp(-beta*this->sys_hubP.u*(new_nu-a_sample*current_nu-b_sample*filled_nu_layer)) > a;
-                        //BOLTZMAN
-                        //accepted = exp(-beta*this->sys_hubP.u*(new_nu-a_sample*current_nu-b_sample*filled_nu_layer)) > a;
 
 
 						//Energy MONTE CARLO Condition
 						if (accepted){
-                            if (new_nu >= filled_nu_layer) {
+                            if (this->sys_sP.propose_filled_layer_state\
+                                || new_nu >= filled_nu_layer) {
                                 all_accepted_states.push_back(new_state);
                             }
 						}
@@ -538,6 +342,7 @@ private:
 					}
 					//If the number of accepted states is bigger than reticle
 					else if (all_accepted_states.size() > reticle) {
+                        std::cout<<"ABOVE ret"<<std::endl;
 						int* rdm_arr = new int[all_accepted_states.size()];
 						for (
                         StateType p = 0; p < all_accepted_states.size(); p++)
@@ -551,13 +356,24 @@ private:
 						for (StateType q = 0; q < reticle; q++) {
 							StateType item = all_accepted_states.at(rdm_arr[q]);
 
-							next_step_eval->add(item);
-							if(!this->countains_element(item)){
+                            new_nu = Hu(item,this->sys_hubP.n_sites);
+                            next_step_eval->add(item);
+							if (!this->countains_element(item)) {
 								add(item);
-								MH_size++;
-								g=0;
+								sampled_size++;
+								stall=0;
+
+                                //Add to counter for each type of nu
+                                nu_state_counter[new_nu] += 1;
+                                if (nb_state_per_nu[new_nu] == nu_state_counter[new_nu]) {
+                                    for (uLong aa = 0; aa < nb_state_per_nu.size(); aa++) {
+                                        if (nb_state_per_nu[i] != nu_state_counter[i]) break;
+                                        filled_nu_layer = aa;
+
+                                    }
+                                }
 							}
-							if (MH_size >= sampling_size) {
+							if (sampled_size >= sampling_size) {
 								delete[] rdm_arr;
                                 //This is a nested break to get out of the for
                                 //loop of the evolution and the for loop of the
@@ -574,31 +390,23 @@ private:
 							StateType item = all_accepted_states.at(l);
 
 
-							next_step_eval->add(item);
+                            new_nu = Hu(item,this->sys_hubP.n_sites);
+                            next_step_eval->add(item);
 							if (!this->countains_element(item)) {
 								add(item);
-								MH_size++;
-								g=0;
+								sampled_size++;
+								stall=0;
 
                                 //Add to counter for each type of nu
-                                new_nu = Hu(item,this->sys_hubP.n_sites);
                                 nu_state_counter[new_nu] += 1;
-                                // Prevents already filled sampling
-                                bool filled_layer = nu_state_counter[new_nu] \
-                                    == nb_state_per_nu[new_nu];
-                                bool prev_filled = true;
-                                if (new_nu>0){
-                                    prev_filled = nu_state_counter[new_nu-1] \ 
-                                    == nb_state_per_nu[new_nu-1];
+                                if (nb_state_per_nu[new_nu] == nu_state_counter[new_nu]) {
+                                    for (uLong aa = 0; aa < nb_state_per_nu.size(); aa++) {
+                                        if (nb_state_per_nu[aa] != nu_state_counter[aa]) break;
+                                        filled_nu_layer = aa;
+                                    }
                                 }
-                                if (filled_layer && prev_filled && 
-                                        filled_nu_layer+1 == new_nu ) {
-                                    filled_nu_layer = new_nu;
-                                    if (verbose > 4) std::cout<<"FILLED : " <<filled_nu_layer<<std::endl;
-                                }
-                                //print_vector(nu_state_counter.data(),nu_state_counter.size());
 							}
-							if (MH_size >= sampling_size) {
+							if (sampled_size >= sampling_size) {
                                 //This is a nested break to get out of the for
                                 //loop of the evolution and the for loop of the
                                 //currentState to evaluate.
@@ -619,14 +427,14 @@ private:
 
             //std::cout<<"g:"<<g<<std::endl;
 		nestedBreakForEnoughSampling:
-			if (g > PERMISSION) {
+			if (stall > PERMISSION) {
 				std::cout << "The sample size entered couldn't be met. "
                           << "This can be a result of:\n\t-An unattainable "
                           << "sample size\n\t-A beta value too large\n";
 				break;
 			}
-			//std::swap(currentState,nextStepEval);
-			if (next_step_eval->get_length()>0){
+
+			if (next_step_eval->get_length() > 0){
 				decltype(current_state) temp = current_state;
 				current_state = next_step_eval;
 				next_step_eval = temp;
@@ -634,7 +442,7 @@ private:
 			next_step_eval->remove_all();
 		}
 
-        delete possible_state;
+        //delete possible_state;
 		delete current_state;
 		delete next_step_eval;
 	}

@@ -11,7 +11,7 @@ const uInt BAND_LANCZOS_MAX_ITERATIONS = 1500;
 //const uInt NUM_THREADS_USED = 1;
 //
 #ifdef _OPENMP
-    const uInt NUM_THREADS_USED = 0.9 * omp_get_max_threads();
+    const uInt NUM_THREADS_USED = 1 * omp_get_max_threads();
 #else
     const uInt NUM_THREADS_USED = 1;
 #endif // _OPENMP
@@ -68,7 +68,7 @@ struct greenParam{ //Green parameters
 		else truth = "FALSE";
 		std::cout << "Add all = " << truth << std::endl;
 		if (!g_add_all) std::cout << "Added Site = " << g_added_site << "\n";
-		
+
 		std::cout << "Added Spin = " << g_added_spin << std::endl;
 		std::cout << "Eta value = " << g_eta << std::endl;
 		if (g_average) truth = "TRUE";
@@ -79,7 +79,7 @@ struct greenParam{ //Green parameters
 
 struct samplingParam{ //Sampling parameters
 	unsigned long reticle, sampling_size;
-	
+
 	//MH sampling
 	float beta_MH;
 
@@ -89,8 +89,28 @@ struct samplingParam{ //Sampling parameters
 
 	//Fundamental truncation cutoff value
 	float fund_tc = 1;
-	
+
 	std::vector<sType> init_state;
+
+    //Quick filling modules
+    /*
+    tree_like_sampling will speed up the sampling process by never
+    proposing a state that already was accepted. There is no garanty
+    that the sample size will be met.
+    */
+    bool tree_like_sampling = false;
+    /*
+    pre_filling_layers will fill the bottom layers if they could be
+    filled completely according to the given subspace sample size
+    */
+    bool pre_filling_layers = false;
+    /*
+    propose_filled_layer_state will allow to go back to any filled layer.
+    If false, the sampling will be able to go back in the most recent filled
+    layer but not the others
+    */
+    bool propose_filled_layer_state = true;
+
 
 	void print() {
 		cct("--- SAMPLING PARAMETERS ---",33);
@@ -98,8 +118,12 @@ struct samplingParam{ //Sampling parameters
 		std::cout << "Truncated Cutoff = " << fund_tc << std::endl;
 		std::cout << "Sampling size: "<< sampling_size << std::endl;
 		std::cout << "Beta_MH = " << beta_MH << std::endl;
-		std::cout << "# H applied = " << nHapply << "\tBeta_Happly = " 
+		std::cout << "# H applied = " << nHapply << "\tBeta_Happly = "
             << beta_Happly << std::endl;
+        std::cout << "Sampling add-ons"<<std::endl;
+        std::cout << "\ttree_like_sampling ("<<tree_like_sampling<<")"<<std::endl;
+        std::cout << "\tpre_filling_layers ("<<pre_filling_layers<<")"<<std::endl;
+        std::cout << "\tpropose_filled_layer_state ("<<propose_filled_layer_state<<")"<<std::endl;
 		std::cout << "Initial states:" << std::endl;
 		print_vector(init_state.data(), init_state.size(),1,0);
 		std::cout << std::endl;
@@ -116,4 +140,4 @@ struct justManyVariables {
 
 
 #endif
- 
+

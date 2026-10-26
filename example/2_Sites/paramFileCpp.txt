@@ -27,7 +27,7 @@ allow_jump: {(1,0,0)} {-1}
 
 ################################# SAMPLING PARAMETERS ##############################
 #(THOSE PARAMETERS ARE REQUIRED FOR SAMPLING PROGRAMS)
-N: {2}
+Ne: {2}
 Sz: {0}
 
 beta: {0}
@@ -54,3 +54,8 @@ initial_states : {}
 compute_green: {YES}
 added_spin: {0} #Must be 0 (down) or 1 (up)
 eta: {0.05}
+
+######################## SAMPLING SPEED UP PARAMETERS #############################
+tree_like_sampling : {NO}
+pre_filling_layers : {NO}
+propose_filled_layer_state : {YES}

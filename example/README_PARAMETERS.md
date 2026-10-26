@@ -47,6 +47,15 @@ Example : `added_spin: {1}`
 Eta $$(\eta)$$ value in the Green function. 
 Example : `eta: {0.05}`
 
+## Speed up sampling parameters
+### tree_like_sampling (YES/NO)
+An accepted state can't be proposed again.
+### pre_filling_layers (YES/NO)
+Will add the lower n_U automatically before the sampling. Very useful, if we know the states will be added eventually.
+### propose_filled_layer_state (YES/NO)
+Allows to propose states with n_U even if all the states of that n_U were accepted.
+
+
 
 ## Optional
 ### initial_state:
