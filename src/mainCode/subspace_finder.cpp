@@ -26,18 +26,14 @@ int main(int argc, char *argv[]){
 	//Read file of parameters
 	justManyVariables jMV = readParameters("/" + (std::string)argv[1]);
 
-    if (verbose == 2) {
-        jMV.hubP.print();
-    }
-
     //Present to the user the number of bytes allowed for states and threads
 	if (verbose > 0) std::cout << "Bytes for a state:" << sizeof(sType) <<
 		"\tMax threads:" << NUM_THREADS_USED << std::endl;
 
 	//Parallel implementation
 #ifdef _OPENMP
-    if (jMV.hubP.n_sites > 10) {omp_set_num_threads(NUM_THREADS_USED);}
-    else {omp_set_num_threads(1);}
+    if (jMV.hubP.n_sites > 10) omp_set_num_threads(NUM_THREADS_USED);
+	else omp_set_num_threads(1);
 #endif // _OPENMP
 
 	//Start computing

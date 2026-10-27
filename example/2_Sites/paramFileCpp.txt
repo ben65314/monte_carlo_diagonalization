@@ -27,7 +27,7 @@ allow_jump: {(1,0,0)} {-1}
 
 ################################# SAMPLING PARAMETERS ##############################
 #(THOSE PARAMETERS ARE REQUIRED FOR SAMPLING PROGRAMS)
-N: {2}
+Ne: {2}
 Sz: {0}
 
 beta: {0}

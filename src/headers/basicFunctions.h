@@ -18,6 +18,10 @@ double find_min_of_array(std::vector<double> array);
 //Maths
 unsigned long comb(uLong n, uLong r);
 unsigned long comb_specified(int nU, int sites, int up, int down);
+template <typename T>
+inline T conj(const T& x) { return x; }
+template <typename T>
+inline std::complex<T> conj(const std::complex<T>& x) { return std::conj(x); }
 double fermi_dirac_function(float x, float beta,float mu);
 double boltzmann_distribution_function(float dE, float beta);
 double calculate_sd(std::vector<double> data);
@@ -159,7 +163,7 @@ template <class T> std::string to_string_precise(const T a_value, const uInt int
 template <class T> T remove_zeros(T a);
 
 //Print vec and matrix
-template <class T, class R> std::string write_vector(const T* vec, R size, int integers = 1, int decimals = 3){
+template <class T, class R> std::string write_vector(const T* vec, R size, int integers=1, int decimals=3){
 	/*****************************************
 	* Writes a double vector has a string
 	*

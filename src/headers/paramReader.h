@@ -15,7 +15,7 @@ struct justManyVariables readParameters(const std::string file) {
 	int Sz = 0;
 	Electrons elec;
 	sType init;
-	std::vector<sType> sites_pos;
+	std::vector<int> sites_pos;
 	unsigned char current_site = 0;
 	std::vector<int> allowed_jump;
 	std::vector<double> jump_energy;
@@ -107,13 +107,13 @@ struct justManyVariables readParameters(const std::string file) {
 			else if (lines.find("mu") != std::string::npos) {
 				send_info.hubP.mu = value_float;
 			}
-			else if (lines.find("N") != std::string::npos) {
+			else if (lines.find("Ne") != std::string::npos) {
 				N = value_int;
 			}
 			else if (lines.find("Sz") != std::string::npos) {
 				Sz = value_int;
 			}
-            else if (lines.find("beta") != std::string::npos) {
+		    else if (lines.find("beta") != std::string::npos) {
 				send_info.sP.beta_MH = value_float;
 			}
 			else if (lines.find("Beta_Happly") != std::string::npos) {
@@ -157,7 +157,6 @@ struct justManyVariables readParameters(const std::string file) {
 				int endB = lines.find('}', startB);
 				double tempo = std::stof(lines.substr(startB + 1,
                                          endB - (startB + 1)));
-                //std::cout<<"temp"<<tempo<<std::endl;
                 jump_energy.push_back(tempo);
 			}
 			//Get initial s states
@@ -213,6 +212,15 @@ struct justManyVariables readParameters(const std::string file) {
 			}
 			else if (lines.find("compute_green") != std::string::npos) {
 				send_info.gP.g_compute = (value_str == "YES");
+			}
+			else if (lines.find("tree_like_sampling") != std::string::npos) {
+				send_info.sP.tree_like_sampling = (value_str == "YES");
+			}
+			else if (lines.find("pre_filling_layers") != std::string::npos) {
+				send_info.sP.pre_filling_layers = (value_str == "YES");
+			}
+			else if (lines.find("propose_filled_layer_state") != std::string::npos) {
+				send_info.sP.propose_filled_layer_state = (value_str == "YES");
 			}
 		}
 		my_file.close();
@@ -329,8 +337,6 @@ struct justManyVariables readParameters(const std::string file) {
 	send_info.hubP.S_z = Sz;
 
 	if(send_info.sP.sampling_size <=0) send_info.sP.sampling_size = 1;
-
-
 
 	return send_info;
 
