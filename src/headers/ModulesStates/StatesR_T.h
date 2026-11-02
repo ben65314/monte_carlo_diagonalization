@@ -197,8 +197,8 @@ private:
         }
 
         //Currently filled nu layer
-        int filled_nu_layer = 0;
-        if (this->sys_sP.pre_filling_layers && !this->sys_sP.propose_filled_layer_state) {
+        int filled_nu_layer = max_nU;
+        if (this->sys_sP.pre_filling_layers) {
             uLong remaining_states = this->sys_sP.sampling_size;
             for (uLong i = 0; i < nb_state_per_nu.size(); i++) {
                 remaining_states -= nb_state_per_nu.at(i);
@@ -245,6 +245,9 @@ private:
                 nu_state_counter[nu_add] += 1;
             }
         }
+
+        if (this->sys_sP.propose_filled_layer_state) filled_nu_layer = 0;
+
         //Size of the subspace
 		unsigned long sampled_size = this->arr.size();
 
@@ -265,10 +268,10 @@ private:
             //Verbose info table
 			step2 = std::chrono::high_resolution_clock::now();
             if (verbose > 4) {
-                printf("Sampled(%5ld/%5ld) \033[42m|\033[0m nU [",sampled_size,sampling_size);
+                printf("Sampled(%*ld/%*ld) \033[42m|\033[0m nU [",int(log10(sampling_size)+1),sampled_size,int(log10(sampling_size)+1),sampling_size);
                 for (int i = 0; i < max_nU+1; i++) {
-                    printf("%6ld/%ld", nu_state_counter[i],
-                           nb_state_per_nu[i]);
+                    printf("%*ld/%*ld ",int(log10(nb_state_per_nu[i]))+1, nu_state_counter[i],
+                           int(log10(nb_state_per_nu[i]))+1, nb_state_per_nu[i]);
                 }
                 printf("] \033[42m|\033[0m dt = %s\n",time_formating(step1,step2).c_str());
             }
@@ -446,149 +449,6 @@ private:
 		delete current_state;
 		delete next_step_eval;
 	}
-	void MC_sampling(unsigned long sampling_size, float beta) {
-		/****************************************************************
-		* Samples states arround the one given and grows a subspace
-        * around of desired size
-		*
-		* Parameters
-		* ----------
-		* sampling_size : (unsigned long) size of the subspace desired
-		* beta : (float) beta value desired for Monte Carlo sampling
-        *
-		* Returns
-		* -------
-        * None
-		*****************************************************************/
-        std::cout<<"MC_SAMPLING"<<std::endl;
-		//Initial states
-		allocate_more_nodes(sampling_size);
-
-		sType MH_size = this->arr.size();
-
-        std::vector<sType> index_active;
-        std::vector<int> neighbor;
-        //Checks how many neighbors are already included in the sample.
-        for (sType i = 0; i < MH_size; i++) {
-            index_active.push_back(i);
-
-            //Neighbor fixing
-			std::vector<StateType> possible_new_state;
-            Ht(this->get_at(i), &possible_new_state, &this->sys_hubP);
-
-            int n_neighbor = possible_new_state.size();
-            for (uint64_t j = 0; j < possible_new_state.size(); j++) {
-                if (this->countains_element(possible_new_state.at(j))) {
-                    n_neighbor--;
-                }
-            }
-            neighbor.push_back(n_neighbor);
-        }
-
-
-		unsigned int g = 0;
-        int last_perc = -1;
-		while (MH_size < sampling_size) {
-			g++;
-            //this->show_all_states();
-            //print_vector(neighbor.data(), neighbor.size());
-
-            //Generate a random state from the active ones
-            sType rdm_element_1 = rdm_number() * (index_active.size()-1);
-            sType rdm_index = index_active.at(rdm_element_1);
-
-			float current_energy = Hu(this->get_at(rdm_index),
-                            this->sys_hubP.n_sites);
-            ///THIS SINGLE LINE SWITCHES BETWEEN THE BUG AND NO BUG
-            //current_energy *= this->sys_hubP.u;
-
-            //Generate a random accessible jumping state from the selected one.
-			std::vector<StateType> possible_new_state;
-            Ht(this->get_at(rdm_index), &possible_new_state, &this->sys_hubP);
-            sType rdm_element_2 = rdm_number() * (possible_new_state.size()-1);
-
-            //Generate the energy of the new state and the difference.
-            int new_nu = Hu(possible_new_state.at(rdm_element_2),
-                            this->sys_hubP.n_sites);
-            float new_energy = new_nu * this->sys_hubP.u;
-            float diff_energy = new_energy - current_energy;
-
-            //Generate a random number for the boltzmann condition.
-            float rdm_element_3 = rdm_number();
-            bool accepted = exp(-beta * diff_energy) > rdm_element_3;
-
-            //Accept condition
-            if (accepted){
-                sType where_index;
-                bool already_countained = this->where_is_element(
-                    possible_new_state.at(rdm_element_2), &where_index);
-
-                if(!already_countained){
-                    this->add(possible_new_state.at(rdm_element_2));
-                    index_active.push_back(MH_size);
-                    MH_size++;
-                    g=0;
-
-                    // Neighbor reducing
-                    std::vector<StateType> neighbor_possible;
-                    Ht(possible_new_state.at(rdm_element_2), &neighbor_possible, &this->sys_hubP);
-                    // For each alreay existing neighbor will reduce -1 at
-                    // possible neighbor and reduce the total of already
-                    // existing neighbor to this presente state.
-                    int n_neighbor = neighbor_possible.size();
-                    int n_already_neighbor = 0;
-                    for (int j = 0; j < n_neighbor; j++) {
-                        StateType index_neighbor;
-                        if (this->where_is_element(neighbor_possible.at(j),
-                                                   &index_neighbor)){
-                            n_already_neighbor++; //Remove to the current state
-                            neighbor[index_neighbor]--; //Remove the neighbor
-                            //std::cout<<index_neighbor<<"/"<<neighbor.size()<<std::endl;
-                            if (neighbor[index_neighbor] <= 0) {
-                                auto remove_index = std::find(index_active.begin(),
-                                          index_active.end(),index_neighbor);
-
-                                if (remove_index != index_active.end()) {
-                                    sType last_index = index_active.back();
-                                    index_active.pop_back();
-                                    *remove_index = last_index;
-                                    if (verbose > 9) {
-                                        printf("Sampled(%5ld/%5ld) | ",MH_size, sampling_size);
-                                        printf("Blocking state %5ld | %6ld states possibly generated \n",
-                                               this->get_at(index_neighbor),index_active.size());
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-                    neighbor.push_back(n_neighbor-n_already_neighbor);
-                }
-
-            }
-            if (verbose > 99) {
-                printf("\nState picked (%8ld)  State proposed (%8ld)  Accepted? (%d)",
-                       this->get_at(rdm_index),
-                       possible_new_state.at(rdm_element_2),
-                       accepted);
-            }
-
-			if (g > PERMISSION) {
-				std::cout << "The sample size entered couldn't be met. "
-                          << "This can be a result of:\n\t-An unattainable "
-                          << "sample size\n\t-A beta value too large\n";
-				break;
-			}
-
-            if (verbose > 4) {
-                int perc = (float)MH_size/sampling_size * 100;
-                if (last_perc < perc && perc%1==0) {
-                    print_progress((double)perc/100);
-                    last_perc = perc;
-                }
-            }
-		}
-	}
 public:
 	//Constructors
 	StatesR_T(uInt reserve = 10) {this->arr.reserve(reserve);}
@@ -710,27 +570,32 @@ public:
 
 		//Mu value (const for every state)
 		float mu_value = compute_mu(this->sys_hubP.mu, this->electrons);
-		#pragma omp parallel for default(none) shared(elements, mu_value,\
-            h_phi_n, phi_n, stdout)
-		for(int i = 0; i < elements; i++){
-			//Hu and hmu
-			h_phi_n[i] += (double)(Hu(this->get_at(i),
-                            this->sys_hubP.n_sites)*this->sys_hubP.u + mu_value)
-                            * phi_n[i];
-
-			//Ht
+            #pragma omp parallel default(none) shared(elements, mu_value, h_phi_n, phi_n,stdout)
+        {
 			std::vector<StateType> proj;
 			std::vector<double> energies;
-			t_jump_energy(this->get_at(i), &proj, &energies, &this->sys_hubP);
+        //#pragma omp parallel for default(none) shared(elements, mu_value,\
+        //    h_phi_n, phi_n, stdout)
+            #pragma omp for schedule(guided)
+            for(int i = 0; i < elements; i++){
+                 proj.clear(); energies.clear();
+                //Hu and hmu
+                h_phi_n[i] += (double)(Hu(this->get_at(i),
+                                this->sys_hubP.n_sites)*this->sys_hubP.u + mu_value)
+                                * phi_n[i];
 
-			for (unsigned int j = 0; j < proj.size(); j++) {
-				StateType index;
+                //Ht
+                t_jump_energy(this->get_at(i), &proj, &energies, &this->sys_hubP);
 
-				if (this->where_is_element(proj.at(j), &index)) {
-					h_phi_n[i] += energies.at(j) * phi_n[index];
-				}
-			}
-		}
+                for (unsigned int j = 0; j < proj.size(); j++) {
+                    StateType index;
+
+                    if (this->where_is_element(proj.at(j), &index)) {
+                        h_phi_n[i] += energies.at(j) * phi_n[index];
+                    }
+                }
+            }
+        }
 	}
 
 
