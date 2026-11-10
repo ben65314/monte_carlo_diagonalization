@@ -404,7 +404,7 @@ template<class StatesArrType> class LanczosSolver{
 			//(10) Manages Deflation
 			for (unsigned long k = 0; k < index_array.size(); k++) {
                 vType temp = t_jpc[index_array.at(k) * iterations + j];
-                    s_jpc[j * iterations + index_array.at(k)] = conj(temp);
+                    s_jpc[j * iterations + index_array.at(k)] = conj<vType>(temp);
 			}
 			if ((j+1)%n_bk == 0 && j >= ((int)n_bk-1)) {
 				int jj = j+1;

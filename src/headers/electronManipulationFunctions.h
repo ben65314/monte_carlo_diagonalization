@@ -101,16 +101,12 @@ template<class T, class U> void write_state_with_double(
 	std::string fund_txt = "";
 	double cummul = 0;
 	for (uLong i = 0 ; i < sorted_fund.size(); i++) {
-        if constexpr(std::is_same_v<vType,double>) {
-            cummul += (sorted_fund.at(i)*sorted_fund.at(i));
-        }
-        else if constexpr(std::is_same_v<vType, std::complex<double>>) {
-            cummul += (sorted_fund.at(i)*std::conj(sorted_fund.at(i))).real();
-        }
+        cummul += std::real(sorted_fund.at(i)*sorted_fund.at(i));
         fund_txt += to_string_precise(sorted_fund.at(i), 4, 14) + "\t"
                   + to_string_precise(sorted_states.at(i), 10) + "\t"
                   + to_string_precise(Hu(sorted_states.at(i), sites), 10)+ "\t"
-                  + to_string_precise(cummul, 2, 16)+"\n";
+                  + to_string_precise(cummul, 2, 16)+"\t"
+                  + to_string_precise(state_energy(sorted_states.at(i),&states->sys_hubP), 2,12) + "\n";
 
 		//Create reduced sampling size
 		if (cummul < keep || keep==1) {

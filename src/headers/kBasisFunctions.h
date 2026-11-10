@@ -156,12 +156,7 @@ template<class T, class U> void count_contribution_wH(
 	double cummul = 0;
 	for (uLong i = 0 ; i < indices.size(); i++) {
         vType fund_index = fund[indices[i]];
-        if constexpr(std::is_same_v<vType,double>) {
-            cummul += (fund_index*fund_index);
-        }
-        else if constexpr(std::is_same_v<vType, std::complex<double>>) {
-            cummul += (fund_index*std::conj(fund_index)).real();
-        }
+        cummul += std::real(fund_index*fund_index);
 
         //Add the states back in the States array but in order of their weight
         if (verbose > 9) std::cout<<cummul<<"/"<<wH<<std::endl;

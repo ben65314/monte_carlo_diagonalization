@@ -399,7 +399,7 @@ public:
 
 		    //He
 			std::vector<StateType> proj;
-			std::vector< VectorType> energies;
+			std::vector<VectorType> energies;
 			epsilon_jump_energy(this->get_at(i), &proj, &energies, &this->sys_hubP);
 			//printf("tJump size:%ld\n",proj.size());
 			//fflush(stdout);
